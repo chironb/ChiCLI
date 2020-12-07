@@ -3,6 +3,8 @@ ChiCLI - A Command Line Interface for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/ChiCLI_Screenshot.png?raw=true)
 
+Please note: This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind. 
+
 ChiCLI Commands:
 
 - about
