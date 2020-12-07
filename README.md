@@ -11,7 +11,7 @@ Please note: This is alpha quality software I banged out quickly out of curiosit
 
 ChiCLI Commands:
 
-***about***
+- about
 This displays information about the software, as well as links to the project on the web. 
 
 - version
@@ -29,38 +29,49 @@ Example:
 
 - hotkey
 This lets you review and set function keys as hotkeys. 
+
 Example: 
 
 - echo
 Displays the text as the first argument. You can also use quotes around the text you want echoed. 
+
 Example:
 
 - clear
+
 This clears the screen of text. 
 
 - list
+
 This displays a listing of the files within the disk, image, or directory/folder you are currently in.
 
 - d8: d9: d10: d11:
+
 This let's you change the current working drive. 
 
 - cd
+
 This changes directories.
 
 - status
+
 This retrives the status of the current drive/
 
 - drive-set
+
 This lets you change the drive number of the current drive.
 
 - delete
 This let's you delete files. You can also use * to delete all the files within the current disk, image, or directory/folder you are currently in.
+
 Example: 
 delete etgame
 delete *
 
 - copy
 This let's you copy files. You can also use * to copy all the files within the current disk, image, or directory/folder you are currently in, to another drive number. 
+
+Example:
 copy somefile copy-of-somefile
 copy somefile d8:
 copy * d8:
