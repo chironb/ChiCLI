@@ -37,6 +37,10 @@ This lets you review and set function keys as hotkeys.
 
 Example: 
 
+chirp
+
+Plays the Commodore PET inspired chime.
+
 echo
 
 Displays the text as the first argument. You can also use quotes around the text you want echoed. 
