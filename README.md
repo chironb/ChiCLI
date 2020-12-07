@@ -11,98 +11,98 @@ Please note: This is alpha quality software I banged out quickly out of curiosit
 
 ChiCLI Commands:
 
-- about -
+ about 
 This displays information about the software, as well as links to the project on the web. 
 
-- version -
+ version 
 This displays version information as well as the compile date and time.
 
-- licence -
+ licence 
 This displays the licencing information. 
 
-- help
-Displays a quick list of commands. See chicli-readme.txt for more details.
+ help
+Displays a quick list of commands. See chiclireadme.txt for more details.
 
-- alias
+ alias
 This lets you review aliases, as well as create your own.
 Example:
 
-- hotkey
+ hotkey
 This lets you review and set function keys as hotkeys. 
 
 Example: 
 
-- echo
+ echo
 Displays the text as the first argument. You can also use quotes around the text you want echoed. 
 
 Example:
 
-- clear
+ clear
 
 This clears the screen of text. 
 
-- list
+ list
 
 This displays a listing of the files within the disk, image, or directory/folder you are currently in.
 
-- d8: d9: d10: d11:
+ d8: d9: d10: d11:
 
 This let's you change the current working drive. 
 
-- cd
+ cd
 
 This changes directories.
 
-- status
+ status
 
 This retrives the status of the current drive/
 
-- drive-set
+ driveset
 
 This lets you change the drive number of the current drive.
 
-- delete
+ delete
 This let's you delete files. You can also use * to delete all the files within the current disk, image, or directory/folder you are currently in.
 
 Example: 
 delete etgame
 delete *
 
-- copy
+ copy
 This let's you copy files. You can also use * to copy all the files within the current disk, image, or directory/folder you are currently in, to another drive number. 
 
 Example:
-copy somefile copy-of-somefile
+copy somefile copyofsomefile
 copy somefile d8:
 copy * d8:
 
-- rename
-- format
-- initialize
-- validate
+ rename
+ format
+ initialize
+ validate
 
-- run ./
-- sys
-- dos-command
-- peek
-- poke
-- peek-hex
-- poke-hex
+ run ./
+ sys
+ doscommand
+ peek
+ poke
+ peekhex
+ pokehex
 
-- view-mem
-- keycodes
-- type
-- sys-info
-- screensaver
+ viewmem
+ keycodes
+ type
+ sysinfo
+ screensaver
 
-- datetime
-- time
-- profile-set
-- color-set
+ datetime
+ time
+ profileset
+ colorset
 
-- exit
-- restart
-- reboot
-- shutdown
+ exit
+ restart
+ reboot
+ shutdown
 
 
