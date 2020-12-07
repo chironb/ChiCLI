@@ -5,48 +5,48 @@ ChiCLI - A Command Line Interface for Commodore Computers!
 
 ChiCLI Commands:
 
-about
-version
-licence
-help
-alias
-hotkey
+- about
+- version
+- licence
+- help
+- alias
+- hotkey
 
-echo
-clear
-list
-d8: d9: d10: d11:
-cd
-status
-drive-set
+- echo
+- clear
+- list
+- d8: d9: d10: d11:
+- cd
+- status
+- drive-set
 
-delete
-copy
-rename
-format
-initialize
-validate
+- delete
+- copy
+- rename
+- format
+- initialize
+- validate
 
-run ./
-sys
-dos-command
-peek
-poke
-peek-hex
-poke-hex
+- run ./
+- sys
+- dos-command
+- peek
+- poke
+- peek-hex
+- poke-hex
 
-view-mem
-keycodes
-type
-sys-info
-screensaver
+- view-mem
+- keycodes
+- type
+- sys-info
+- screensaver
 
-datetime
-time
-profile-set
-color-set
+- datetime
+- time
+- profile-set
+- color-set
 
-exit
-restart
-reboot
-shutdown
+- exit
+- restart
+- reboot
+- shutdown
