@@ -91,6 +91,12 @@ rename
 
 format
 
+Format a disk, based on the device your currently in. 
+
+Example:
+
+format mydisk 0 
+
 initialize
 
 validate
