@@ -11,11 +11,11 @@ Please note: This is alpha quality software I banged out quickly out of curiosit
 
 ChiCLI Commands:
 
-about 
+=about= 
 
 This displays information about the software, as well as links to the project on the web. 
 
-version 
+=version= 
 
 This displays version information as well as the compile date and time.
 
