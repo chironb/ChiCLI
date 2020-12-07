@@ -1313,7 +1313,7 @@ int main( int argc, char* argv[] ) {
 			
 			display_title_text();
 			display_description_text();
-			printf("github.com/chironbramberger/ChiCLI\n");
+			printf("github.com/chironb/ChiCLI\n");
 			printf("Licenced under terms of the GNU GPL v3\n");
 			printf("www.gnu.org/licenses/\n");
 
