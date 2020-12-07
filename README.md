@@ -50,9 +50,3 @@ exit
 restart
 reboot
 shutdown
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 2d512a544df649d707c46f26f3b15c86278f926e
