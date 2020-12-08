@@ -1,16 +1,3 @@
-# ChiCLI
-ChiCLI - A Command Line Interface for Commodore Computers!
-
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/ChiCLI_Screenshot.png?raw=true)
-
-This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind.
-
-Latest News: 
-- Now supports bulk deleting and copying of files!
-- Also supports tab completion!
-- Added support for drive numbers 8 through 15.
-
-<pre>
 ---------------------------------------
 ChiCLI - Detailed Help
 ---------------------------------------
@@ -351,4 +338,3 @@ TODO: Write this section.
 
 Example: 
 ---------------------------------------
-</pre>

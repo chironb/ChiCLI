@@ -2273,29 +2273,29 @@ int main( int argc, char* argv[] ) {
 			// copy * d8:      --> copies all the files in the current folder to d8:
 			// copy * stuff    --> ERROR for now, but in teh future, this should copy into another folder on the SD card when it's UIEC
 
-			if        ( matching( "d8:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 8;
+			if        ( matching( "d8:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 8;
 				use_dcopy = TRUE;
-			} else if ( matching( "d9:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 9;  
+			} else if ( matching( "d9:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 9;  
 				use_dcopy = TRUE;
-			} else if ( matching("d10:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 10;
+			} else if ( matching("d10:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 10;
 				use_dcopy = TRUE;
-			} else if ( matching("d11:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 11;
+			} else if ( matching("d11:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 11;
 				use_dcopy = TRUE;
-			} else if ( matching("d12:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 12;
+			} else if ( matching("d12:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 12;
 				use_dcopy = TRUE;	
-			} else if ( matching("d13:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 13;
+			} else if ( matching("d13:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 13;
 				use_dcopy = TRUE;
-			} else if ( matching("d14:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 14;
+			} else if ( matching("d14:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 14;
 				use_dcopy = TRUE;
-			} else if ( matching("d15:",user_input_arg1_string) ) { 
-				user_input_arg1_number = 15;
+			} else if ( matching("d15:",user_input_arg2_string) ) { 
+				user_input_arg2_number = 15;
 				use_dcopy = TRUE;															
 			} else {
 				use_dcopy = FALSE;
@@ -2326,24 +2326,24 @@ int main( int argc, char* argv[] ) {
 					};//end if 
 
 				} else if ( use_dcopy == TRUE ) {
-				printf("Detected file: %s ", user_input_arg1_string );                                  
-				detected_filetype = detect_filetype(user_input_arg1_string, TRUE);
-				dcopy();
+					printf("Detected file: %s ", user_input_arg1_string );                                  
+					detected_filetype = detect_filetype(user_input_arg1_string, TRUE);
+					dcopy();
 
-			} else if ( use_dcopy == FALSE ) {
-				copy();
+				} else if ( use_dcopy == FALSE ) {
+					copy();
 
-			} else { // error 
-				printf("Copy syntax error.\n");
+				} else { // error 
+					printf("Copy syntax error.\n");
 
-			};//end if 
-	    break;	
+				};//end if 
+	    	break;	
 
-	    default : 
-	    	printf("Err args:%i\n", number_of_user_inputs);
-	    //end default
+	    	default : 
+	    		printf("Err args:%i\n", number_of_user_inputs);
+	    	//end default
 
-	};//end switch
+		};//end switch
 
 
 
