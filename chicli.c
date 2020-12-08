@@ -1372,7 +1372,7 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("version",user_input_command_string) ) {
 
 			display_title_text();
-			printf("Licenced under terms of the GNU GPL v3\n");
+			//printf("Licenced under terms of the GNU GPL v3\n");
 			printf("Ver:  %s\n", VERSION);
 			printf("Date: %s\n",__DATE__);
 			printf("Time: %s\n",__TIME__);
@@ -1385,7 +1385,7 @@ int main( int argc, char* argv[] ) {
 			
 			display_title_text();
 			display_description_text();
-			printf("github.com/chironbramberger/ChiCLI\n");
+			printf("github.com/chironb/ChiCLI\n");
 			printf("Licenced under terms of the GNU GPL v3\n");
 			printf("www.gnu.org/licenses/\n");
 
@@ -1397,12 +1397,14 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("licence",user_input_command_string) ) {
 			
 			display_title_text();
-			// printf("Licenced under terms of the GNU GPL v3\n");
-			// printf("www.gnu.org/licenses/\n");
+			printf("Licenced under terms of the GNU GPL v3.\n");
+			printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
+			printf("Licence download: www.gnu.org/licenses/\n");
 
-		    printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation, either version 3\nof the License, or (at your option) any later version.\n\n");
-		    printf("This program is distributed in the hope\nthat it will be useful, but WITHOUT ANY\nWARRANTY; without even the implied\nwarranty of MERCHANTABILITY or FITNESS\nFOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more\ndetails.\n\n");
-		    printf("You should have received a copy of the\nGNU General Public License along with\nthis program.  If not, see\n<https://www.gnu.org/licenses/>.\n");
+
+		    //printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation, either version 3\nof the License, or (at your option) any later version.\n\n");
+		    //printf("This program is distributed in the hope\nthat it will be useful, but WITHOUT ANY\nWARRANTY; without even the implied\nwarranty of MERCHANTABILITY or FITNESS\nFOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more\ndetails.\n\n");
+		    //printf("You should have received a copy of the\nGNU General Public License along with\nthis program.  If not, see\n<https://www.gnu.org/licenses/>.\n");
 
 
 		// ********************************************************************************
@@ -1623,6 +1625,18 @@ int main( int argc, char* argv[] ) {
 			} else if ( matching("d11:",user_input_arg1_string) ) { 
 				user_input_arg1_number = 11;
 				use_dcopy = TRUE;
+			} else if ( matching("d12:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 12;
+				use_dcopy = TRUE;	
+			} else if ( matching("d13:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 13;
+				use_dcopy = TRUE;
+			} else if ( matching("d14:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 14;
+				use_dcopy = TRUE;
+			} else if ( matching("d15:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 15;
+				use_dcopy = TRUE;															
 			} else {
 				use_dcopy = FALSE;
 			};//end if
@@ -1787,7 +1801,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// D9: COMMAND 
+		// D10: COMMAND 
 		// ********************************************************************************
 		} else if ( matching("d10:",user_input_command_string) ) {
 
@@ -1795,14 +1809,43 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// D9: COMMAND 
+		// D11: COMMAND 
 		// ********************************************************************************
 		} else if ( matching("d11:",user_input_command_string) ) {
 
 			change_drive(11);
 
 
+		// ********************************************************************************
+		// D12: COMMAND 
+		// ********************************************************************************
+		} else if ( matching("d12:",user_input_command_string) ) {
 
+			change_drive(12);
+
+
+		// ********************************************************************************
+		// D13: COMMAND 
+		// ********************************************************************************
+		} else if ( matching("d13:",user_input_command_string) ) {
+
+			change_drive(13);
+
+
+		// ********************************************************************************
+		// D14: COMMAND 
+		// ********************************************************************************
+		} else if ( matching("d14:",user_input_command_string) ) {
+
+			change_drive(14);
+
+
+		// ********************************************************************************
+		// D15: COMMAND 
+		// ********************************************************************************
+		} else if ( matching("d15:",user_input_command_string) ) {
+
+			change_drive(15);									
 
 
 
@@ -2230,21 +2273,33 @@ int main( int argc, char* argv[] ) {
 			// copy * d8:      --> copies all the files in the current folder to d8:
 			// copy * stuff    --> ERROR for now, but in teh future, this should copy into another folder on the SD card when it's UIEC
 
-			if        ( matching( "d8:",user_input_arg2_string) ) { 
-				user_input_arg2_number = 8;
+			if        ( matching( "d8:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 8;
 				use_dcopy = TRUE;
-			} else if ( matching( "d9:",user_input_arg2_string) ) { 
-				user_input_arg2_number = 9;  
+			} else if ( matching( "d9:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 9;  
 				use_dcopy = TRUE;
-			} else if ( matching("d10:",user_input_arg2_string) ) { 
-				user_input_arg2_number = 10;
+			} else if ( matching("d10:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 10;
 				use_dcopy = TRUE;
-			} else if ( matching("d11:",user_input_arg2_string) ) { 
-				user_input_arg2_number = 11;
+			} else if ( matching("d11:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 11;
 				use_dcopy = TRUE;
+			} else if ( matching("d12:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 12;
+				use_dcopy = TRUE;	
+			} else if ( matching("d13:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 13;
+				use_dcopy = TRUE;
+			} else if ( matching("d14:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 14;
+				use_dcopy = TRUE;
+			} else if ( matching("d15:",user_input_arg1_string) ) { 
+				user_input_arg1_number = 15;
+				use_dcopy = TRUE;															
 			} else {
 				use_dcopy = FALSE;
-		};//end if
+			};//end if
 
 		switch (number_of_user_inputs) {
 			case 3 : 	
