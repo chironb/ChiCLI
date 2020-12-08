@@ -1081,6 +1081,78 @@ int main( int argc, char* argv[] ) {
 				load_hotkey_command(8);
 				break;
 
+			// ********************************************************************************
+			// TAB COMPLETION LEFT ARROW 
+			// ********************************************************************************
+			} else if (keystroke == 95) { // We are using LEFT ARROW for tab complete, because teh COmodoore 64 doesn't have a TAB key. HOwever, now we can't enter an arrow character, so it's compendated below 
+
+				// do stuff
+
+
+				// Go over the input string backwards and extract the last characters 
+
+				//entered_keystrokes[position_in_string]
+				//MAX_LENGTH_COMMAND
+
+				unsigned char tab_length = 0;
+				unsigned char entered_keystrokes_length = 0;
+				unsigned char tab_complete_position = 0;
+				unsigned char *tab_complete_pointer;
+				unsigned char new_entered_keystrokes[MAX_LENGTH_COMMAND];
+
+				entered_keystrokes_length = strlen(entered_keystrokes);
+				tab_complete_pointer = entered_keystrokes; // update pointer so that it points to teh beginning character of the entered_keystrokes string
+				tab_length = 0;
+				memset( new_entered_keystrokes, 0, sizeof(new_entered_keystrokes) );				
+
+				for (i = (entered_keystrokes_length-1) ; i > 0 ; i--) {
+
+					if (entered_keystrokes[i] == ' ') {
+						break;
+					} else {
+						tab_length++;
+					};//end if 
+
+				};//end for 
+
+				tab_complete_position = entered_keystrokes_length-tab_length;
+
+				tab_complete_pointer = tab_complete_pointer + tab_complete_position ; // update pointer to point at the char in entered_keystrokes
+				
+				//loop						
+				dir_file_count(dir_file_total); // get the total number of files to copy and store in dir_file_total 
+
+				//printf("\ndir_file_total:%i\n", dir_file_total);
+
+				for (loop_k = 0; loop_k <= dir_file_total ; loop_k++) {
+
+					if (loop_k == 0) { //first entry is the disk anme 
+						//do nothing
+					} else { 
+						dir_goto_file_index(loop_k);
+						//printf("dir_ent.name:%s\n",dir_ent.name);//debug
+						if (strncmp(tab_complete_pointer,dir_ent.name,tab_length) == 0) { 				// 	use strncmp to compare the first X chars in the current file to the extracted text
+							strncpy(new_entered_keystrokes,entered_keystrokes,tab_complete_position); 	// copy beginning of entered keystrokes
+							strcat(new_entered_keystrokes,dir_ent.name); 								// aoppend the found filename to teh end
+							strcpy(entered_keystrokes,new_entered_keystrokes); 							//update teh entered_keystrokes with teh tab completed version					
+							cursor_end(); 																//erase the current entered text on teh screen, update teh screen with teh newly tab completed version, update teh screen cursor which can all be done with cursor_end()
+							break; 																		// break out ot eh loop to avoid loading teh resat of the files for no reason 
+						} else {
+							// do nothing 																// maybe play a bell/beep of some kind
+						};//end_if 
+					};//end if 
+
+				};//end for 
+
+
+
+			// ********************************************************************************
+			// LEFT ARROW 
+			// ********************************************************************************
+			} else if (keystroke == 6) { // CTRL + <- = 6 // we need this becuase left arrow is tab complete, but a filename might have an arrow in it, so CTRL plus LEFT ARROW will now emit an arrow character to compensate
+				keystroke = 95; //replcace CTRL LEFT ARROW with LEFT ARROW
+				cursor_add_character();
+
 
 			// ********************************************************************************
 			// TYPEABLE KEYS : 
@@ -1313,7 +1385,7 @@ int main( int argc, char* argv[] ) {
 			
 			display_title_text();
 			display_description_text();
-			printf("github.com/chironb/ChiCLI\n");
+			printf("github.com/chironbramberger/ChiCLI\n");
 			printf("Licenced under terms of the GNU GPL v3\n");
 			printf("www.gnu.org/licenses/\n");
 
