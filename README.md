@@ -205,9 +205,17 @@ Example: d9:
 cd 
 
 This let's you change the current 
-working folder. 
+working folder. It also lets you move
+to the previous or root folders
 
-Example: cd sidfiles
+Example: move into a folder
+cd sidfiles
+
+Example: move up one folder
+cd .. or cd..
+
+Example: move to the root foler
+cd /
 ---------------------------------------
 status 
 
@@ -222,6 +230,25 @@ of the current drive.
 Examples: 
 drive-set -1541 10
 drive-set -uiec 11 
+---------------------------------------
+mount
+
+This mounts a disk image on a UIEC
+device, like the SD2IEC. You can then
+copy some of all of the files to a real
+floppy disk. 
+
+Example: 
+mount chicli-disk.d64
+---------------------------------------
+unmount
+
+This unmounts a previously mounted 
+disk image. It automatically pops you 
+back to the previous folder. 
+
+Example:
+unmount
 ---------------------------------------
 delete
 
