@@ -1,7 +1,7 @@
 # ChiCLI
 ChiCLI - A Command Line Interface for Commodore Computers!
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/ChiCLI_Screenshot.png?raw=true)
+![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot.png?raw=true)
 
 This program works in a any that is similar to and inspired by Commodore DOS, AmigaDOS, MS-DOS, and Linux. 
 
@@ -30,6 +30,12 @@ Known Bugs:
 - Pressing RUN/STOP on the bottom line screws the cursor up
 - When exiting to dos, you need to enter NEW before loading anything
 - debug-args: 4 args is supported (should be 5), and the program name is borked
+
+![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
+
+![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_del_star.png?raw=true)
+
+![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_copy_star.png?raw=true)
 
 <pre>
 ---------------------------------------
