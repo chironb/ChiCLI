@@ -13,7 +13,7 @@ https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64
 This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind.
 
 I’ve tried it with the following hardware: 
-- SD2IEC by Jim Brain --> Buy One Here! --> http://store.go4retro.com/
+- uIEC/SD by Jim Brain --> Buy One Here! --> http://store.go4retro.com/uiec-sd/
 - IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
@@ -34,6 +34,7 @@ Known Bugs:
 - Pressing RUN/STOP on the bottom line screws the cursor up
 - When exiting to dos, you need to enter NEW before loading anything
 - debug-args: 4 args is supported (should be 5), and the program name is borked
+- The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 
 
 Removals
 - Due to trying to squeeze every feature into about 50K, the maximum aliases is now 24 instead of 32
