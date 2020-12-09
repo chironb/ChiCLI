@@ -3,7 +3,7 @@
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
 //
 /* Compiling, deleting object files, and launching VICE in fast prg loading mode: 
-cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli
+cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-16.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-16.prg
 */ 
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardw
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v0.15"
+#define VERSION "v0.16"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -790,17 +790,17 @@ int main( int argc, char* argv[] ) {
 	
 	set_alias( "ls"       , "list"        );   
 	set_alias( "dir"      , "list"        );   
+	set_alias( "directory", "list"        );	
 	set_alias( "del"      , "delete"      );     
 	set_alias( "rm"       , "delete"      );     
 	set_alias( "ren"      , "rename"      );  
 	set_alias( "md"       , "make-dir"    );       
 	set_alias( "mkdir"    , "make-dir"    );       
-	set_alias( "rd"       , "remove-dir"  ); //TODO: have I even created teh remove-dir command yet?         
+	set_alias( "rd"       , "remove-dir"  );       
+	set_alias( "rmdir"    , "remove-dir"  ); 	
 	set_alias( "cls"      , "clear"       );    
 	set_alias( "cp"       , "copy"        );   
-	set_alias( "cat"      , "type"        );   
-	set_alias( "hotkeys"  , "hotkey"      );          	
-	set_alias( "r"        , "restart"     ); 
+	set_alias( "cat"      , "type"        );           	
 	set_alias( "cd.."     , "cd .."       ); 
 	set_alias( "cd/"      , "cd /"        ); 
 	set_alias( "ss"       , "screensaver" ); 
@@ -808,7 +808,6 @@ int main( int argc, char* argv[] ) {
 	set_alias( "endcli"   , "exit"        ); 	
 	set_alias( "ver"      , "version"     ); 
 	set_alias( "lic"      , "licence"     ); 
-	set_alias( "readme"   , "type chicli-readme" ); 	
         
 
 	// ********************************************************************************
@@ -1105,6 +1104,10 @@ int main( int argc, char* argv[] ) {
 				tab_length = 0;
 				memset( new_entered_keystrokes, 0, sizeof(new_entered_keystrokes) );				
 
+				// remove cursor, we will put it back when we redraw the line with a cursor_end();
+				cputc(' ');
+				
+
 				for (i = (entered_keystrokes_length-1) ; i > 0 ; i--) {
 
 					if (entered_keystrokes[i] == ' ') {
@@ -1135,7 +1138,7 @@ int main( int argc, char* argv[] ) {
 							strncpy(new_entered_keystrokes,entered_keystrokes,tab_complete_position); 	// copy beginning of entered keystrokes
 							strcat(new_entered_keystrokes,dir_ent.name); 								// aoppend the found filename to teh end
 							strcpy(entered_keystrokes,new_entered_keystrokes); 							//update teh entered_keystrokes with teh tab completed version					
-							cursor_end(); 																//erase the current entered text on teh screen, update teh screen with teh newly tab completed version, update teh screen cursor which can all be done with cursor_end()
+							// cursor_end(); // put this at the end  																
 							break; 																		// break out ot eh loop to avoid loading teh resat of the files for no reason 
 						} else {
 							// do nothing 																// maybe play a bell/beep of some kind
@@ -1144,7 +1147,8 @@ int main( int argc, char* argv[] ) {
 
 				};//end for 
 
-
+				cursor_home();
+				cursor_end(); //erase the current entered text on teh screen, update teh screen with teh newly tab completed version, update teh screen cursor which can all be done with cursor_end()
 
 			// ********************************************************************************
 			// LEFT ARROW 
@@ -1363,6 +1367,8 @@ int main( int argc, char* argv[] ) {
 			printf("poke   keycodes screensaver initialize\n"); 
 			printf("exit   reboot   restart     shutdown\n"); 
 			printf("echo   time     datetime    licence\n"); 
+			printf("chirp  make-dir remove-dir  debug-args\n");
+			printf("uiec-hide-ext   uiec-show-ext\n");
 			printf("Please see chicli-readme for details.\n");
 
 
@@ -1386,8 +1392,8 @@ int main( int argc, char* argv[] ) {
 			display_title_text();
 			display_description_text();
 			printf("github.com/chironb/ChiCLI\n");
-			printf("Licenced under terms of the GNU GPL v3\n");
-			printf("www.gnu.org/licenses/\n");
+			//printf("Licenced under terms of the GNU GPL v3\n");
+			//printf("www.gnu.org/licenses/\n");
 
 
 
@@ -1397,9 +1403,10 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("licence",user_input_command_string) ) {
 			
 			display_title_text();
-			printf("Licenced under terms of the GNU GPL v3.\n");
-			printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
-			printf("Licence download: www.gnu.org/licenses/\n");
+			printf("Licenced under terms of the GNU GPL v3.\nwww.gnu.org/licenses/\nTo read, enter: type chicli-licence\n");
+
+			// printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
+			// printf("Licence download: www.gnu.org/licenses/\n");
 
 
 		    //printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation, either version 3\nof the License, or (at your option) any later version.\n\n");
@@ -1707,6 +1714,56 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
+		// UIEC-HIDE-EXT COMMAND 
+		// ********************************************************************************
+		} else if ( matching("uiec-hide-ext",user_input_command_string) ) {
+
+			// OPEN lf,dv,15:PRINT#lf,"XE{+|-}":CLOSElf
+			// + is used to enable hiding.
+			// - is used to disable hiding.
+
+			result = get_status(dev, TRUE);
+
+			if (result != 255) {
+				printf("Setting UIEC to hide extentions...\n");
+
+				result = cbm_open(1, dev, 15, "xe+");
+				cbm_close(1);
+
+				if (result == 0) {
+					printf("Done.\n");
+				} else {
+					printf("Err: %i\n", result);
+				};//end if 
+			};//end if 
+
+					
+		// ********************************************************************************
+		// UIEC-SHOW-EXT COMMAND 
+		// ********************************************************************************
+		} else if ( matching("uiec-show-ext",user_input_command_string) ) {
+
+			// OPEN lf,dv,15:PRINT#lf,"XE{+|-}":CLOSElf
+			// + is used to enable hiding.
+			// - is used to disable hiding.
+
+			result = get_status(dev, TRUE);
+
+			if (result != 255) {
+				printf("Setting UIEC to show extentions...\n");
+
+				result = cbm_open(1, dev, 15, "xe-");
+				cbm_close(1);
+
+				if (result == 0) {
+					printf("Done.\n");
+				} else {
+					printf("Err: %i\n", result);
+				};//end if 
+			};//end if 
+
+
+		// ********************************************************************************
 		// CD COMMAND 
 		// ********************************************************************************
 		} else if ( matching("cd",user_input_command_string) ) {
@@ -1848,10 +1905,44 @@ int main( int argc, char* argv[] ) {
 			change_drive(15);									
 
 
+		// ********************************************************************************
+		// MAKE-DIR COMMAND 
+		// ********************************************************************************
+		} else if ( matching("make-dir",user_input_command_string) ) {
+
+			switch (number_of_user_inputs) {
+				case 2 : 				
+					strcpy (drive_command_string,"md:");
+					strcat (drive_command_string,user_input_arg1_string);
+					strcat (drive_command_string,"");
+					result = cbm_open(1, dev, 15, drive_command_string);
+					cbm_close(1);
+			    break;	
+
+			    default : 
+			    	printf("Err args:%i\n", number_of_user_inputs);
+			    //end default
+			};//end switch
 
 
+		// ********************************************************************************
+		// REMOVE-DIR COMMAND 
+		// ********************************************************************************
+		} else if ( matching("remove-dir",user_input_command_string) ) {
 
+			switch (number_of_user_inputs) {
+				case 2 : 	
+					strcpy (drive_command_string,"rd:");
+					strcat (drive_command_string,user_input_arg1_string);
+					strcat (drive_command_string,"");
+					result = cbm_open(1, dev, 15, drive_command_string);
+					cbm_close(1);
+			    break;	
 
+			    default : 
+			    	printf("Err args:%i\n", number_of_user_inputs);
+			    //end default
+			};//end switch
 
 
 		// ********************************************************************************

@@ -18,8 +18,11 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News: 
-- Now supports bulk deleting and copying of files!
+- Now supports setting UIEC devices to hide or show extensions!
+- Added make-dir and remove-dir commands.
 - Also supports tab completion!
+- Tab completion how hides the cursor until it is finished searching.
+- Now supports bulk deleting and copying of files!
 - Added support for drive numbers 8 through 15.
 
 Known Bugs:
@@ -30,6 +33,10 @@ Known Bugs:
 - Pressing RUN/STOP on the bottom line screws the cursor up
 - When exiting to dos, you need to enter NEW before loading anything
 - debug-args: 4 args is supported (should be 5), and the program name is borked
+
+Removals
+- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 24 instead of 32
+- Had to trim more text away from things like about, version, and licence.
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
 
@@ -195,7 +202,7 @@ crunching utilities.
 Exomizer is being tested with ChiCLI,
 and you can download the compressed
 version called chicli-exo.prg in the 
-project's exomizer folder. 
+project's folder. 
 
 The program is compressed by about 50%
 and decompresses in about 5 seconds. 
@@ -306,6 +313,34 @@ Examples:
 drive-set -1541 10
 drive-set -uiec 11 
 ---------------------------------------
+uiec-hide-ext
+
+This is a uiec specific setting that
+causes it to hide files ending in 
+Commodore DOS extensions, such as
+.prg or .seq and instead automatically 
+reports them to the system as if they 
+were in fact that type of file. 
+
+Please see your UIEC documentation. 
+
+Example:
+uiec-hide-ext
+---------------------------------------
+uiec-show-ext
+
+This is a uiec specific setting that
+causes it to show files ending in 
+Commodore DOS extensions, such as
+.prg or .seq and reports all files 
+as PRG files unless Commodore DOS
+as set specifically.
+
+Please see your UIEC documentation. 
+
+Example:
+uiec-show-ext
+---------------------------------------
 mount
 
 This mounts a disk image on a UIEC
@@ -351,6 +386,9 @@ Copy a single file within the current
 directory (duplicate):
 copy somefile.txt somefile-copy.txt
 
+Copy a file into a folder
+copy helloworld test-dir/helloworld
+
 Copy a file to drive 8:
 copy somefile.txt d8:
 
@@ -363,6 +401,20 @@ rename
 Renames a file. 
 
 Example: rename oldfilename newfilename
+---------------------------------------
+make-dir
+
+Create a directory. 
+
+Example: 
+make-dir test-dir
+---------------------------------------
+remove-dir
+
+Remvoe a directory. 
+
+Example: 
+remove-dir test-dir
 ---------------------------------------
 format 
 
