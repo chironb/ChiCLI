@@ -3,7 +3,16 @@ ChiCLI - A Command Line Interface for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/ChiCLI_Screenshot.png?raw=true)
 
+This program works in a any that is similar to and inspired by Commodore DOS, AmigaDOS, MS-DOS, and Linux. 
+
+It features a command line interface, which can list files, rename them, copy them, delete them, as well as view them, and with an UIEC device it can extract disk image files and copy them to a real floppy disk drive. It also features a hardware scanning system info tool, a screensaver with clock, the ability to view memory and files with a hex viewer, as well as load and run other from within. It can also change the drive number assignment for 1541 and UIEC drives, peek and poke memory, read and report keyboard key codes, set custom display colors, and execute user input dos commands, all without leaving the interface. 
+
 This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind.
+
+I’ve tried it with the following hardware: 
+- Commodore 1541 Disk Drive
+- SD2IEC by Jim Brain
+- Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News: 
 - Now supports bulk deleting and copying of files!
