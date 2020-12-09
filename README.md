@@ -34,7 +34,7 @@ Known Bugs:
 - Pressing RUN/STOP on the bottom line screws the cursor up
 - When exiting to dos, you need to enter NEW before loading anything
 - debug-args: 4 args is supported (should be 5), and the program name is borked
-- The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 
+- The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. Everything else works fine. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 
 
 Removals
 - Due to trying to squeeze every feature into about 50K, the maximum aliases is now 24 instead of 32
