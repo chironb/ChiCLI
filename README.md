@@ -13,8 +13,9 @@ https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64
 This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind.
 
 I’ve tried it with the following hardware: 
+- SD2IEC by Jim Brain --> Buy One Here! --> http://store.go4retro.com/
+- IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive
-- SD2IEC by Jim Brain
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News: 
