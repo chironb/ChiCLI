@@ -7,6 +7,9 @@ This program works in a any that is similar to and inspired by Commodore DOS, Am
 
 It features a command line interface, which can list files, rename them, copy them, delete them, as well as view them, and with an UIEC device it can extract disk image files and copy them to a real floppy disk drive. It also features a hardware scanning system info tool, a screensaver with clock, the ability to view memory and files with a hex viewer, as well as load and run other from within. It can also change the drive number assignment for 1541 and UIEC drives, peek and poke memory, read and report keyboard key codes, set custom display colors, and execute user input dos commands, all without leaving the interface. 
 
+You can download a disk image with this program and it's supporting Commodore readable text files here: 
+https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64
+
 This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind.
 
 I’ve tried it with the following hardware: 
