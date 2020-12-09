@@ -29,6 +29,7 @@ Known Bugs:
 - If you set the date and time more than once, it gets screwy
 - Pressing RUN/STOP on the bottom line screws the cursor up
 - When exiting to dos, you need to enter NEW before loading anything
+- debug-args: 4 args is supported (should be 5), and the program name is borked
 
 <pre>
 ---------------------------------------
@@ -559,5 +560,29 @@ shutdown
 This exits the program and displays
 a message letting you know it's safe
 to turn off your Commodore.  
+---------------------------------------
+debug-args   
+
+This program supports cc65's method for
+working with arguments passed to the 
+program from within Commodore Basic.
+
+It uses the following format: 
+RUN:REM ARG1 "ARG2 QUOTED" ARG3 "" ARG5
+
+You can type in this command to read
+the arguments passed as well as the 
+program file name. 
+
+Example: 
+debug-args
+
+Example output:
+Number of args:6
+Program Name: chicli
+Arg 1:arg1
+Arg 2:arg2 quoted
+Arg 3:arg3
+Arg 4: 
 ---------------------------------------
 </pre>
