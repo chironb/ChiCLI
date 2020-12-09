@@ -20,19 +20,34 @@ USER INTERFACE
 ---------------------------------------
 Text Entry
 
-TODO: Write this section.
----------------------------------------
-Cursor keys
+ChiCLI uses custom routines to get 
+manage the input and editing of text
+on the command line. It automatically
+inserts characters, and supports 
+backspace and delete. It also supports
+cursor keys and a home and end keys.
 
-TODO: Write this section.
----------------------------------------
-Hotkeys
+The Commodore cursor keys are supported
+as well as extra keys to make it easier 
+for people who are coming from the 
+standard Linux or Windows keyboard 
+layouts.
 
-TODO: Write this section.
----------------------------------------
-Aliases
+Note: 
+DEL and HOME are treated the same.
 
-TODO: Write this section.
+CURSOR-LEFT CTRL+J - Cursor Left
+CURSOR-LEFT CTRL+L - Cursor Right
+CURSOR-UP   CTRL+I - Last Entered Text
+CURSOR-DOWN CTRL+K - Erase Line
+
+DEL CTRL+H         - Backspace
+SHIFT+DEL CTRL+;   - Forward Delete
+
+CTRL+U             - Start of Line
+CTRL+O             - End of Line
+
+RUNSTOP CTRL+C     - Cancels input
 ---------------------------------------
 Tab Completion
 
@@ -51,16 +66,60 @@ CTRL + LEFT ARROW
 to enter this character.
 
 The tab completion will start searching
-the current directory for files whose
+the current folder for files whose
 beginning match the last string of 
 text entered on the command line that's
 separated by an empty space. 
 
 Please note: Nothing appears to happen
 as it takes a long time to go through 
-all the files in the current directory. 
+all the files in the current folder. 
 It's very slow when compared with 
 faster systems. 
+---------------------------------------
+Hotkeys
+
+Hotkey manages the ability to assign
+command strings to the function keys. 
+
+Examples:
+hotkey                  - Lists hotkeys
+hotkey 1 = "echo Hi!"   - Assigns F1
+hotkey 2 clear          - Assigns F2
+hotkey 1 " "            - Clears F1
+hotkey -clear           - Clears all
+
+You can also do something a little more
+complex like this: 
+
+hotkey 1 = "echo ;ChiCLI Rules!;"
+
+The semi-colon is automatically 
+substituted for quotes when the system
+processes the echo command. 
+---------------------------------------
+Aliases
+
+Alias managed the aliasing system. You
+can set your own, clear them, or clear
+all of the aliases. 
+
+There are a number of pre-configured 
+aliases already set, based on commands
+from Commodore DOS, AmigaDOS, MS-DOS,
+and Linux.
+
+alias                   - Lists aliases
+alias hi = "echo Hi!"   - Sets an alias
+alias cls clear         - Sets an alias
+alias cls               - Clears alias
+alias -clear            - Clears all
+
+alias cr = "echo ;ChiCLI Rules!;"
+
+The semi-colon is automatically 
+substituted for quotes when the system
+processes the echo command. 
 ---------------------------------------
 
 COMMANDS
@@ -96,20 +155,6 @@ contains detailed help.
 
 Example: help
 ---------------------------------------
-alias
-
-This lets you review aliases, as well 
-as create your own.
-
-Example: TODO: All the uses. 
----------------------------------------
-hotkey
-
-This lets you review and set function 
-keys as hotkeys. 
-
-Example: 
----------------------------------------
 chirp
 
 Plays the Commodore PET inspired chime.
@@ -133,7 +178,7 @@ Example: clear
 list 
 
 This displays a listing of the files 
-within the disk, image, or directory 
+within the disk, image, or folder 
 you are currently in.
 
 Example: list
@@ -143,12 +188,16 @@ d#:
 Changes the currently active drive.
 This is the drive you're "in".
 
+Drive numbers 8 through 15 are 
+supported, depending on your 
+hardware.
+
 Example: d9:
 ---------------------------------------
 cd 
 
 This let's you change the current 
-working directory. 
+working folder. 
 
 Example: cd sidfiles
 ---------------------------------------
@@ -156,32 +205,27 @@ status
 
 This retrives the status of the 
 current drive.
-
-Examples: 
-drive-set -1541 10
-drive-set -uiec 11 
 ---------------------------------------
 drive-set
 
 This lets you change the drive number 
 of the current drive.
-
-Example: 
+ 
+Examples: 
+drive-set -1541 10
+drive-set -uiec 11 
 ---------------------------------------
 delete
 
 This let's you delete files. You can 
 also use * to delete all the files 
 within the current disk, image, or 
-directory you are currently in.
+folder you are currently in.
 
 Examples:
-
-Delete a single file:
-delete somefile.txt
-
-Delete all files in current directory
-delete * 
+delete somefile.txt - Deletes a file
+delete *            - Deletes all files
+                      in current folder
 ---------------------------------------
 copy    
 
@@ -220,135 +264,253 @@ Second arg is the disk number
 Example: format mydisk 0 
 ---------------------------------------
 initialize 
-Example: 
+
+Executes the Commodore DOS drive 
+command for initialize, based on the 
+current drive.
 ---------------------------------------
 validate  
-Example: 
+
+Executes the Commodore DOS drive 
+command for validate, based on the 
+current drive.
 ---------------------------------------
 run 
 
-TODO: Write this section.
+This loads and runs a command after 
+exiting the ChiCLI system. You can use
+tab completion with this command.
 
-Example: 
+Example:
+run kong-arcade
 ---------------------------------------
 ./
 
-TODO: Write this section.
+This loads and runs a command after 
+exiting the ChiCLI system. This doesn't
+work autocomplete.
 
-Example: 
+Example:
+./kong-arcade
 ---------------------------------------
 sys   
 
-TODO: Write this section.
+This causes execution to jump to the 
+memory location given. It expects a
+number in decimal. This works just 
+like the Commodore Basic command.
 
 Example: 
+sys 64738
 ---------------------------------------
 dos-command      
 
-TODO: Write this section.
+This lets you execute a custom command
+intended for a Commodore DOS device.
+It expects a second argument to be the
+command to send to the currently 
+selected drive. It uses the command
+channel 1. It passes the given string
+directly to the Commodore DOS device.
+
+Note: Remember that most examples are
+given in upper case because that is the 
+default Commodore Basic startup mode. 
+Commodore DOS expects lower case, so 
+when using this command in ChiCLI, you
+need to use lower case, as in the 
+example given below. 
 
 Example: 
+dos-command initialize0
 ---------------------------------------
 peek      
 
-TODO: Write this section.
+Returns the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
+
+This version takes the address as a 
+decimal value.
 
 Example: 
+peek 1000
 ---------------------------------------
 poke      
 
-TODO: Write this section.
+Updates the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
+
+This version takes the address and 
+value as a decimal number.
 
 Example: 
+poke 1000 33
 ---------------------------------------
 peek-hex   
 
-TODO: Write this section.
+Updates the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
+
+This version takes the address and
+value as a hexidecimal number, instead 
+of a decimal value.
 
 Example: 
+peek-hex ffff 
 ---------------------------------------
 poke-hex     
 
-TODO: Write this section.
+Returns the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
+
+This version takes the address as a
+hexidecimal value, instead of a 
+decimal value.
 
 Example: 
+poke-hex ffff ab
 ---------------------------------------
 view-mem   
 
-TODO: Write this section.
+Displays memory in hexidecimal and in 
+plain text value.
 
 Example: 
+view-mem a000
 ---------------------------------------
 keycodes    
 
-TODO: Write this section.
+Displays the key code of a key that's 
+pressed in decimal value. RUN/STOP or
+CTRL+C quits the command.
 
-Example: 
+keycodes 
 ---------------------------------------
 type    
 
-TODO: Write this section.
+This is a file viewer. It can display
+files in the formats SEQ, PRG, or any
+other type of file. 
+
+It attempts to auto-detect the file 
+type and shows the relevant output.
+
+For SEQ files, it displays them as if
+they were text files. 
+
+For PRG files, it displays them as 
+Commodore Basic would display them.
+It substitutes the codes for their 
+related basic tokens.
+
+If you'd like to view the file's raw
+hexidecimal values, you can append
+-hex as the last argument. 
 
 Example: 
+type chicli
+type chicli-readme
+type chicli -hex
 ---------------------------------------
 sys-info     
 
-TODO: Write this section.
+Attempts to detect your hardware and
+displays information about your system.
+It assumes that you've got a standard
+stock Commodore. It also plays a chime
+based on the chime used on the 
+Commodore PET and Commodore PC 
+computers. 
 
-Example: 
+Feel free to donate additional hardware
+if you'd like more specialized systems
+to be recognised. 
 ---------------------------------------
 screensaver    
 
-TODO: Write this section.
+Displays a screensaver that is a moving
+Commodore logo and the current time. 
 
-Example: 
+Note: Use datetime -set to set the 
+correct time. 
+
+If you'd like ChiCLI to support a 
+real-time clock, please feel free to 
+donate the relevant hardware. 
 ---------------------------------------
 datetime       
 
-TODO: Write this section.
+This displays the current date and time.
 
-Example: 
+To set the date and time enter:
+datetime -set
 ---------------------------------------
 time     
 
-TODO: Write this section.
+Displays the current time. 
 
-Example: 
+To set the date and time enter:
+datetime -set
 ---------------------------------------
 profile-set    
 
-TODO: Write this section.
+Changes the current text, background 
+and border colors, to one of a set of
+pre-determined profiles. If you simply
+enter profile-set without any args, 
+it will display a list of available 
+profiles and prompt you to choose one.
 
 Example: 
+profile-set 
+profile-set 1
 ---------------------------------------
 color-set   
 
-TODO: Write this section.
+Changes the current text, background 
+and border colors, allowing you to set
+each individually. It will display a
+list of colors and prompt for each of
+text, background and border colors
+---------------------------------------
+detect-filetype
+
+This detects the Commodore file type of
+a given file. 
 
 Example: 
+detect-filetype chicli-readme
 ---------------------------------------
 exit      
 
-TODO: Write this section.
-
-Example: 
+This exits ChiCLI.
 ---------------------------------------
 restart      
 
-TODO: Write this section.
-
-Example: 
+This exits ChiCLI and automatically
+loads and runs ChiCLI from disk again. 
 ---------------------------------------
 reboot   
 
-TODO: Write this section.
+This restarts the Commodore by calling
+the system reset vector. 
 
-Example: 
+Note: If you're using a FastLoad 
+cartridge, this will reset without 
+FastLoad. You'll have to sys to a 
+special value to reload the FastLoad
+cartidge. 
+
+TODO: Update with FastLoad memory value
 ---------------------------------------
 shutdown   
 
-TODO: Write this section.
-
-Example: 
+This exits the program and displays
+a message letting you know it's safe
+to turn off your Commodore.  
 ---------------------------------------
 </pre>
