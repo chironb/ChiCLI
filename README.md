@@ -10,6 +10,14 @@ Latest News:
 - Also supports tab completion!
 - Added support for drive numbers 8 through 15.
 
+Known Bugs:
+- When copying files, if there’s an error, it borks the whole system
+- File sizes reported are sometimes wonky 
+- Running programs from a different drive issue 
+- If you set the date and time more than once, it gets screwy
+- Pressing RUN/STOP on the bottom line screws the cursor up
+- When exiting to dos, you need to enter NEW before loading anything
+
 <pre>
 ---------------------------------------
 ChiCLI - Detailed Help
