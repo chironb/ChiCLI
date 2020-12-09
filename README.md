@@ -142,6 +142,46 @@ The semi-colon is automatically
 substituted for quotes when the system
 processes the echo command. 
 ---------------------------------------
+Arguments
+
+ChiCLI supports arguments passed by 
+Commodore Basic. 
+
+It uses the following format: 
+RUN:REM ARG1 "ARG2 QUOTED" ARG3 "" ARG5
+
+Currently, only one argument is 
+supported, for debugging purposes.
+
+Disable Drive Detect
+-ddd
+
+This disabled drive detection. This is
+also disabled once you change drive 
+numbers in software. In the future, 
+this will be addressed differently. 
+
+Example:
+LOAD"CHICLI",8
+RUN:REM -DDD
+---------------------------------------
+Compressed ChiCLI for Faster Loading
+
+ChiCLI can be compressed using various
+crunching utilities. 
+
+Exomizer is being tested with ChiCLI,
+and you can download the compressed
+version called chicli-exo.prg in the 
+project's exomizer folder. 
+
+The program is compressed by about 50%
+and decompresses in about 5 seconds. 
+
+The passing of arguments to a 
+compressed version of ChiCLI has been 
+tested and works.
+---------------------------------------
 
 COMMANDS
 
