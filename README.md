@@ -31,27 +31,27 @@ Known Bugs:
 - When exiting to dos, you need to enter NEW before loading anything
 - debug-args: 4 args is supported (should be 5), and the program name is borked
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_del_star.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_del_star.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_copy_star.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_copy_star.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_seq.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_seq.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_prg.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_prg.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_hex_1.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_hex_1.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_hex_2.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_type_hex_2.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_datetime.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_datetime.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_hotkey.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_hotkey.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_alias.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_alias.png?raw=true)
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_screensaver.png?raw=true)
+(https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_screensaver.png?raw=true)
 
 <pre>
 ---------------------------------------
