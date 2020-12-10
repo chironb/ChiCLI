@@ -19,25 +19,34 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News: 
+- FIXED: When copying files, if there’s an error, it borks the whole system.
+- FIXED: Pressing RUN/STOP on the bottom line screws the cursor up.
+- FIXED: debug-args: 4 args is supported (should be 5).
 - Now supports setting UIEC devices to hide or show extensions!
 - Added make-dir and remove-dir commands.
 - Also supports tab completion!
 - Tab completion how hides the cursor until it is finished searching.
 - Now supports bulk deleting and copying of files!
 - Added support for drive numbers 8 through 15.
-- FIXED: Pressing RUN/STOP on the bottom line screws the cursor up
 
 Known Bugs:
-- When copying files, if there’s an error, it borks the whole system
+- Need to inform the user when they can't set another alias because all the slots are full
 - File sizes reported are sometimes wonky 
-- Running programs from a different drive issue 
 - If you set the date and time more than once, it gets screwy
 - When exiting to dos, you need to enter NEW before loading anything
-- debug-args: 4 args is supported (should be 5), and the program name is borked
+- ??? debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
+Here are some links to help:
+https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
+https://github.com/cc65/cc65/blob/master/asminc/c64.inc
+
+Known Issues:
+- I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
+- It can only load files from the drive it was loaded from. Running programs from a different drive issue 
 - The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. Everything else works fine. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 
 
-Removals
-- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 24 instead of 32
+Removals:
+- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 16 instead of 32
+- Had to remove a few built-in aliases for now because of the 16 limitation. 
 - Had to trim more text away from things like about, version, and licence.
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)

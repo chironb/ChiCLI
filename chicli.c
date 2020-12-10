@@ -4,6 +4,7 @@
 //
 /* Compiling, deleting object files, and launching VICE in fast prg loading mode: 
 cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-16.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-16.prg
+exomizer sfx sys -n chicli.prg -o chicli-exo.prg
 */ 
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -115,9 +116,11 @@ unsigned char starting_y = 0;
 unsigned char position_in_string = 0;
 unsigned char previous_x = 0;
 unsigned char previous_y = 0;
-unsigned char result = 0;
-unsigned char result2 = 0;
-unsigned char read_bytes = 0;
+// TODO: Fucking hell... I'm too tired to re-work a bunch of code. The below should be different. I'm re-using these vars and some need to be unsigned char and some need to be signed char 
+// ALSO: Holy fucking balls! This eats up a SHITLOAD of RAM on the Commodore 64. I need to go through the code and try and replace anything that uses an INT and instead use single BYTE vars whereever I can!!! 
+signed int result     = 0; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
+signed int result2    = 0; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
+signed int read_bytes = 0; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
 
 unsigned char i; // shared by all for loops
 
@@ -780,9 +783,16 @@ void screensaver(void) {
 
 int main( int argc, char* argv[] ) {
 
+	// This is for helping to try and fix this bug: 
+	// - ??? debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
+	// Here are some links to help:
+	// https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
+	// https://github.com/cc65/cc65/blob/master/asminc/c64.inc
+
+	// printf("\nProgram Name:%s\n", argv[0]);
+	// wait_for_keypress(); // wait for a keypress, after flushing the buffer 
 
 	reboot_register.pc = 0xFCE2; // this is the value that get sys'ed to reboot 
-
 
 	// ********************************************************************************
 	// SET DEFAULT ALIASES 
@@ -790,24 +800,24 @@ int main( int argc, char* argv[] ) {
 	
 	set_alias( "ls"       , "list"        );   
 	set_alias( "dir"      , "list"        );   
-	set_alias( "directory", "list"        );	
 	set_alias( "del"      , "delete"      );     
 	set_alias( "rm"       , "delete"      );     
 	set_alias( "ren"      , "rename"      );  
-	set_alias( "md"       , "make-dir"    );       
-	set_alias( "mkdir"    , "make-dir"    );       
+	set_alias( "md"       , "make-dir"    );           
 	set_alias( "rd"       , "remove-dir"  );       
-	set_alias( "rmdir"    , "remove-dir"  ); 	
 	set_alias( "cls"      , "clear"       );    
 	set_alias( "cp"       , "copy"        );   
 	set_alias( "cat"      , "type"        );           	
 	set_alias( "cd.."     , "cd .."       ); 
 	set_alias( "cd/"      , "cd /"        ); 
-	set_alias( "ss"       , "screensaver" ); 
+	set_alias( "endcli"   , "exit"        ); 		
 	set_alias( "quit"     , "exit"        ); 
-	set_alias( "endcli"   , "exit"        ); 	
 	set_alias( "ver"      , "version"     ); 
-	set_alias( "lic"      , "licence"     ); 
+	// set_alias( "mkdir"    , "make-dir"    );  
+	// set_alias( "rmdir"    , "remove-dir"  ); 			
+	// set_alias( "directory", "list"        );
+	// set_alias( "ss"       , "screensaver" ); 	
+	// set_alias( "lic"      , "licence"     ); 
         
 
 	// ********************************************************************************
@@ -2833,12 +2843,18 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("debug-args",user_input_command_string) ) {
 
-			printf("Number of args:%i\n", argc);
-		 	printf("Program Name:%s\n", argv[0]);	
-		 	if (argc > 1)printf("Arg 1:%s\n", argv[1]);
-		 	if (argc > 2)printf("Arg 2:%s\n", argv[2]);
-		 	if (argc > 3)printf("Arg 3:%s\n", argv[3]);
-		 	if (argc > 4)printf("Arg 4:%s\n", argv[4]);
+			printf             ("Number of args:%i\n", argc);
+		 	printf             ("PRG Name:%s\n"      , argv[0]);	
+		 	if (argc > 1)printf("Arg  1:%s\n"         , argv[ 1]);
+		 	if (argc > 2)printf("Arg  2:%s\n"         , argv[ 2]);
+		 	if (argc > 3)printf("Arg  3:%s\n"         , argv[ 3]);
+		 	if (argc > 4)printf("Arg  4:%s\n"         , argv[ 4]);
+		 	if (argc > 5)printf("Arg  5:%s\n"         , argv[ 5]);
+			// if (argc > 6)printf("Arg  6:%s\n"         , argv[ 6]);
+			// if (argc > 7)printf("Arg  7:%s\n"         , argv[ 7]);
+			// if (argc > 8)printf("Arg  8:%s\n"         , argv[ 8]);
+			// if (argc > 9)printf("Arg  9:%s\n"         , argv[ 9]);
+			// if (argc >10)printf("Arg 10:%s\n"         , argv[10]);
 
 
 		// ********************************************************************************

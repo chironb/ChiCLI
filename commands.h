@@ -157,9 +157,9 @@
 			strcat (drive_command_string, ",r,");                                                       \
 			strcat (drive_command_string, detected_filetype_char); 				                        \
                                                                                                         \
-			// printf("OPEN 6,%i,%i,%s\n", dev, CBM_READ, drive_command_string);		                    \
+			// printf("OPEN 6,%i,%i,%s\n", dev, CBM_READ, drive_command_string);		                \
                                                                                                         \
-			result = cbm_open(6, dev, CBM_READ, drive_command_string);                                 \
+			result = cbm_open(6, dev, CBM_READ, drive_command_string);                                  \
                                                                                                         \
 			/* Setup TARGET FILE for WRITING */                                                         \
 			strcpy (drive_command_string2, "");                                                         \
@@ -167,11 +167,11 @@
 			strcat (drive_command_string2, ",w,");                                                      \
 			strcat (drive_command_string2, detected_filetype_char); 			                        \
                                                                                                         \
-			// printf("OPEN 7,%i,%i,%s\n", user_input_arg2_number, CBM_WRITE, drive_command_string2);		\
+			// printf("OPEN 7,%i,%i,%s\n", user_input_arg2_number, CBM_WRITE, drive_command_string2);	\
                                                                                                         \
 			result2 = cbm_open(7, user_input_arg2_number, CBM_WRITE, drive_command_string2);            \
                                                                                                         \
-			printf("-> %s [",user_input_arg1_string);                                                              \
+			printf("-> %s [",user_input_arg1_string);                                                   \
                                                                                                         \
 			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));                                    \
                                                                                                         \
@@ -179,6 +179,10 @@
 				do {                                                                                    \
 					read_bytes = cbm_read(6, disk_sector_buffer, sizeof(disk_sector_buffer));           \
 					result = cbm_write(7, disk_sector_buffer, read_bytes); 								\
+					if ( (read_bytes == -1) || (result == -1) ) {										\
+						printf("Copy error!");															\
+						break;																			\
+					};/*end_if*/																		\
 					printf(".");																		\
 					memset(disk_sector_buffer,0,sizeof(disk_sector_buffer)); 							\
 				} while( read_bytes == sizeof(disk_sector_buffer) ); 									\
@@ -187,11 +191,11 @@
 			cbm_close (6);																				\
 			cbm_close (7);																				\
 																										\
-			printf("]\n");																		\
+			printf("]\n");																		        \
 	    break;																							\
 	    																								\
 	    default : 																						\
-	    	printf("Err args:%i\n", number_of_user_inputs);						\
+	    	printf("Err args:%i\n", number_of_user_inputs);						                        \
 	    /* end default */																				\
 	};/* end switch */																					\
 //end macro func 
