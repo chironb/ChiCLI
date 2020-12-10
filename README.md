@@ -45,6 +45,7 @@ Known Issues:
 - The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. Everything else works fine. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 
 
 Removals:
+- Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
 - Due to trying to squeeze every feature into about 50K, the maximum aliases is now 16 instead of 32
 - Had to remove a few built-in aliases for now because of the 16 limitation. 
 - Had to trim more text away from things like about, version, and licence.
