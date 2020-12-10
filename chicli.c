@@ -1392,8 +1392,9 @@ int main( int argc, char* argv[] ) {
 			printf("exit   reboot   restart     shutdown\n"); 
 			printf("echo   time     datetime    licence\n"); 
 			printf("chirp  make-dir remove-dir  debug-args\n");
-			printf("uiec-hide-ext   uiec-show-ext\n");
-			printf("Please see chicli-readme for details.\n");
+			printf("uiec-hide-ext   uiec-show-ext \n");
+			printf("uiec-save-config\n");			
+			printf("Enter: type chicli-readme for details.\n");
 
 
 		// ********************************************************************************
@@ -1777,6 +1778,31 @@ int main( int argc, char* argv[] ) {
 				printf("Setting UIEC to show extentions...\n");
 
 				result = cbm_open(1, dev, 15, "xe-");
+				cbm_close(1);
+
+				if (result == 0) {
+					printf("Done.\n");
+				} else {
+					printf("Err: %i\n", result);
+				};//end if 
+			};//end if 
+
+
+		// ********************************************************************************
+		// UIEC-SHOW-EXT COMMAND 
+		// ********************************************************************************
+		} else if ( matching("uiec-save-config",user_input_command_string) ) {
+
+			// OPEN lf,dv,15:PRINT#lf,"XE{+|-}":CLOSElf
+			// + is used to enable hiding.
+			// - is used to disable hiding.
+
+			result = get_status(dev, TRUE);
+
+			if (result != 255) {
+				printf("Saving current UIEC config to EEPROM...\n");
+
+				result = cbm_open(1, dev, 15, "xw");
 				cbm_close(1);
 
 				if (result == 0) {

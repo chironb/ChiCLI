@@ -18,7 +18,8 @@ I’ve tried it with the following hardware:
 - Commodore 1541 Disk Drive
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
-Latest News: 
+Latest News:
+- Added ability to write current config to the EEPROM of the UIEC 
 - FIXED: When copying files, if there’s an error, it borks the whole system.
 - FIXED: Pressing RUN/STOP on the bottom line screws the cursor up.
 - FIXED: debug-args: 4 args is supported (should be 5).
