@@ -19,6 +19,7 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News:
+- FIXED: Exomizer version works with loading and running files from within ChiCLI! 
 - Added ability to write current config to the EEPROM of the UIEC 
 - FIXED: When copying files, if there’s an error, it borks the whole system.
 - FIXED: Pressing RUN/STOP on the bottom line screws the cursor up.
@@ -42,8 +43,7 @@ https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 
 Known Issues:
 - I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
-- It can only load files from the drive it was loaded from. Running programs from a different drive issue 
-- The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. Everything else works fine. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 
+- It can only load files from the drive it was loaded from. Running programs from a different drive issue  
 
 Removals:
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
