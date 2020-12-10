@@ -94,7 +94,7 @@ CURSOR-UP   CTRL+I - Last Entered Text
 CURSOR-DOWN CTRL+K - Erase Line
 
 DEL CTRL+H         - Backspace
-SHIFT+DEL CTRL+;   - Forward Delete
+SHIFT+DEL CTRL+:   - Forward Delete
 
 CTRL+U             - Start of Line
 CTRL+O             - End of Line
