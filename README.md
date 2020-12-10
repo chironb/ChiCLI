@@ -25,13 +25,13 @@ Latest News:
 - Tab completion how hides the cursor until it is finished searching.
 - Now supports bulk deleting and copying of files!
 - Added support for drive numbers 8 through 15.
+- FIXED: Pressing RUN/STOP on the bottom line screws the cursor up
 
 Known Bugs:
 - When copying files, if there’s an error, it borks the whole system
 - File sizes reported are sometimes wonky 
 - Running programs from a different drive issue 
 - If you set the date and time more than once, it gets screwy
-- Pressing RUN/STOP on the bottom line screws the cursor up
 - When exiting to dos, you need to enter NEW before loading anything
 - debug-args: 4 args is supported (should be 5), and the program name is borked
 - The exomizer version of ChiCLI can't seem to load and run files, so you can't use it as a launcher. Everything else works fine. This is an issue with how it's getting compressed. Use the regular version if you need it as a launcher. 

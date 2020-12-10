@@ -984,13 +984,27 @@ int main( int argc, char* argv[] ) {
 			// ********************************************************************************
 			} else if (keystroke == 3) {	// CTRL+C / RUN/STOP = 3
 
-			    cputc(' ');
-				gotoy(wherey()+1);
-				gotox(SCREEN_LEFT_EDGE);
-				cputs(prompt);
-				cputc(CURSOR_CHARACTER);
-				gotox(wherex()-1);			
+			 //    cputc(' ');
+				// gotoy(wherey()+1);
+				// gotox(SCREEN_LEFT_EDGE);
+				// cputs(prompt);
+				// cputc(CURSOR_CHARACTER);
+				// gotox(wherex()-1);			
 				memset(entered_keystrokes,0,sizeof(entered_keystrokes));
+
+			    if ( position_in_string == strlen(entered_keystrokes) ) {
+			    	printf(" \n"); // this erases the cursor 
+			    } else {
+			    	printf("%c\n",entered_keystrokes[position_in_string]); //this erases teh cyursor and restores the character underneth it 
+			    };//
+		
+				//TODO: This needs to be different. A scan to test if all the chars are spaces, which is tested before before copying the current to teh previosu 
+				remove_extra_spaces(entered_keystrokes); 
+
+				if (strlen(entered_keystrokes) != 0) {
+					strcpy(previous_entered_keystrokes, entered_keystrokes); //backup command so pressing up cursor will recall it 
+				};//end if 
+				break; // break out of this loop to beginning processing and executing command
 
 
 			// ********************************************************************************
