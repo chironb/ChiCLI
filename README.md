@@ -19,7 +19,8 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News:
-- FIXED: Exomizer version works with loading and running files from within ChiCLI! 
+- Tab completion now works when the previous separator is '/' and not just a ' ' space. This means you can type ./somefile and hit tab, and it will complete it something like ./somefilename, which is pretty cool! It also works like this: copy somefile /somed and it would complete it to copy /somedir allowing you to then finish typing copy /somedir/somefile which is also pretty cool!
+- Added ability to launch in -skiptitle or -st mode, which skips the hardware screen gets you to the prompt faster. This is also created for external programs that are launched from it and then re-load and re-run it, created a more seamless experience. 
 - Added ability to write current config to the EEPROM of the UIEC 
 - FIXED: When copying files, if there’s an error, it borks the whole system.
 - FIXED: Pressing RUN/STOP on the bottom line screws the cursor up.
@@ -44,6 +45,7 @@ https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 Known Issues:
 - I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
 - It can only load files from the drive it was loaded from. Running programs from a different drive issue  
+- Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
 
 Removals:
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
@@ -192,11 +194,11 @@ Commodore Basic.
 It uses the following format: 
 RUN:REM ARG1 "ARG2 QUOTED" ARG3 "" ARG5
 
-Currently, only one argument is 
-supported, for debugging purposes.
+Supported options:
 
-Disable Drive Detect
--ddd
+-----
+
+Disable Drive Detect: -ddd
 
 This disabled drive detection. This is
 also disabled once you change drive 
@@ -206,6 +208,25 @@ this will be addressed differently.
 Example:
 LOAD"CHICLI",8
 RUN:REM -DDD
+
+-----
+
+Skip Title: -skiptitle or -st
+
+This skips the hardware screen gets 
+you to the prompt faster. This is also 
+created for external programs that are 
+launched from it and then re-load and 
+re-run it, created a more seamless 
+experience. 
+
+Example from Basic:
+LOAD"CHICLI",8
+RUN:REM -ST
+
+Example from within ChiCLI:
+./chicli -st
+run chicli -st
 ---------------------------------------
 Compressed ChiCLI for Faster Loading
 
@@ -401,6 +422,7 @@ copy somefile.txt somefile-copy.txt
 
 Copy a file into a folder
 copy helloworld test-dir/helloworld
+copy somefile /somedir/somefile
 
 Copy a file to drive 8:
 copy somefile.txt d8:

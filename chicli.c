@@ -4,7 +4,7 @@
 //
 /* Compiling, deleting object files, and launching VICE in fast prg loading mode: 
 cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-16.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-16.prg
-exomizer sfx sys -n chicli.prg -o chicli-exo.prg
+exomizer sfx sys -n chicli-16.prg -o chicli-16-exo.prg
 */ 
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -849,15 +849,31 @@ int main( int argc, char* argv[] ) {
 
 
 
-	/* White on L.Blue on Blue */
-	set_profile_colors(13);
+
 
 	// Start the prompt input stuff 
 	starting_x = wherex();
 	starting_y = wherey();
 
 	// Display the logo, hardware info, and play the chirp 
-	display_title_screen(have_device_numbers_changed); // this disabled the drive detection rountine 
+	// display_title_screen(have_device_numbers_changed); // this disabled the drive detection rountine 
+
+			
+
+	if ( (argc > 1  &&  matching("-skiptitle",argv[1])) || (argc > 1  &&  matching("-st",argv[1])) ) {
+		//display_title_text();
+	} else {
+		/* White on L.Blue on Blue */
+		set_profile_colors(13);
+		clrscr();					
+		display_title_text();
+		sys_info(have_device_numbers_changed);	 // this is loaded like this: RUN:REM -ddd // RUN:REM ARG1 " ARG2 IS QUOTED" ARG3 "" ARG5	
+		pet_chirp();	
+	};//end if 
+
+					
+
+
 
 	//set current directory to whatevr it is 
 	dev = getcurrentdevice();
@@ -1134,7 +1150,7 @@ int main( int argc, char* argv[] ) {
 
 				for (i = (entered_keystrokes_length-1) ; i > 0 ; i--) {
 
-					if (entered_keystrokes[i] == ' ') {
+					if (entered_keystrokes[i] == ' ' || entered_keystrokes[i] == '/') {
 						break;
 					} else {
 						tab_length++;
@@ -1468,12 +1484,12 @@ int main( int argc, char* argv[] ) {
 			// switch (number_of_user_inputs) {
 				
 			// 	case 2 : 				
-					if (they_are_sure() == TRUE) {			
+					// if (they_are_sure() == TRUE) {			
 						strcpy(extracted_program_name,user_input_command_string+2); // THIS GIVES ME EVERYTHING EXCEPT THE FIRST TWO CHARACTERS 
-						printf("Running: %s\n", extracted_program_name);				
+						// printf("Running: %s\n", extracted_program_name);				
 			    		exec(extracted_program_name, user_input_arg1_string); 
 		    			return EXIT_SUCCESS;
-		    		};//end if 
+		    		// };//end if 
 			    // break;				
 	 			
 	 			// // TODO: rewrite this to inlude all args with quotes on the command line 	
