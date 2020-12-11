@@ -93,7 +93,7 @@ backspace and delete. It also supports
 cursor keys and a home and end keys.
 
 The Commodore cursor keys are supported
-as well as extra keys to make it easier 
+as well as extra keys to make it easier
 for people who are coming from the 
 standard Linux or Windows keyboard 
 layouts.
