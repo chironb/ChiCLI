@@ -19,6 +19,7 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News:
+- DONE: Updated readme's with a list of the built-in common aliases.
 - FIXED: Copy path bugs. Now you can do this:
 -- copy sauce tartar  --> Copies "sauce" in the current folder to another file in the current folder called "tartar"
 -- copy sauce /tartar --> Copies "sauce" in the current folder to another file in the root folder called "tartar"
@@ -51,7 +52,6 @@ https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
 https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 
 Known Issues:
-- I need to type up a list of the built-in common aliases.
 - I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
 - It can only load files from the drive it was loaded from. Running programs from a different drive issue  
 - Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
