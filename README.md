@@ -793,27 +793,27 @@ Optimization Links
 —————
 
 Docs for cc65 
-https://cc65.github.io/doc/coding.html
+- https://cc65.github.io/doc/coding.html
 
 Really Great Guide Readable on GitHub
-https://github.com/ilmenit/CC65-Advanced-Optimizations#12---inline-functions-activate-additional-register-keyword-optimizations---29-ticks-6-speedup
+- https://github.com/ilmenit/CC65-Advanced-Optimizations
 
 Optimizing C array lookups for the 6502
-http://8bitworkshop.com/blog/compilers/2019/03/17/cc65-optimization.html
+- http://8bitworkshop.com/blog/compilers/2019/03/17/cc65-optimization.html
 
 Amateur Optimization Hour, part 2
-https://coronax.wordpress.com/2018/09/13/amateur-optimization-hour-part-2/
+- https://coronax.wordpress.com/2018/09/13/amateur-optimization-hour-part-2/
 
 nesdoug - NES Programming with cc65 - How cc65 works
-https://nesdoug.com/2018/09/05/how-cc65-works/
+- https://nesdoug.com/2018/09/05/how-cc65-works/
 
 Programming NES games in C by Shiru
-https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
+- https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
 
 —————
 
-Available Memory
-https://www.cc65.org/doc/internal.txt
+Commodore Systems - Available Memory to cc65
+- https://www.cc65.org/doc/internal.txt
 
 <pre>
 Quick Summary
