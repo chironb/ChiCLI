@@ -246,15 +246,8 @@
 	\
 	strcpy (drive_command_string,"c0"); /* start copy command, not gonna deal with partitions for now */ \
 	\
-	if (target_path[0] == '/') { \
-		strcat (drive_command_string,"/"); /* if it start with slash / then it's refering to the root folder and it needs two slashes // instead */ \
-		strcat (drive_command_string,target_path); /* add the target path */ \
-	                                                                               \
-	} else if (target_path_length != 0) {  \
 		strcat (drive_command_string,"/");    \
 		strcat (drive_command_string,target_path); /* add the target path */ \
-	                                                                               \
-	};/*end_if*/ \
 	                                                                               \
 	strcat (drive_command_string,":"); /* finish the target path  */ \
 	\
@@ -266,15 +259,8 @@
 	                                                                               \
 	strcat (drive_command_string,"=");					   \
 	                                                                               \
-	if (source_path[0] == '/') { \
-		strcat (drive_command_string,"/"); /* if it start with slash / then it's refering to the root folder and it needs two slashes // instead */ \
-		strcat (drive_command_string,source_path); /* add the source path */ \
-	                                                                               \
-	} else if (source_path_length != 0) {  \
 		strcat (drive_command_string,"/");   \
 		strcat (drive_command_string,source_path); /* add the source path */ \
-	                                                                               \
-	};/*end_if*/ \
 	                                                                               \
 	strcat (drive_command_string,":"); /* finish the source path  */ \
 	strcat (drive_command_string,source_filename_pointer); /* add the source filename  */ \
@@ -287,7 +273,7 @@
 		cbm_close(1);  \
 	};/*end_if*/ \
 	\
-	/* printf("2 tp:%s tf:%s\nsp:%s sf:%s\n", target_path, target_filename_pointer, source_path, source_filename_pointer); */ \
+	/* printf("2 tp:%s tf:%s\nsp:%s sf:%s\n", target_path, target_filename_pointer, source_path, source_filename_pointer); */  \
 //end macro_func
 
 // ********************************************************************************
