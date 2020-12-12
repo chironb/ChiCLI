@@ -1848,8 +1848,14 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 
 		// ********************************************************************************
 		// CD COMMAND 
-		// ********************************************************************************
+		// ******************************************************************************** 		
 		} else if ( matching("cd",user_input_command_string) ) {
+
+			// TODO: I can make cd.. and cd/ built-in aliases if I do this 
+			// --> } else if ( user_input_command_string[0] == 'c' && user_input_command_string[1] == 'd' ) {
+			// Then I can check like this: if ( user_input_command_string[2] == '.' && user_input_command_string[3] == '.' ) {
+			// and put that below where I also check for teh second argument. 
+			// Then I'll save ram and can remove two more calls to alias in the startup
 
 			switch (number_of_user_inputs) {
 				
