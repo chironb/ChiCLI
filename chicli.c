@@ -2037,6 +2037,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 		// ********************************************************************************
 		} else if ( matching("delete",user_input_command_string) || 
 					matching("del",user_input_command_string)    || 
+					matching("dl",user_input_command_string)     || 					
 					matching("rm",user_input_command_string)) {
 
 			// delete test --> deletes test in the current dir

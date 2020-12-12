@@ -19,6 +19,10 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News:
+- FIXED: Copy path bugs. Now you can do this:
+-- copy sauce tartar  --> Copies "sauce" in the current folder to another file in the current folder called "tartar"
+-- copy sauce /tartar --> Copies "sauce" in the current folder to another file in the root folder called "tartar"
+-- copy sourcedir/sauce targetdir/tartar --> Copies "sauce" in the current folder's folder called sourcedir to the current folder's folder called targetdir named "tartar"
 - Copy now works with paths. You can now do things like copy * //allfiles/ or copy //somefile //somedir/newfilename! You must end folder with a slash / as it doesn't yet automatically figure out if you mean copy the file to this filename, or copy this file to this folder name using the original implied filename. 
 - The most common alias are built into the system, so they don't take up alias slots. However, there's only 8 now, at least until I squeeze out some more ram. 
 - The list command takes up one less screenline when displaying.
@@ -53,7 +57,7 @@ Known Issues:
 - Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
 
 Removals:
-- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 8, but common ones are built-in now.
+- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 7 (seven), but common ones are built-in now.
 - Due, again, to not having enough RAM, the hotkey command can only be 20 characters in size. 
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
 - Had to remove a few built-in aliases for now because of the 16 limitation. 
@@ -82,6 +86,41 @@ Removals:
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_screensaver.png?raw=true)
 
 <pre>
+---------------------------------------
+ChiCLI - Quick Command List
+---------------------------------------
+
+help   about    version     sys-info  
+alias  hotkey   profile-set color-set 
+clear  list     d#:   cd    run   ./  
+type   copy     rename      delete    
+format status   dos-command drive-set 
+peek   sys      validate    view-mem  
+poke   keycodes screensaver initialize
+exit   reboot   restart     shutdown  
+echo   time     datetime    licence   
+chirp  make-dir remove-dir  debug-args
+uiec-hide-ext   uiec-show-ext         
+uiec-save-config
+
+---------------------------------------
+Built-In Aliases
+---------------------------------------
+
+clear             - cls
+help              - ?
+version           - ver
+licence           - lic
+exit              - quit, bye, endcli
+dos-command       - dc
+make-dir          - md, mkdir
+remove-dir        - rd, rmdir
+delete            - dl, del, rm
+rename            - ren
+copy              - cp
+type              - cat
+list              - ls, dir, directory
+
 ---------------------------------------
 ChiCLI - Detailed Help
 ---------------------------------------
