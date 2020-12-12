@@ -131,7 +131,156 @@
 //end macro func 
 
 
-
+// ********************************************************************************
+// ACOPY COMMAND - Advanced Copy - Will Replace Copy 
+// ********************************************************************************
+#define acopy() \
+ \
+unsigned char user_input_arg1_string_length; \
+unsigned char user_input_arg2_string_length; \
+unsigned char right_slash_index; \
+unsigned char right_slash_position; \
+ \
+unsigned char  source_path[MAX_COMMODORE_DOS_FILENAME]; \
+unsigned char  source_path_length; \
+unsigned char *source_filename_pointer; \
+unsigned char  source_filename_length; \
+ \
+unsigned char  target_path[MAX_COMMODORE_DOS_FILENAME]; \
+unsigned char  target_path_length;			 \
+unsigned char *target_filename_pointer; \
+unsigned char  target_filename_length;	 \
+ \
+unsigned char  copy_error_status; \
+ \
+memset( source_path, 0, sizeof(source_path) ); \
+memset( target_path, 0, sizeof(target_path) ); \
+ \
+user_input_arg1_string_length = 0; \
+user_input_arg2_string_length = 0; \
+ \
+right_slash_index = 0; \
+ \
+user_input_arg1_string_length = strlen(user_input_arg1_string); \
+user_input_arg2_string_length = strlen(user_input_arg2_string); \
+ \
+source_filename_pointer = &user_input_arg1_string[0]; /* update pointer --> user_input_arg1_string_length string */ \
+target_filename_pointer = &user_input_arg2_string[0]; /* update pointer --> user_input_arg1_string_length string */ \
+ \
+source_filename_length = 0; \
+target_filename_length = 0; \
+ \
+copy_error_status = FALSE; \
+ \
+/* -------------------- SOURCE -------------------- */ \
+ \
+right_slash_index = 0; \
+ \
+for (i = (user_input_arg1_string_length) ; i > 0 ; i--) { \
+	if (user_input_arg1_string[i-1] == '/') { \
+		break; \
+	} else { \
+		right_slash_index++; /* how many positons left does the rightmost slash / occur */ \
+	};/*end_if*/ \
+};/*end_if*/  \
+ \
+right_slash_position = (user_input_arg1_string_length - 1) - right_slash_index;			\
+\
+if (right_slash_index == user_input_arg1_string_length) {/* if we searched the whole string and found no / slashes */ \
+	/* leave source filename_pointer as-is, leave source path as-is */ \
+\
+} else if (right_slash_position == 0) { /* if right_slash_position == 0 then there's only a slash at the very beginning */ \
+	source_filename_pointer = source_filename_pointer + 1; \
+\
+} else if (right_slash_index == 0) { /* if there's a slash at the very end */ \
+	copy_error_status = TRUE; /* ERROR! in this case, there can't be only a path as the source, cause that's not a file */ \
+\
+} else { \
+	source_filename_pointer = source_filename_pointer + (right_slash_position+1); \
+\
+};/*end_if*/ \
+\
+source_filename_length = strlen(source_filename_pointer); \
+\
+source_path_length = user_input_arg1_string_length-source_filename_length; \
+source_filename_length = strlen(source_filename_pointer); \
+strncpy(source_path , user_input_arg1_string , source_path_length ); /* copy the arg2 into the path leaving out the last filename characters */ \
+\
+/* -------------------- TARGET -------------------- */ \
+\
+right_slash_index = 0; \
+\
+for (i = (user_input_arg2_string_length) ; i > 0 ; i--) { \
+	if (user_input_arg2_string[i-1] == '/') { \
+		break; \
+	} else { \
+		right_slash_index++; /* how many positons left does the rightmost slash / occur */ \
+	};/*end_if*/ \
+};/*end_for*/ \
+\
+right_slash_position = (user_input_arg2_string_length - 1) - right_slash_index; \
+\
+if (right_slash_index == user_input_arg2_string_length) { /* if we searched the whole string and found no slashes then... */ \
+	/* use this string as the filename , the path is left empty */ \
+\
+} else if (right_slash_position == 0) { /* if there's only a slash at the very beginning */ \
+	target_filename_pointer = target_filename_pointer + 1; \
+\
+} else if (right_slash_index == 0) { /* if there's a slash at the very end */ \
+	target_filename_pointer = source_filename_pointer; /* then they haven't given us a filename, and the source filename is implied */ \
+	strcpy(target_path,user_input_arg2_string); \
+ \
+} else { \
+	target_filename_pointer = target_filename_pointer + (right_slash_position+1); \
+ \
+};/*end_if*/ \
+ \
+\
+ \
+target_path_length = user_input_arg2_string_length-target_filename_length; \
+target_filename_length = strlen(target_filename_pointer); \
+strncpy(target_path , user_input_arg2_string , target_path_length ); /* copy the arg2 into the path leaving out the last filename characters */ \
+\
+/* -------------------- BUILD STRING -------------------- */ \
+\
+strcpy (drive_command_string,"c0"); /* start copy command, not gonna deal with partitions for now */ \
+\
+if (target_path[0] == '/') { \
+	strcat (drive_command_string,"/"); /* if it start with slash / then it's refering to the root folder and it needs two slashes // instead */ \
+	strcat (drive_command_string,target_path); /* add the target path */ \
+ \
+} else if (target_path_length != 0) {  \
+	strcat (drive_command_string,"/");    \
+	strcat (drive_command_string,target_path); /* add the target path */ \
+ \
+};/*end_if*/ \
+ \
+strcat (drive_command_string,":"); /* finish the target path  */ \
+ \
+strcat (drive_command_string,target_filename_pointer); /* add the target filename  */ \
+ \
+strcat (drive_command_string,"=");					   \
+ \
+if (source_path[0] == '/') { \
+	strcat (drive_command_string,"/"); /* if it start with slash / then it's refering to the root folder and it needs two slashes // instead */ \
+	strcat (drive_command_string,source_path); /* add the source path */ \
+ \
+} else if (source_path_length != 0) {  \
+	strcat (drive_command_string,"/");   \
+	strcat (drive_command_string,source_path); /* add the source path */ \
+ \
+};/*end_if*/ \
+ \
+strcat (drive_command_string,":"); /* finish the source path  */ \
+strcat (drive_command_string,source_filename_pointer); /* add the source filename  */ \
+printf("-->%s\n", drive_command_string); \
+ \
+if (copy_error_status == TRUE) {  \
+	printf("ERR: File not found!\n");  \
+} else { \
+	result = cbm_open(1, dev, 15, drive_command_string);   \
+	cbm_close(1);  \
+};/*end_if*/ \
 
 
 // ********************************************************************************

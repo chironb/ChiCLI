@@ -1,5 +1,6 @@
 # ChiCLI
-ChiCLI - A Command Line Interface for Commodore Computers!
+ChiCLI v0.17 (c) 2020 Chiron Bramberger
+A Command Line Interface for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot.png?raw=true)
 
@@ -19,8 +20,11 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News:
+- Copy now works with paths. You can now do things like copy * //allfiles/ or copy //somefile //somedir/newfilename! You must end folder with a slash / as it doesn't yet automatically figure out if you mean copy the file to this filename, or copy this file to this folder name using the original implied filename. 
+- The most common alias are built into the system, so they don't take up alias slots. However, there's only 8 now, at least until I squeeze out some more ram. 
+- The list command takes up one less screenline when displaying.
 - Tab completion now works when the previous separator is '/' and not just a ' ' space. This means you can type ./somefile and hit tab, and it will complete it something like ./somefilename, which is pretty cool! It also works like this: copy somefile /somed and it would complete it to copy /somedir allowing you to then finish typing copy /somedir/somefile which is also pretty cool!
-- Added ability to launch in -skiptitle or -st mode, which skips the hardware screen gets you to the prompt faster. This is also created for external programs that are launched from it and then re-load and re-run it, created a more seamless experience. 
+- Added ability to launch in -skiptitle or -st mode, which skips the hardware screen gets you to the prompt faster. This is also created for external programs that are launched from it and then re-load and re-run it, created a more seamless experience. There are two sample files to test this with: echoarg and lorem. Echoarg just prints whatever you arguments you send it. Lorem just prints out the lorum ipsum text. They both call ChiCLI -sf when they finished so it doesn't appear like you've left the system. 
 - Added ability to write current config to the EEPROM of the UIEC 
 - FIXED: When copying files, if there’s an error, it borks the whole system.
 - FIXED: Pressing RUN/STOP on the bottom line screws the cursor up.
@@ -33,6 +37,7 @@ Latest News:
 - Added support for drive numbers 8 through 15.
 
 Known Bugs:
+- Need to figure out how to make colors and color profiles consistent and retained after calling an external program and returning back into ChiCLI using the -sf option. 
 - Need to inform the user when they can't set another alias because all the slots are full
 - File sizes reported are sometimes wonky 
 - If you set the date and time more than once, it gets screwy
@@ -43,13 +48,15 @@ https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
 https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 
 Known Issues:
+- I need to type up a list of the built-in common aliases.
 - I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
 - It can only load files from the drive it was loaded from. Running programs from a different drive issue  
 - Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
 
 Removals:
+- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 8, but common ones are built-in now.
+- Due, again, to not having enough RAM, the hotkey command can only be 20 characters in size. 
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
-- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 16 instead of 32
 - Had to remove a few built-in aliases for now because of the 16 limitation. 
 - Had to trim more text away from things like about, version, and licence.
 
@@ -413,6 +420,10 @@ also use * to copy all the files
 within the current disk, image, or 
 directory/folder you are currently in, 
 to another drive number. 
+
+Folders must end with a slash / to 
+show they are folders and not a new
+filename for the copied file. 
 
 Examples:
 

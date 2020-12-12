@@ -3,8 +3,8 @@
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
 //
 /* Compiling, deleting object files, and launching VICE in fast prg loading mode: 
-cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-16.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-16.prg
-exomizer sfx sys -n chicli-16.prg -o chicli-16-exo.prg
+cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-17.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-17.prg
+exomizer sfx sys -n chicli-17.prg -o chicli-17-exo.prg
 */ 
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ exomizer sfx sys -n chicli-16.prg -o chicli-16-exo.prg
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v0.16"
+#define VERSION "v0.17"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -99,9 +99,11 @@ unsigned char color_profiles[14][3] = {{06,01,01}, //  1 - C PET Style
 								       {01,02,16}, // 12 - Greyscale Two
 								       {02,15,07}};// 13 - Default
 
-unsigned char alias_shortcut_list[MAX_ALIASES][MAX_LENGTH_COMMAND] ; // --> lots of RAM! like 2.5K !!!
-unsigned char alias_command_list[MAX_ALIASES][MAX_LENGTH_COMMAND] ;  // --> see chicli.h to change this
-unsigned char hotkeys_list[MAX_HOTKEYS][MAX_LENGTH_COMMAND] ;
+unsigned char alias_shortcut_list[MAX_ALIASES][MAX_ALIAS_LENGTH] ; // --> lots of RAM! like 2.5K !!!
+unsigned char alias_command_list[MAX_ALIASES][MAX_ALIAS_LENGTH] ;  // --> see chicli.h to change this
+
+unsigned char hotkeys_list[MAX_HOTKEYS][MAX_HOTKEY_LENGTH] ;
+
 unsigned char entered_keystrokes[MAX_ENTERED_KEYSTROKES] ;
 unsigned char position_at_prompt_x = 0;
 unsigned char position_at_prompt_y = 0;	
@@ -136,8 +138,8 @@ unsigned char     user_input_arg2_type                          = 'e' ;
 unsigned char     user_input_arg3_type                          = 'e' ;  
 unsigned char     user_input_arg4_type                          = 'e' ;  
 
-unsigned char 	  drive_command_string[MAX_LENGTH_COMMAND]		= "drive_command_string not used yet"  ;
-unsigned char 	  drive_command_string2[MAX_LENGTH_COMMAND]		= "drive_command_string2 not used yet"  ;
+unsigned char 	  drive_command_string[MAX_LENGTH_COMMAND]		= ""  ;
+unsigned char 	  drive_command_string2[MAX_LENGTH_COMMAND]		= ""  ;
 
 unsigned char 	  user_input_command_string[MAX_LENGTH_COMMAND] = ""  ;
 unsigned char     user_input_arg1_string[MAX_LENGTH_ARGS]       = ""  ;
@@ -788,7 +790,6 @@ int main( int argc, char* argv[] ) {
 	// Here are some links to help:
 	// https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
 	// https://github.com/cc65/cc65/blob/master/asminc/c64.inc
-
 	// printf("\nProgram Name:%s\n", argv[0]);
 	// wait_for_keypress(); // wait for a keypress, after flushing the buffer 
 
@@ -797,41 +798,47 @@ int main( int argc, char* argv[] ) {
 	// ********************************************************************************
 	// SET DEFAULT ALIASES 
 	// ********************************************************************************
-	
-	set_alias( "ls"       , "list"        );   
-	set_alias( "dir"      , "list"        );   
-	set_alias( "del"      , "delete"      );     
-	set_alias( "rm"       , "delete"      );     
-	set_alias( "ren"      , "rename"      );  
-	set_alias( "md"       , "make-dir"    );           
-	set_alias( "rd"       , "remove-dir"  );       
-	set_alias( "cls"      , "clear"       );    
-	set_alias( "cp"       , "copy"        );   
-	set_alias( "cat"      , "type"        );           	
+	// set_alias( "ls"       , "list"        );   
+	// set_alias( "dir"      , "list"        );	
+	// set_alias( "directory", "list"        );	
+	// set_alias( "cls"      , "clear"       );      
+	// set_alias( "del"      , "delete"      );     
+	// set_alias( "rm"       , "delete"      );   
+
+	// set_alias( "ren"      , "rename"      );  
+	// set_alias( "md"       , "make-dir"    );           
+	// set_alias( "rd"       , "remove-dir"  );       
+ 
+	// set_alias( "cp"       , "copy"        );   
 	set_alias( "cd.."     , "cd .."       ); 
 	set_alias( "cd/"      , "cd /"        ); 
-	set_alias( "endcli"   , "exit"        ); 		
-	set_alias( "quit"     , "exit"        ); 
-	set_alias( "ver"      , "version"     ); 
+	// set_alias( "dc"       , "dos-command" ); 
+	// set_alias( "cat"      , "type"        );  	
+	
+	// set_alias( "quit"     , "exit"        ); 
+	// set_alias( "endcli"   , "exit"        ); 
+
+	// set_alias( "ver"      , "version"     ); 
 	// set_alias( "mkdir"    , "make-dir"    );  
 	// set_alias( "rmdir"    , "remove-dir"  ); 			
-	// set_alias( "directory", "list"        );
-	// set_alias( "ss"       , "screensaver" ); 	
+
+	set_alias( "ss"       , "screensaver" ); 	
 	// set_alias( "lic"      , "licence"     ); 
-        
+
+	// set_alias( "?"        , "help"     );  
 
 	// ********************************************************************************
 	// SET DEFAULT HOTKEYS 
 	// ********************************************************************************
 	
 	set_hotkey(1,"cls");
-	set_hotkey(2,"");
+	// set_hotkey(2,"");
 	set_hotkey(3,"ls");		
-	set_hotkey(4,"");
+	// set_hotkey(4,"");
 	set_hotkey(5,"screensaver");
-	set_hotkey(6,"");
+	// set_hotkey(6,"");
 	set_hotkey(7,"help");
-	set_hotkey(8,"");
+	// set_hotkey(8,"");
 
 	// ********************************************************************************
 	// PROCESS ARGUMENTS
@@ -1304,7 +1311,8 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// CLEAR COMMAND 
 		// ********************************************************************************
-		if        ( matching("clear",user_input_command_string) ) {
+		if        ( matching("clear",user_input_command_string) || 
+					matching("cls",user_input_command_string) ) {
 
 			if (number_of_user_inputs == 1) {
 				clrscr();
@@ -1394,29 +1402,32 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// HELP COMMAND 
 		// ********************************************************************************
-		} else if ( matching("help",user_input_command_string) ) {
-			
-			//     "                                       "	
-			printf("ChiCLI Commands:\n");
-			printf("help   about    version     sys-info\n"); 
-			printf("alias  hotkey   profile-set color-set\n"); 
-			printf("clear  list     d#:   cd    run   ./\n"); 
-			printf("type   copy     rename      delete\n"); 
-			printf("format status   dos-command drive-set\n"); 
-			printf("peek   sys      validate    view-mem\n"); 
-			printf("poke   keycodes screensaver initialize\n"); 
-			printf("exit   reboot   restart     shutdown\n"); 
-			printf("echo   time     datetime    licence\n"); 
-			printf("chirp  make-dir remove-dir  debug-args\n");
-			printf("uiec-hide-ext   uiec-show-ext \n");
-			printf("uiec-save-config\n");			
-			printf("Enter: type chicli-readme for details.\n");
+		} else if ( matching("help",user_input_command_string) ||
+					matching("?",user_input_command_string) ) {
+
+// This is messy but it's saving jigawatts of RAMS!!!
+// printf("ChiCLI Commands:\n");
+// printf("\
+// help   about    version     sys-info  \
+// alias  hotkey   profile-set color-set \
+// clear  list     d#:   cd    run   ./  \
+// type   copy     rename      delete    \
+// format status   dos-command drive-set \
+// peek   sys      validate    view-mem  \
+// poke   keycodes screensaver initialize\
+// exit   reboot   restart     shutdown  \
+// echo   time     datetime    licence   \
+// chirp  make-dir remove-dir  debug-args\
+// uiec-hide-ext   uiec-show-ext         \
+// uiec-save-config\n");
+printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 
 
 		// ********************************************************************************
 		// VERSION COMMAND
 		// ********************************************************************************
-		} else if ( matching("version",user_input_command_string) ) {
+		} else if ( matching("version",user_input_command_string) || 
+					matching("ver",user_input_command_string) ) {
 
 			display_title_text();
 			//printf("Licenced under terms of the GNU GPL v3\n");
@@ -1433,7 +1444,7 @@ int main( int argc, char* argv[] ) {
 			display_title_text();
 			display_description_text();
 			printf("github.com/chironb/ChiCLI\n");
-			//printf("Licenced under terms of the GNU GPL v3\n");
+			printf("GNU GPL v3.\n");
 			//printf("www.gnu.org/licenses/\n");
 
 
@@ -1441,10 +1452,12 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// LICENCE COMMAND
 		// ********************************************************************************
-		} else if ( matching("licence",user_input_command_string) ) {
+		} else if ( matching("licence",user_input_command_string) || 
+					matching("lic",user_input_command_string)) {
 			
-			display_title_text();
-			printf("Licenced under terms of the GNU GPL v3.\nwww.gnu.org/licenses/\nTo read, enter: type chicli-licence\n");
+			//display_title_text();
+			//printf("Licenced under terms of the GNU GPL v3.\nwww.gnu.org/licenses/\nTo read, enter: type chicli-licence\n");
+			printf("GNU GPL v3.\nEnter:'type chicli-licence' for more.\n");
 
 			// printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
 			// printf("Licence download: www.gnu.org/licenses/\n");
@@ -1525,7 +1538,10 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// EXIT COMMAND 
 		// ********************************************************************************
-		} else if ( matching("exit",user_input_command_string) ) {
+		} else if ( matching("exit",user_input_command_string) || 
+					matching("quit",user_input_command_string) ||
+					matching("bye",user_input_command_string) ||
+					matching("endcli",user_input_command_string)) {
 
 			if (they_are_sure() == TRUE) {
 				exit(0);
@@ -1577,7 +1593,8 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// DOS-COMMAND COMMAND 
 		// ********************************************************************************
-		} else if ( matching("dos-command",user_input_command_string) ) {
+		} else if ( matching("dos-command",user_input_command_string) || 
+					matching("dc",user_input_command_string) ) {
 
 			if (they_are_sure() == TRUE) {
 				result = cbm_open(1, dev, 15, user_input_arg1_string);
@@ -1974,7 +1991,9 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// MAKE-DIR COMMAND 
 		// ********************************************************************************
-		} else if ( matching("make-dir",user_input_command_string) ) {
+		} else if ( matching("make-dir",user_input_command_string) || 
+			 		matching("mkdir",user_input_command_string)    ||
+					matching("md",user_input_command_string) ) {
 
 			switch (number_of_user_inputs) {
 				case 2 : 				
@@ -1994,7 +2013,9 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// REMOVE-DIR COMMAND 
 		// ********************************************************************************
-		} else if ( matching("remove-dir",user_input_command_string) ) {
+		} else if ( matching("remove-dir",user_input_command_string) || 
+					matching("rmdir",user_input_command_string)      ||
+					matching("rd",user_input_command_string) ) {
 
 			switch (number_of_user_inputs) {
 				case 2 : 	
@@ -2014,7 +2035,9 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// DELETE COMMAND 
 		// ********************************************************************************
-		} else if ( matching("delete",user_input_command_string) ) {
+		} else if ( matching("delete",user_input_command_string) || 
+					matching("del",user_input_command_string)    || 
+					matching("rm",user_input_command_string)) {
 
 			// delete test --> deletes test in the current dir
 			// delete *    --> deletes all teh files iun teh current dir 
@@ -2107,7 +2130,8 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// RENAME COMMAND 
 		// ********************************************************************************
-		} else if ( matching("rename",user_input_command_string) ) {
+		} else if ( matching("rename",user_input_command_string) || 
+					matching("ren",user_input_command_string)) {
 
 			switch (number_of_user_inputs) {
 				case 3 : 				
@@ -2420,10 +2444,12 @@ int main( int argc, char* argv[] ) {
 
 
 
+
 		// ********************************************************************************
 		// COPY COMMAND 
 		// ********************************************************************************
-		} else if ( matching("copy",user_input_command_string) ) {
+		} else if ( matching("copy",user_input_command_string) || 
+					matching("cp",user_input_command_string) ) {
 
 			// copy test test2 --> creates a new file called test2 that contains the contents of test using copy()
 			// copy test d8:   --> copies test to drive 8 using dcopy()
@@ -2460,7 +2486,7 @@ int main( int argc, char* argv[] ) {
 
 		switch (number_of_user_inputs) {
 			case 3 : 	
-				if ( matching("*",user_input_arg1_string) && use_dcopy == TRUE) { 			// copy * d8:     
+				if ( matching("*",user_input_arg1_string) ) { 			// copy * d8:     
 
 					dir_file_count(dir_file_total); // get the total number of files to copy and store in dir_file_total 
 					printf("Files to copy: %i\n", dir_file_total);
@@ -2473,9 +2499,21 @@ int main( int argc, char* argv[] ) {
 						    	//do nothing
 						    } else { 
 						    	dir_goto_file_index(loop_k);
-								detected_filetype = dir_ent.type;
-								strcpy (user_input_arg1_string, dir_ent.name);    
-								dcopy();
+								detected_filetype = dir_ent.type; //use this to detect if it's a directory or not
+								strcpy (user_input_arg1_string, dir_ent.name);
+								
+								if 	(dir_ent.type ==  2) {									
+				    				printf("Skipping dir: %s\n", dir_ent.name);
+
+				    			} else {
+							    	if (use_dcopy == TRUE) {   
+										dcopy(); // use dcopy for another drive and acopy for bulk moving to a folder on teh current drive
+									} else {
+										acopy(); // use acopy to copy a bunch of files to another folder on the same drive 
+									};//end_if
+
+								};//end_if
+
 							};//end if 
 
 						};//end for 
@@ -2488,7 +2526,8 @@ int main( int argc, char* argv[] ) {
 					dcopy();
 
 				} else if ( use_dcopy == FALSE ) {
-					copy();
+					// copy();
+					acopy(); // advanced copy 
 
 				} else { // error 
 					printf("Copy syntax error.\n");
@@ -2512,7 +2551,8 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// TYPE COMMAND 
 		// ********************************************************************************
-		} else if ( matching("type",user_input_command_string) ) {
+		} else if ( matching("type",user_input_command_string) || 
+					matching("cat",user_input_command_string) ) {
 
 			switch (number_of_user_inputs) {
 
@@ -2520,7 +2560,7 @@ int main( int argc, char* argv[] ) {
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
 					switch(detected_filetype){
 						case 2 : // case  2 : printf("DIR"); break;	// DIR
-							printf("Error: this is a directory.\n");
+							printf("Error: this is a dir.\n");
 						break;
 
 						case 16 : // case 16 : printf("SEQ"); break; // SEQ
@@ -2588,9 +2628,12 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// LIST COMMAND 
 		// ********************************************************************************
-		} else if ( matching("list",user_input_command_string) ) {
+		} else if ( matching("list",user_input_command_string) || 
+					matching("ls",user_input_command_string)   || 
+					matching("dir",user_input_command_string)  ||
+					matching("directory",user_input_command_string) ) {
 
-		    printf("Directory of D%i:\n", dev);
+		    printf("D%i: ", dev);
 
 		    result = cbm_opendir(1, dev); // need to deal with errors here
 
@@ -2632,7 +2675,7 @@ int main( int argc, char* argv[] ) {
 
 			    if (number_of_files == 0) {
 			    	//printf("\ncbm_readdir  result: %i\n", result);
-			    	printf("Disk Name: %s\n", dir_ent.name);
+			    	printf("%s\n", dir_ent.name);
 			    	// the size is actually drive 0 or drive 1 from PET dual drives
 			    } else if (result == 2) {
 
@@ -2757,10 +2800,10 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("color-set",user_input_command_string) ) {
 	
-			printf("1-Blk 2-Wht 3-Red 4-Cyn 5-Pur 6-Grn\n");
-			printf("7-Blu 8-Yel 9-Org 10-Br 11-Pk 12-DGr\n");
-			printf("13-Gr 14-LG 15-LB 16-LG\n");
-			printf("0-Skip\n");
+printf("1-Blk 2-Wht 3-Red 4-Cyn 5-Pur 6-Grn\
+7-Blu 8-Yel 9-Org 10-Br 11-Pk 12-DGr\
+13-Gr 14-LG 15-LB 16-LG\
+0-Skip\n");
 
 			printf("Text: ");
 			scanf("%i", &user_input_number1);
@@ -2801,11 +2844,11 @@ int main( int argc, char* argv[] ) {
 			    break;	
 
 			    default : 
-					printf(" 1-CPET 2-CVIC-20 3-C64 4-CSX-64\n");
-					printf(" 5-C128/VIC 6-C128/VDC 7-AmigaDOS \n");
-					printf(" 8-White/Blue/L.Blue 9-B/W 10-W/B\n");
-					printf("11-Grey1 12-Grey2 13 Default 0-Skip\n");
-					printf("Select Color Profile:");
+printf(" 1-CPET 2-CVIC-20 3-C64 4-CSX-64\
+ 5-C128/VIC 6-C128/VDC 7-AmigaDOS\
+ 8-White/Blue/L.Blue 9-B/W 10-W/B\
+11-Grey1 12-Grey2 13 Default 0-Skip\
+Select Color Profile:");
 					scanf("%i", &user_input_number1);					
 
 					set_profile_colors(user_input_number1);
