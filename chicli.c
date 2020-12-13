@@ -25,7 +25,7 @@ exomizer sfx sys -n chicli-18.prg -o chicli-18-exo.prg
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v0.17"
+#define VERSION "v0.18"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
