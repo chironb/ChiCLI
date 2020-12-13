@@ -1,5 +1,5 @@
 # ChiCLI
-ChiCLI v0.17 (c) 2020 Chiron Bramberger - A CLI for Commodore Computers!
+ChiCLI v0.18 (c) 2020 Chiron Bramberger - A CLI for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot.png?raw=true)
 
