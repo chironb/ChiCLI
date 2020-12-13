@@ -19,6 +19,7 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCard
 
 Latest News:
+- Converted last aliases to built-in, saving migs and megs of RAMs, and freeing up slots for users. There are 8 free now. 
 - DONE: Updated readme's with a list of the built-in common aliases.
 - FIXED: Copy path bugs. Now you can do this:
 -- copy sauce tartar  --> Copies "sauce" in the current folder to another file in the current folder called "tartar"
@@ -57,7 +58,7 @@ Known Issues:
 - Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
 
 Removals:
-- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 7 (seven), but common ones are built-in now.
+- Due to trying to squeeze every feature into about 50K, the maximum aliases is now 8 (eight), but common ones are built-in now.
 - Due, again, to not having enough RAM, the hotkey command can only be 20 characters in size. 
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
 - Had to remove a few built-in aliases for now because of the 16 limitation. 
@@ -86,9 +87,11 @@ Removals:
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_screensaver.png?raw=true)
 
 <pre>
+
 ---------------------------------------
 ChiCLI - Quick Command List
 ---------------------------------------
+
 
 help   about    version     sys-info  
 alias  hotkey   profile-set color-set 
@@ -100,15 +103,17 @@ poke   keycodes screensaver initialize
 exit   reboot   restart     shutdown  
 echo   time     datetime    licence   
 chirp  make-dir remove-dir  debug-args
-uiec-hide-ext   uiec-show-ext         
+uiec-hide-ext   
+uiec-show-ext         
 uiec-save-config
+
 
 ---------------------------------------
 Built-In Aliases
 ---------------------------------------
 
-clear             - cls
 help              - ?
+clear             - cls
 version           - ver
 licence           - lic
 exit              - quit, bye, endcli

@@ -20,7 +20,7 @@
 #define MAX_LENGTH_COMMAND 40 	  // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
 #define MAX_LENGTH_ARGS 40 		  // Commodore DOS maximum length of command string is 40 characters
 
-#define MAX_ALIASES 7    		  // 8 TODO:RAM: unsigned char alias_shortcut_list[MAX_ALIASES][MAX_LENGTH_COMMAND] ; // --> lots of RAM! like 2.5K !!!
+#define MAX_ALIASES 8    		  // 8 TODO:RAM: unsigned char alias_shortcut_list[MAX_ALIASES][MAX_LENGTH_COMMAND] ; // --> lots of RAM! like 2.5K !!!
 #define MAX_ALIAS_LENGTH 40		  // TODO:RAM: this needs to match the MAX_LENGTH_COMMAND until I fix it 
 #define MAX_HOTKEYS 8  			  // TODO:RAM: 
 #define MAX_HOTKEY_LENGTH 20 	  // TODO:RAM: 

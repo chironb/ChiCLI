@@ -3,8 +3,8 @@
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
 //
 /* Compiling, deleting object files, and launching VICE in fast prg loading mode: 
-cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-17.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-17.prg
-exomizer sfx sys -n chicli-17.prg -o chicli-17-exo.prg
+cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli-18.prg  &&  rm *.o  &&  x64sc -autostartprgmode 1 chicli-18.prg
+exomizer sfx sys -n chicli-18.prg -o chicli-18-exo.prg
 */ 
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -810,8 +810,8 @@ int main( int argc, char* argv[] ) {
 	// set_alias( "rd"       , "remove-dir"  );       
  
 	// set_alias( "cp"       , "copy"        );   
-	set_alias( "cd.."     , "cd .."       ); 
-	set_alias( "cd/"      , "cd /"        ); 
+	// set_alias( "cd.."     , "cd .."       ); // 58 - 38 = 20
+	// set_alias( "cd/"      , "cd /"        ); // 38 - 19 = 19
 	// set_alias( "dc"       , "dos-command" ); 
 	// set_alias( "cat"      , "type"        );  	
 	
@@ -822,7 +822,7 @@ int main( int argc, char* argv[] ) {
 	// set_alias( "mkdir"    , "make-dir"    );  
 	// set_alias( "rmdir"    , "remove-dir"  ); 			
 
-	set_alias( "ss"       , "screensaver" ); 	
+	// set_alias( "ss"       , "screensaver" ); //19 - 2 = 17	
 	// set_alias( "lic"      , "licence"     ); 
 
 	// set_alias( "?"        , "help"     );  
@@ -1849,23 +1849,22 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 		// ********************************************************************************
 		// CD COMMAND 
 		// ******************************************************************************** 		
-		} else if ( matching("cd",user_input_command_string) ) {
+		} else if ( ( user_input_command_string[0] == 'c' && user_input_command_string[1] == 'd' ) ) {
 
-			// TODO: I can make cd.. and cd/ built-in aliases if I do this 
-			// --> } else if ( user_input_command_string[0] == 'c' && user_input_command_string[1] == 'd' ) {
-			// Then I can check like this: if ( user_input_command_string[2] == '.' && user_input_command_string[3] == '.' ) {
-			// and put that below where I also check for teh second argument. 
-			// Then I'll save ram and can remove two more calls to alias in the startup
+			strcpy (drive_command_string,"cd");
 
 			switch (number_of_user_inputs) {
-				
-				// case 1 : 				
-	 		// 		printf("TODO: Print current directory.\n");
-			 //    break;		
+
+				case 1 :
+					if ( user_input_command_string[2] == '.' && user_input_command_string[3] == '.' ) { 
+						strcat (drive_command_string,command_cdback);
+					} else if ( user_input_command_string[2] == '/' ) {
+						strcat (drive_command_string,"//");
+					};//end_if 
+
+				break;
 
 				case 2 : 				
-					strcpy (drive_command_string,"cd");
-
 					if ( matching("..",user_input_arg1_string) ) {
 						strcat (drive_command_string,command_cdback);
 
@@ -1877,17 +1876,40 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 						strcat (drive_command_string,user_input_arg1_string);
 						strcat (drive_command_string,"/");
 
-					};//end if 					
-
-					result = cbm_open(1, dev, 15, drive_command_string);		
-					cbm_close(1);
+					};//end_if 					
 			    break;			
 	 				
-			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    // default : 
+			    // 	printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 
 			};//end switch	
+
+			result = cbm_open(1, dev, 15, drive_command_string);		
+			cbm_close(1);
+
+		// // ********************************************************************************
+		// // CD.. COMMAND 
+		// // ******************************************************************************** 		
+		// } else if ( matching("cd..",user_input_command_string) ) {
+
+		// 	strcpy (drive_command_string,"cd");
+		// 	strcat (drive_command_string,command_cdback);
+		// 	result = cbm_open(1, dev, 15, drive_command_string);		
+		// 	cbm_close(1);
+
+
+		// // ********************************************************************************
+		// // CD/ COMMAND 
+		// // ******************************************************************************** 		
+		// } else if ( matching("cd/",user_input_command_string) ) {
+
+		// 	strcpy (drive_command_string,"cd");
+		// 	strcat (drive_command_string,"//");
+		// 	result = cbm_open(1, dev, 15, drive_command_string);		
+		// 	cbm_close(1);
+
+
 
 
 		// ********************************************************************************
