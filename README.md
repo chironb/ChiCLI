@@ -10,7 +10,7 @@ It features a command line interface, which can list files, rename them, copy th
 You can download a disk image with this program and it's supporting Commodore readable text files here: 
 https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64
 
-This is alpha quality software I banged out quickly out of curiosity and to meet my own needs. It comes with no warranty or guarantees of any kind.
+This is beta quality software. It comes with no warranty or guarantees of any kind.
 
 I’ve tried it with the following hardware: 
 - uIEC/SD by Jim Brain --> Buy One Here! --> http://store.go4retro.com/uiec-sd/
