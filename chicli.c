@@ -628,7 +628,7 @@ void display_date_nice() {
 	/* Print it out in a nice format. */
 	strftime (buffer, 40, "%A, %B %d, %Y.\n", loctime);
 	fputs (buffer, stdout);
-	strftime (buffer, 40, "%I:%M:%S %p.\n", loctime);
+	strftime (buffer, 40, "%I:%M %p.\n", loctime);
 	fputs (buffer, stdout);
 
 };//end func 
@@ -657,14 +657,16 @@ void display_time_nice() {
 
 void set_date() { 
 
-	unsigned int user_date_input;
+	unsigned char user_date_input;
+
+	set_time_offset = 0;
 
 	/* Get the current time. */
-	curtime = time (NULL)+set_time_offset;
+	curtime = time(NULL)+set_time_offset;
 
-	printf("Year: ");
+	printf("Enter 2-digits for:\nYear: ");
 	scanf("%i", &user_date_input);
-    set_time.tm_year = user_date_input-1900;  // Year - 1900 - Unix Epoch
+    set_time.tm_year = ((user_date_input)+100);  // ((user_date_input)+100);   // year since 1900,  current year + 100 + 1900 = correct year
 
 	printf("Mon: ");
 	scanf("%i", &user_date_input);
@@ -682,9 +684,9 @@ void set_date() {
 	scanf("%i", &user_date_input);
     set_time.tm_min = user_date_input;  
 
-	printf("Sec: ");					
-	scanf("%i", &user_date_input);
-    set_time.tm_sec = user_date_input;  
+	// printf("Sec: ");					
+	// scanf("%i", &user_date_input);
+ //    set_time.tm_sec = user_date_input;  
 
     //printf("Set date and time.\n");
 
@@ -694,7 +696,7 @@ void set_date() {
 
     set_time_offset = mktime(&set_time);
 
-    set_time_offset = set_time_offset; // - (60*60); // Why is this needed? WTF??? 
+    //set_time_offset = set_time_offset; // - (60*60); // Why is this needed? WTF??? 
 
     set_time_offset = set_time_offset - curtime;
 
@@ -1503,7 +1505,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			
 			//display_title_text();
 			//printf("Licenced under terms of the GNU GPL v3.\nwww.gnu.org/licenses/\nTo read, enter: type chicli-licence\n");
-			printf("GNU GPL v3 'type chicli-licence'\n");
+			printf("GNU GPLv3 'type chicli-licence'\n");
 
 			// printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
 			// printf("Licence download: www.gnu.org/licenses/\n");
@@ -1540,6 +1542,8 @@ printf("Enter:'type chicli-readme' for more.\n");
 		// ********************************************************************************
 		} else if ( user_input_command_string[0] == '.' && user_input_command_string[1] == '/' ) {		
 
+			// rpobvably need to do a chagne directory to root before running this
+
 			// switch (number_of_user_inputs) {
 				
 			// 	case 2 : 				
@@ -1565,12 +1569,12 @@ printf("Enter:'type chicli-readme' for more.\n");
 			// switch (number_of_user_inputs) {
 				
 			// 	case 2 : 				
-					if (they_are_sure() == TRUE) {			
-						//strcpy(extracted_program_name,user_input_command_string+2); // THIS GIVES ME EVERYTHING EXCEPT THE FIRST TWO CHARACTERS 
-						printf("Running: %s \"%s\"\n", user_input_arg1_string, user_input_arg2_string);				
-			    		exec(user_input_arg1_string, user_input_arg2_string); 
-		    			return EXIT_SUCCESS;
-		    		};//end if 
+					// if (they_are_sure() == TRUE) {			
+					// 	//strcpy(extracted_program_name,user_input_command_string+2); // THIS GIVES ME EVERYTHING EXCEPT THE FIRST TWO CHARACTERS 
+					// 	printf("Running: %s \"%s\"\n", user_input_arg1_string, user_input_arg2_string);				
+			  //   		exec(user_input_arg1_string, user_input_arg2_string); 
+		   //  			return EXIT_SUCCESS;
+		   //  		};//end if 
 			    // break;				
 	 			
 			// TODO: rewrite this to inlude all args with quotes on the command line 	
@@ -1580,6 +1584,27 @@ printf("Enter:'type chicli-readme' for more.\n");
 		    // and then either use the exec() from teh startup drive, or, 
 		    // use teh dracopy trick to laod from the other drive
 		    // then email the mailing list ot find out how to change teh drive that exec() loads from 
+
+
+			POKE(0xD018, 21); // UPPER CASE/PETSCII MODE
+		    clrscr();// clear screen
+		    cputs("new");// print new
+		    gotoxy(0,3);// move down 3 lines 
+		    cputs("load\"");// print load"---name_of_program---",9
+		    cputs(user_input_arg1_string);//
+		    cputs("\",");		    
+		    printf("%i", dev);
+		    gotoxy(0,8);// move down 5 lines
+		    cputs("run:rem ");// print run:rem 
+		    cputs(user_input_arg2_string);// print ---arguments--- 
+		    gotoxy(0,10);// move down 2 lines 		    
+  			POKE(0x0277, 19); // HOME - Push the following keystrokes into the keyboard buffer: HOME RETURN RETURN RETURN 
+		    POKE(0x0278, 13); // RETURN
+		    POKE(0x0279, 13); // RETURN
+		    POKE(0x027A, 13); // RETURN	    	
+		    POKE(0x00C6,  4); // Push number of characters in the keyboard buffer
+		    return EXIT_SUCCESS;
+
 
 		// ********************************************************************************
 		// EXIT COMMAND 
