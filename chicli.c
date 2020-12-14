@@ -1365,6 +1365,8 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("alias",user_input_command_string) ) {
 
+			result = 1; // Set this so that only if it's full does it trigger the full message.
+
 			if (number_of_user_inputs == 1) { // there should be a var number_of_arguments as well 
 				display_alias_all();
 			} else if (number_of_user_inputs == 2 && matching("-clear",user_input_arg1_string)  ) {
@@ -1385,7 +1387,7 @@ int main( int argc, char* argv[] ) {
 				 printf("Aliases full!\n");
 			};//end_if
 
-
+			result = 0; //reset it when we are done. 
 
 		// ********************************************************************************
 		// UNALIAS COMMAND 
@@ -1473,8 +1475,8 @@ printf("Enter:'type chicli-readme' for more.\n");
 		} else if ( matching("version",user_input_command_string) || 
 					matching("ver",user_input_command_string) ) {
 
-			display_title_text();
-			//printf("Licenced under terms of the GNU GPL v3\n");
+			//display_title_text();
+			printf("ChiCLI by Chiron Bramberger\n");
 			printf("Ver:  %s\n", VERSION);
 			printf("Date: %s\n",__DATE__);
 			printf("Time: %s\n",__TIME__);
@@ -1501,7 +1503,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			
 			//display_title_text();
 			//printf("Licenced under terms of the GNU GPL v3.\nwww.gnu.org/licenses/\nTo read, enter: type chicli-licence\n");
-			printf("GNU GPL v3 - 'type chicli-licence' for more.\n");
+			printf("GNU GPL v3 'type chicli-licence'\n");
 
 			// printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
 			// printf("Licence download: www.gnu.org/licenses/\n");
