@@ -34,6 +34,7 @@
 #include "string_processing.h"
 #endif 
 
+
 extern unsigned int  error_number      ;
 extern unsigned char error_message[32] ;
 extern unsigned int  error_track       ;

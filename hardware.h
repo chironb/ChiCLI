@@ -9,6 +9,31 @@
 // hardware.h 
 // ********************************************************************************
 
+// ********************************************************************************
+// COMMODORE 64 COLORS
+// ********************************************************************************
+
+#define BLACK        1-1
+#define WHITE        2-1
+#define RED          3-1
+#define CYAN         4-1
+#define PURPLE       5-1
+#define GREEN        6-1
+#define BLUE         7-1
+#define YELLOW       8-1
+#define ORANGE       9-1
+#define DARK_ORANGE 10-1
+#define BROWN       10-1
+#define LIGHT_RED   11-1
+#define PINK        11-1
+#define DARK_GREY   12-1
+#define DARK_GRAY   12-1
+#define GREY        13-1
+#define GRAY        13-1
+#define LIGHT_GREEN 14-1
+#define LIGHT_BLUE  15-1
+#define LIGHT_GREY  16-1
+#define LIGHT_GRAY  16-1
 
 // ********************************************************************************
 // HARDWARE MACRO FUNCTIONS 

@@ -5,7 +5,7 @@ ChiCLI v0.18 (c) 2020 Chiron Bramberger - A CLI for Commodore Computers!
 
 This program works in a any that is similar to and inspired by Commodore DOS, AmigaDOS, MS-DOS, and Linux. 
 
-It features a command line interface, which can list files, rename them, copy them, delete them, as well as view them, and with an UIEC device it can extract disk image files and copy them to a real floppy disk drive. It also features a hardware scanning system info tool, a screensaver with clock, the ability to view memory and files with a hex viewer, as well as load and run other from within. It can also change the drive number assignment for 1541 and UIEC drives, peek and poke memory, read and report keyboard key codes, set custom display colors, and execute user input dos commands, all without leaving the interface. 
+It features a command line interface, which can list files, rename them, copy them, delete them, as well as view them, and with an UIEC device it can extract disk image files and copy them to a real floppy disk drive. It also features a hardware scanning system info tool, a screensaver with clock, the ability to view memory and files with a hex viewer, as well as load and run other from within. It can also change the drive number assignment for 1541 and UIEC drives, peek and poke memory, read and report keyboard key codes, set custom display colors, and execute user input dos commands, all without leaving the interface. Made in Canada. :-)
 
 You can download a disk image with this program and it's supporting Commodore readable text files here: 
 https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64
@@ -16,15 +16,23 @@ I’ve tried it with the following hardware:
 - uIEC/SD by Jim Brain --> Buy One Here! --> http://store.go4retro.com/uiec-sd/
 - IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive
-- Commodore 2031 via a Batteries Included IEEE-488 BusCard
+- Commodore 2031 via a Batteries Included IEEE-488 BusCardII
 
 Latest News:
+- Added ss = screensaver to built-in aliases. 
+- FIXED: Command screensaver now respects the currently set text color as well. 
+- FIXED: Command sys-info wasn't using the current text color. Bug in color-set was fixed, where the global car tracking the current text color is now updated properly. 
+- FIXED: When displaying a Basic file using type, it makes the Basic commands in uppercase, but the screen is in lower case mode, so it should be in lowercase. 
+- FIXED: When displaying a Basic file using type, case 174 : printf("↑") wouldn't work, because I'm using a unicode character in the cc65 source code. Fixed with printf("%c", 94 ) instead, which sends the correct PETSCII character. 
+- FIXED: Remaining free disk space is often reported wrong and too small. It needed a long int.
+- FIXED: File sizes reported are sometimes wonky. Was using 1024 instead of 1000 to divide into kilobytes. 
+- FIXED: When exiting to dos, you need to enter NEW before loading anything 
+- FIXED: Need to inform the user when they can't set another alias because all the slots are full
+- FIXED: Setting a background color to red screws up the red part of displaying the Commodore logo on sys-info.
+- FIXED: Figured out how to make colors and color profiles consistent and retained after calling an external program and returning back into ChiCLI using the -sf option. 
 - Converted last aliases to built-in, saving migs and megs of RAMs, and freeing up slots for users. There are 8 free now. 
 - DONE: Updated readme's with a list of the built-in common aliases.
-- FIXED: Copy path bugs. Now you can do this:
--- copy sauce tartar  --> Copies "sauce" in the current folder to another file in the current folder called "tartar"
--- copy sauce /tartar --> Copies "sauce" in the current folder to another file in the root folder called "tartar"
--- copy sourcedir/sauce targetdir/tartar --> Copies "sauce" in the current folder's folder called sourcedir to the current folder's folder called targetdir named "tartar"
+- FIXED: Copy path bugs. Now you can do this: --> copy sauce tartar  --> Copies "sauce" in the current folder to another file in the current folder called "tartar" --> copy sauce /tartar --> Copies "sauce" in the current folder to another file in the root folder called "tartar" --> copy sourcedir/sauce targetdir/tartar --> Copies "sauce" in the current folder's folder called sourcedir to the current folder's folder called targetdir named "tartar"
 - Copy now works with paths. You can now do things like copy * //allfiles/ or copy //somefile //somedir/newfilename! You must end folder with a slash / as it doesn't yet automatically figure out if you mean copy the file to this filename, or copy this file to this folder name using the original implied filename. 
 - The most common alias are built into the system, so they don't take up alias slots. However, there's only 8 now, at least until I squeeze out some more ram. 
 - The list command takes up one less screenline when displaying.
@@ -42,18 +50,13 @@ Latest News:
 - Added support for drive numbers 8 through 15.
 
 Known Bugs:
-- Need to figure out how to make colors and color profiles consistent and retained after calling an external program and returning back into ChiCLI using the -sf option. 
-- Need to inform the user when they can't set another alias because all the slots are full
-- File sizes reported are sometimes wonky 
 - If you set the date and time more than once, it gets screwy
-- When exiting to dos, you need to enter NEW before loading anything
-- ??? debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
+- Tough one: debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
 Here are some links to help:
 https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
 https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 
 Known Issues:
-- I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
 - It can only load files from the drive it was loaded from. Running programs from a different drive issue  
 - Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
 
@@ -63,6 +66,18 @@ Removals:
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
 - Had to remove a few built-in aliases for now because of the 16 limitation. 
 - Had to trim more text away from things like about, version, and licence.
+
+Opportunities for Optimization of CPU and RAM Usage:
+- The list command has lots of room to remove code and printf statements. 
+- I need to make an entry in this list, every time I think of a place to optimize, so I don't forget and miss some low hanging fruit.
+- I've got to go through the code and replace every integer variable with either a signed or unsigned char. This will save a *bunch* of RAM!
+- If I re-write the alias code so that I can define the size of the string holding each alias. Right now, there's bug, and when I change the MACRO definition, it borks it up
+- I can save a few vars if I clean up the color-set and profile-set code, so it reads and writes directly and only to memory, and looks it up directly from memory when needed. Now that I read it for start-up in -skiptitle mode, I can just tidy up and start using my memory helper macros.
+- I should check the string helper actual functions, as I'm sure there are redundancies from merging code I developed separately and then integrated later. 
+- I should create a few static strings that I re-use as much as possible, so I'm not wasting RAM with lots of string literals all over the joint. 
+- I should figure out where I can ditch printf for conio functions, where possible. 
+- Write something that automatically opens and prints a text file, so I don't have to ask the user to enter: "type chicli-readme" but instead it just gets called when they enter: "help". 
+- Even more text file based help, and have it search for a certain tag in the text file. Have something like the user enter: "help alias" or "man alias" or "alias -h" or "alias --h" and it pulls up the section of the readme that has the relevant info. 
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
 
@@ -125,6 +140,7 @@ rename            - ren
 copy              - cp
 type              - cat
 list              - ls, dir, directory
+screensaver       - ss
 
 ---------------------------------------
 ChiCLI - Detailed Help

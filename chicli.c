@@ -173,7 +173,7 @@ unsigned char dev = 0;
 struct        cbm_dirent dir_ent;  
 unsigned int  number_of_files = 0;
 unsigned char displayed_count = 0;
-unsigned int  file_size = 0;
+
 
 const char command_cdback[] = { ':', 0x5F, '\0' };
 
@@ -220,6 +220,9 @@ unsigned char current_dir_file_index = 0;
 unsigned char iii = 0;
 unsigned char jjj = 0;
 unsigned char loop_k = 0;
+
+unsigned long int filesize = 0; //    filesize = (dir_ent.size*256)/1024;
+unsigned int  file_size = 0;
 
 // ********************************************************************************
 // FUNCTIONS
@@ -348,14 +351,23 @@ void display_logo(unsigned char x, unsigned char y) {
 	// unsigned char line8[] = "B  XXXXX     ";
 	// unsigned char line9[] = "B   XXXX     ";
 
+	// unsigned char line1[] = "   XXXX     ";
+	// unsigned char line2[] = "  XXXXX     ";
+	// unsigned char line3[] = " XX|   XXXXX";
+	// unsigned char line4[] = "XX|    XXXX ";
+	// unsigned char line5[] = "XX          ";
+	// unsigned char line6[] = "XX|    XXXX ";
+	// unsigned char line7[] = " XX|   XXXXX";
+	// unsigned char line8[] = "  XXXXX     ";
+	// unsigned char line9[] = "   XXXX     ";
 
 	unsigned char line1[] = "   XXXX     ";
 	unsigned char line2[] = "  XXXXX     ";
 	unsigned char line3[] = " XX|   XXXXX";
 	unsigned char line4[] = "XX|    XXXX ";
 	unsigned char line5[] = "XX          ";
-	unsigned char line6[] = "XX|    XXXX ";
-	unsigned char line7[] = " XX|   XXXXX";
+	unsigned char line6[] = "XX|         ";
+	unsigned char line7[] = " XX|        ";
 	unsigned char line8[] = "  XXXXX     ";
 	unsigned char line9[] = "   XXXX     ";
 
@@ -401,10 +413,10 @@ void display_logo(unsigned char x, unsigned char y) {
 
 	gotoxy(x,y+0); 
 
-	if (current_bgcolor == 6) { // blue but like it's offset... 
-		textcolor( 1-1 ); // if background is blue, use black 
+	if (current_bgcolor == BLUE) { // blue but like it's offset... 
+		textcolor( BLACK ); // if background is blue, use black 
 	} else {
-		textcolor( 7-1 ); // if background isn't blue, use blue 
+		textcolor( BLUE ); // if background isn't blue, use blue 
 	};//switch
 
 	gotoxy(x,y+0); printf("%s",line1);
@@ -417,7 +429,16 @@ void display_logo(unsigned char x, unsigned char y) {
 	gotoxy(x,y+7); printf("%s",line8);
 	gotoxy(x,y+8); printf("%s",line9);	
 
-	gotoxy(x,y+0); printf("%c",28); // 28 red
+
+	//gotoxy(x,y+0); printf("%c",28); // 28 red
+	current_bgcolor = read_nibble_low(0xD021);
+	if (current_bgcolor == RED) { // red but like it's offset... 
+		//printf("1C:%i\n",current_bgcolor);
+		textcolor( PINK ); // if background is red, use pink 
+	} else {
+		//printf("2C:%i\n",current_bgcolor);
+		textcolor( RED ); // if background isn't red, use red 
+	};//switch
 
 	gotoxy(x+7,y+5); printf("%s",line6r);
 	gotoxy(x+7,y+6); printf("%s",line7r);
@@ -538,7 +559,7 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 	if ( is_drive_detection_disabled == TRUE ) {  // THIS IS CRASHES SOMETIMES AND WHEN I USE THE BUSCARD 		
 		
 		gotoxy(starting_x+14,starting_y+8); // if drive 8, dusoplay it 
-		printf("Dectect disabled.");
+		printf("Detect disabled.");
 
 	} else {
 
@@ -734,11 +755,11 @@ void screensaver(void) {
 
 		clrscr(); 
 
-		if (current_bgcolor == 2-1) { // blue but like it's offset... 
-			textcolor( 1-1 ); // if background is blue, use black 
-		} else {
-			textcolor( 2-1 ); // if background isn't blue, use blue 
-		};//switch		gotoxy(current_x+1, current_y+10);
+		// if (current_bgcolor == 2-1) { // blue but like it's offset... 
+		// 	textcolor( 1-1 ); // if background is blue, use black 
+		// } else {
+		// 	textcolor( 2-1 ); // if background isn't blue, use blue 
+		// };//switch		gotoxy(current_x+1, current_y+10);
 
 		gotoxy(current_x+1, current_y+10);
 
@@ -833,11 +854,11 @@ int main( int argc, char* argv[] ) {
 	
 	set_hotkey(1,"cls");
 	// set_hotkey(2,"");
-	set_hotkey(3,"ls");		
+	// set_hotkey(3,"ls");		
 	// set_hotkey(4,"");
-	set_hotkey(5,"screensaver");
+	// set_hotkey(5,"cd..");
 	// set_hotkey(6,"");
-	set_hotkey(7,"help");
+	set_hotkey(7,"ss");
 	// set_hotkey(8,"");
 
 	// ********************************************************************************
@@ -868,14 +889,32 @@ int main( int argc, char* argv[] ) {
 			
 
 	if ( (argc > 1  &&  matching("-skiptitle",argv[1])) || (argc > 1  &&  matching("-st",argv[1])) ) {
-		//display_title_text();
+		// read colors for text, background, and border, and set the vars so things don't get screwy 
+		// poke 53280,0 (for the border) // poke 53281,0 (for the background) // POKE 646,X (text)
+		// void set_colors(unsigned char text, unsigned char background, unsigned char border) {
+		//set_colors( PEEK(????) , PEEK(0xD021) , PEEK(0xD020) );
+		// Color RAM:
+		// $D800-$DBE7 	55296-56295 		1/2 kB (1000 nibbles) of color memory.
+		// $DBE8-$DBFF 	56296-56319 		Unused 
+
+		current_textcolor   = read_nibble_low(0xD800);// PEEK(0xD800) & 0x0F;    
+	    current_bgcolor     = read_nibble_low(0xD021);// PEEK(0xD021) & 0x0F ; //n eed to read teh low nibble, jsut doing a -240 this isn't right, because it depnds on the high nibble always being 1111 xxxx
+	    current_bordercolor = read_nibble_low(0xD020);// PEEK(0xD020) & 0x0F ;
+
+		textcolor(   current_textcolor   );
+		bgcolor(     current_bgcolor     );
+		bordercolor( current_bordercolor );
+
+		//printf("TX:%i BG:%i BR:%i\n", current_textcolor , current_bgcolor , current_bordercolor );	
+
 	} else {
 		/* White on L.Blue on Blue */
 		set_profile_colors(13);
 		clrscr();					
 		display_title_text();
 		sys_info(have_device_numbers_changed);	 // this is loaded like this: RUN:REM -ddd // RUN:REM ARG1 " ARG2 IS QUOTED" ARG3 "" ARG5	
-		pet_chirp();	
+		pet_chirp();
+
 	};//end if 
 
 					
@@ -1335,12 +1374,17 @@ int main( int argc, char* argv[] ) {
 			} else if (number_of_user_inputs == 2) {
 				clear_alias(user_input_arg1_string);
 			} else if (number_of_user_inputs == 3) {
-				set_alias(user_input_arg1_string,user_input_arg2_string);
+				result = set_alias(user_input_arg1_string,user_input_arg2_string);
 			} else if (number_of_user_inputs == 4 && matching("=",user_input_arg2_string)) {
-				set_alias(user_input_arg1_string,user_input_arg3_string);
+				result = set_alias(user_input_arg1_string,user_input_arg3_string);
 			} else {
 				printf("Err args:%i\n", number_of_user_inputs);
 			};//end if 		
+
+			if ( result == 0 ) { // set_alias returns 0 if there are no slots left
+				 printf("Aliases full!\n");
+			};//end_if
+
 
 
 		// ********************************************************************************
@@ -1420,7 +1464,7 @@ int main( int argc, char* argv[] ) {
 // chirp  make-dir remove-dir  debug-args\
 // uiec-hide-ext   uiec-show-ext         \
 // uiec-save-config\n");
-printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
+printf("Enter:'type chicli-readme' for more.\n");
 
 
 		// ********************************************************************************
@@ -1444,7 +1488,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 			display_title_text();
 			display_description_text();
 			printf("github.com/chironb/ChiCLI\n");
-			printf("GNU GPL v3.\n");
+			//printf("GNU GPL v3.\n");
 			//printf("www.gnu.org/licenses/\n");
 
 
@@ -1457,7 +1501,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 			
 			//display_title_text();
 			//printf("Licenced under terms of the GNU GPL v3.\nwww.gnu.org/licenses/\nTo read, enter: type chicli-licence\n");
-			printf("GNU GPL v3.\nEnter:'type chicli-licence' for more.\n");
+			printf("GNU GPL v3 - 'type chicli-licence' for more.\n");
 
 			// printf("This program is free software: you can\nredistribute it and/or modify it under\nthe terms of the GNU General Public\nLicense as published by the Free\nSoftware Foundation.\nThis program is distributed in the\nhope that it will be useful, but\nWITHOUT ANY WARRANTY.\n");
 			// printf("Licence download: www.gnu.org/licenses/\n");
@@ -1544,7 +1588,29 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 					matching("endcli",user_input_command_string)) {
 
 			if (they_are_sure() == TRUE) {
-				exit(0);
+
+		    	// POKE(0x0277,145); // UP
+		    	// POKE(0x0278, 32); // r
+		    	// POKE(0x0279, 32); // e
+		    	// POKE(0x027A, 32); // a
+		    	// POKE(0x027B, 32); // d
+		    	// POKE(0x027C, 32); // y
+		    	// POKE(0x027D, 32); // .		    	
+		    	// POKE(0x027E,145); // UP
+		    	// // POKE(0x027F,230); // CHECKERBOARD
+		    	// // POKE(0x0280,157); // LEFT
+		    	// POKE(0x00C6, 10); // Number of characters in the keyboard buffer
+				
+				//POKE(0x0277,147); // CLR/HOME	
+		    	POKE(0x0277, 78); // n
+		    	POKE(0x0278, 69); // e
+		    	POKE(0x0279, 87); // w
+		    	POKE(0x027A, 13); // return	    	
+		    	POKE(0x00C6,  4); // Number of characters in the keyboard buffer
+
+		    	POKE(0xD018, 21); // UPPER CASE/PETSCII MODE
+
+		    	exit(EXIT_SUCCESS);  // whcih allows us to call exit properly, or we could say "press return to restart" and have hidden black on black text with SYS 64738 waiting for them 
 			};//end if
 				
 	 				
@@ -1552,27 +1618,30 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 		// RESTART COMMAND 
 		// ********************************************************************************
 		} else if ( matching("restart",user_input_command_string) ) {
+			
+			if (they_are_sure() == TRUE) {
+				printf("Please wait...\n");
+				exec(PROGRAM_NAME, "-r"); // This reloads whatever the program name is 
+				return EXIT_SUCCESS;      // I don't even know if we ever get here.
+			};//end_if
 
-
-
-
-			switch (number_of_user_inputs) {
-				// don't ask if there are any parameters, like -y for autoamticaly saying yes 
-				case 2 : 				
-						printf("Running %s\nPlease wait...\n", PROGRAM_NAME);
-						exec(PROGRAM_NAME, "-r"); // This reloads whatever the program name is 
-						return EXIT_SUCCESS;      // I don't even know if we ever get here.
-			    break;				
+			// switch (number_of_user_inputs) {
+			// 	// don't ask if there are any parameters, like -y for autoamticaly saying yes 
+			// 	case 2 : 				
+			// 			printf("Please wait...\n");
+			// 			exec(PROGRAM_NAME, "-r"); // This reloads whatever the program name is 
+			// 			return EXIT_SUCCESS;      // I don't even know if we ever get here.
+			//     break;				
 	 				
-			    default : 
-			    	if (they_are_sure() == TRUE) {
-						printf("Running %s\nPlease wait...\n", PROGRAM_NAME);
-						exec(PROGRAM_NAME, "-r"); // This reloads whatever the program name is 
-						return EXIT_SUCCESS;      // I don't even know if we ever get here.
-					};//end if
-			    //end default
+			//     default : 
+			//     	if (they_are_sure() == TRUE) {
+			// 			printf("Please wait...\n");
+			// 			exec(PROGRAM_NAME, "-r"); // This reloads whatever the program name is 
+			// 			return EXIT_SUCCESS;      // I don't even know if we ever get here.
+			// 		};//end if
+			//     //end default
 
-			};//end switch	
+			// };//end switch	
 
 
 			
@@ -1783,7 +1852,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 			result = get_status(dev, TRUE);
 
 			if (result != 255) {
-				printf("Setting UIEC to hide extentions...\n");
+				printf("Set UIEC --> hide exts...\n");
 
 				result = cbm_open(1, dev, 15, "xe+");
 				cbm_close(1);
@@ -1808,7 +1877,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 			result = get_status(dev, TRUE);
 
 			if (result != 255) {
-				printf("Setting UIEC to show extentions...\n");
+				printf("Set UIEC --> show exts...\n");
 
 				result = cbm_open(1, dev, 15, "xe-");
 				cbm_close(1);
@@ -1833,7 +1902,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 			result = get_status(dev, TRUE);
 
 			if (result != 255) {
-				printf("Saving current UIEC config to EEPROM...\n");
+				printf("Saving UIEC config...\n");
 
 				result = cbm_open(1, dev, 15, "xw");
 				cbm_close(1);
@@ -2559,7 +2628,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 					acopy(); // advanced copy 
 
 				} else { // error 
-					printf("Copy syntax error.\n");
+					printf("Copy syntax err.\n");
 
 				};//end if 
 	    	break;	
@@ -2589,7 +2658,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
 					switch(detected_filetype){
 						case 2 : // case  2 : printf("DIR"); break;	// DIR
-							printf("Error: this is a dir.\n");
+							printf("Err: this is a dir.\n");
 						break;
 
 						case 16 : // case 16 : printf("SEQ"); break; // SEQ
@@ -2609,7 +2678,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 						break;
 
 						default : // case  2 : printf("DIR"); break;	// DIR
-							printf("Error: unknown type.\n");
+							printf("Err: unknown type.\n");
 						//end default 
 					};//end switch
 				break;
@@ -2617,7 +2686,7 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 				case 3 :
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
 					if (detected_filetype == 255) {
-						printf("Error: unknown type.\n");
+						printf("Err: unknown type.\n");
 						break;
 					};//end if 
 					if (matching("-hex",user_input_arg2_string)) {
@@ -2716,13 +2785,17 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 				    	printf(" 512 B");
 				    } else if (dir_ent.size == 3) {
 				    	printf(" 768 B");	
-				    } else if (dir_ent.size == 4) {
-				    	printf("1024 B");	 
+				    // } else if (dir_ent.size == 4) {
+				    // 	printf("1024 B");	 
 				    } else {
-				    	printf("%i KB", (dir_ent.size*256)/1024 );
+				    	filesize = dir_ent.size;
+				    	filesize = filesize*256;
+				    	filesize = filesize/1000;
+				    	printf("%lu KB", filesize );
 				    };//end if   
 
-			    	printf(" free disk space.\n", (dir_ent.size*256)/1024);
+			    	printf(" free space.\n");
+					//printf(" free disk space.\n", (dir_ent.size*256)/1024);
 			    	break;
 
 			    } else { 
@@ -2763,10 +2836,10 @@ printf("ChiCLI Help.\nEnter:'type chicli-readme' for more.\n");
 					    	printf(" 512 B");
 					    } else if (dir_ent.size == 3) {
 					    	printf(" 768 B");	
-					    } else if (dir_ent.size == 4) {
-					    	printf("1024 B");	 
+					    // } else if (dir_ent.size == 4) {
+					    // 	printf("1024 B");	 
 					    } else {
-					    	file_size = (dir_ent.size*256)/1024;
+					    	file_size = (dir_ent.size*256)/1000;
 					    	if (file_size <= 9) {
 					    		printf("   %i KB", file_size);
 					    	} else if (file_size <= 99) {
@@ -2834,11 +2907,16 @@ printf("1-Blk 2-Wht 3-Red 4-Cyn 5-Pur 6-Grn\
 13-Gr 14-LG 15-LB 16-LG\
 0-Skip\n");
 
+		    // current_textcolor   = text-1 ;
+		    // current_bgcolor     = background-1 ;
+		    // current_bordercolor = border-1 ;
+
 			printf("Text: ");
 			scanf("%i", &user_input_number1);
 			if (user_input_number1 != 0) {
 				--user_input_number1;
 				textcolor(user_input_number1); 
+				current_textcolor = user_input_number1;
 			};//end if
 			
 			printf("Background: ");
@@ -2846,6 +2924,7 @@ printf("1-Blk 2-Wht 3-Red 4-Cyn 5-Pur 6-Grn\
 			if (user_input_number1 != 0) {
 				--user_input_number1;
 				bgcolor(user_input_number1); 
+				current_bgcolor = user_input_number1;
 			};//end if
 
 			printf("Border: ");
@@ -2853,6 +2932,7 @@ printf("1-Blk 2-Wht 3-Red 4-Cyn 5-Pur 6-Grn\
 			if (user_input_number1 != 0) {
 				--user_input_number1;
 				bordercolor(user_input_number1); 
+				current_bordercolor = user_input_number1;
 			};//end if
 
 			
@@ -2877,7 +2957,7 @@ printf(" 1-CPET 2-CVIC-20 3-C64 4-CSX-64\
  5-C128/VIC 6-C128/VDC 7-AmigaDOS\
  8-White/Blue/L.Blue 9-B/W 10-W/B\
 11-Grey1 12-Grey2 13 Default 0-Skip\
-Select Color Profile:");
+Profile:");
 					scanf("%i", &user_input_number1);					
 
 					set_profile_colors(user_input_number1);
@@ -2908,7 +2988,7 @@ Select Color Profile:");
 		// ********************************************************************************
 		// SCREENSAVER COMMAND 
 		// ********************************************************************************
-		} else if ( matching("screensaver",user_input_command_string) ) {
+		} else if ( matching("screensaver",user_input_command_string) || matching("ss",user_input_command_string) ) {
 
 			screensaver();
 
