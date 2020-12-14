@@ -19,6 +19,7 @@ I’ve tried it with the following hardware:
 - Commodore 2031 via a Batteries Included IEEE-488 BusCardII
 
 Latest News:
+- FIXED: Doing the command 'type basic-program' would print out minus signs weird. Turns out, I entered another unicode character instead of a normal keyboard hyphen - character. I made a basic program to barf out every single command so I can check that I'm translating the tokens properly.
 - Added ss = screensaver to built-in aliases. 
 - FIXED: Command screensaver now respects the currently set text color as well. 
 - FIXED: Command sys-info wasn't using the current text color. Bug in color-set was fixed, where the global car tracking the current text color is now updated properly. 

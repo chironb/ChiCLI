@@ -295,7 +295,7 @@ void type_prg( unsigned char * file_to_type ) {
 								case 168 : printf("not"    ); break;
 								case 169 : printf("step"   ); break;
 								case 170 : printf("+"      ); break;
-								case 171 : printf("−"      ); break;
+								case 171 : printf("-"      ); break; // TODO: Check if something is wrong with this??? THIS: − isn't a hyphen but a unicode thingy 
 								case 172 : printf("*"      ); break;
 								case 173 : printf("/"      ); break;
 								case 174 : printf("%c", 94 ); break; // ↑ - up arrow --> http://sta.c64.org/cbm64pet.html
