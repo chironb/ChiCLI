@@ -52,22 +52,20 @@ Latest News:
 - Added support for drive numbers 8 through 15.
 
 Known Bugs:
+- It can only load files from the drive it was loaded from. Running programs from a different drive issue. Also, Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. I think the fix for one is the fix for both, which is to use the dracopy method for loading external programs. 
 - If you set the date and time more than once, it gets screwy
+
+Known Issues:
 - Tough one: debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
 Here are some links to help:
 https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
 https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 
-Known Issues:
-- It can only load files from the drive it was loaded from. Running programs from a different drive issue  
-- Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
-
 Removals:
 - Due to trying to squeeze every feature into about 50K, the maximum aliases is now 8 (eight), but common ones are built-in now.
 - Due, again, to not having enough RAM, the hotkey command can only be 20 characters in size. 
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
-- Had to remove a few built-in aliases for now because of the 16 limitation. 
-- Had to trim more text away from things like about, version, and licence.
+- Had to trim more text away from about and version. Also, help and licence simply suggest using the 'type' command to view the chicli-readme and chicli-licence files. 
 
 Opportunities for Optimization of CPU and RAM Usage:
 - The list command has lots of room to remove code and printf statements. 
