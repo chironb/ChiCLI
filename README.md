@@ -17,8 +17,12 @@ I’ve tried it with the following hardware:
 - IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive
 - Commodore 2031 via a Batteries Included IEEE-488 BusCardII
+- Commodore SFD 1001 via a Batteries Included IEEE-488 BusCardII
 
 Latest News:
+- Updated type: added option -text to force it display the file as if it were a text file. Now type can auto-detect the filetype and display it accordingly, or it can be put into -hex mode or -text mode. 
+- Added a new shortcut alias rn for rename, and a new shortcut cler for clear. This is because if you type fast on a Commodore keyboard, certain key combinations tend to get lost, because the keyboard doesn't have any anti-ghosting diodes. For example pressing and holding R and then E blocks E for registering. Pressing and holding E then A blocks A. 
+- Made a little more room in RAM for type update, by re-writing the CBM error codes text to be shorter but mostly as informative. 
 - FIXED: Run command now supported running on any drives. NOTE: The command ./ does not, but that's because it's intended for a different purpose, basically letting you run commands that are small and external as if they were built into the system. BUG: It can only load files from the drive it was loaded from. Running programs from a different drive issue. Also, Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. I think the fix for one is the fix for both, which is to use the dracopy method for loading external programs. 
 - FIXED: If you set the date and time more than once, it gets screwy. Fix: needed to reset to zero the time offset variable in set_date();
 - FIXED: Displays both Aliases empty and aliases full. Process: start ChiCLI, set datetime, run screensaver, then alias (with none set). Fix was that result, a global var, wasn't being cleared before being used in the alias code. So it was assumed, erroniously, that it would be 0 unless changed by the testing for the alias list being full. This is the problem with global variables, obviously, but in such a limited system, it's faster and makes more sense to use them. 

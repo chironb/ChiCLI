@@ -529,7 +529,7 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 		case 9  : cputs("8502"); break;
 		case 10 : cputs("8500"); break;
 		case 11 : cputs("6510"); break;
-		default : cputs("Unknown"); //end default
+		default : cputs("?"); //end default
 	};//end switch 
 
 	gotoxy(starting_x+25,starting_y+6);
@@ -547,7 +547,7 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 	switch(sid_detected) {		
 		case    1 : cputs("6581"); break;
 		case    2 : cputs("8580"); break;	
-		default   : cputs("Unknown"); //end default 
+		default   : cputs("?"); //end default 
 	};//end switch
 
 
@@ -1353,6 +1353,7 @@ int main( int argc, char* argv[] ) {
 		// CLEAR COMMAND 
 		// ********************************************************************************
 		if        ( matching("clear",user_input_command_string) || 
+					matching("cler",user_input_command_string) || 
 					matching("cls",user_input_command_string) ) {
 
 			if (number_of_user_inputs == 1) {
@@ -1371,7 +1372,7 @@ int main( int argc, char* argv[] ) {
 
 			if (number_of_user_inputs == 1) { // there should be a var number_of_arguments as well 
 				display_alias_all();
-			} else if (number_of_user_inputs == 2 && matching("-clear",user_input_arg1_string)  ) {
+			} else if (number_of_user_inputs == 2 && matching("-clear",user_input_arg1_string)  ) { 
 				if (they_are_sure() == TRUE) {
 					clear_alias_all();
 				};//end if 
@@ -1382,7 +1383,7 @@ int main( int argc, char* argv[] ) {
 			} else if (number_of_user_inputs == 4 && matching("=",user_input_arg2_string)) {
 				result = set_alias(user_input_arg1_string,user_input_arg3_string);
 			} else {
-				printf("Err args:%i\n", number_of_user_inputs);
+				printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			};//end if 		
 
 			if ( result == 0 ) { // set_alias returns 0 if there are no slots left
@@ -1425,7 +1426,7 @@ int main( int argc, char* argv[] ) {
 			} else if (number_of_user_inputs == 4 && matching("=",user_input_arg2_string)) {
 				set_hotkey(user_input_arg1_number,user_input_arg3_string);			
 			} else {
-				printf("Err args:%i\n", number_of_user_inputs);
+				printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			};//end if 	
 
 
@@ -1441,7 +1442,7 @@ int main( int argc, char* argv[] ) {
 			    break;				
 	 				
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 
 			};//end switch	
@@ -1478,7 +1479,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 					matching("ver",user_input_command_string) ) {
 
 			//display_title_text();
-			printf("ChiCLI by Chiron Bramberger\n");
+			//printf("ChiCLI by Chiron Bramberger\n");
 			printf("Ver:  %s\n", VERSION);
 			printf("Date: %s\n",__DATE__);
 			printf("Time: %s\n",__TIME__);
@@ -1762,7 +1763,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;				
 	 				
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 
 			};//end switch	
@@ -1813,7 +1814,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;			
 	 				
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 
 			};//end switch	
@@ -1976,7 +1977,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;			
 	 				
 			    // default : 
-			    // 	printf("Err args:%i\n", number_of_user_inputs);
+			    // 	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 
 			};//end switch	
@@ -2023,7 +2024,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2043,7 +2044,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2129,7 +2130,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2151,7 +2152,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2209,7 +2210,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 				break;	
 
 				default : 
-					printf("Err args:%i\n", number_of_user_inputs);
+					printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 				//end default
 
 			};//end switch
@@ -2242,7 +2243,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2256,7 +2257,8 @@ printf("Enter:'type chicli-readme' for more.\n");
 		// RENAME COMMAND 
 		// ********************************************************************************
 		} else if ( matching("rename",user_input_command_string) || 
-					matching("ren",user_input_command_string)) {
+					matching("ren",user_input_command_string)    ||
+					matching("rn",user_input_command_string))    {
 
 			switch (number_of_user_inputs) {
 				case 3 : 				
@@ -2270,7 +2272,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2317,7 +2319,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 			    break;	
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 			};//end switch
 
@@ -2661,7 +2663,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 	    	break;	
 
 	    	default : 
-	    		printf("Err args:%i\n", number_of_user_inputs);
+	    		printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 	    	//end default
 
 		};//end switch
@@ -2685,7 +2687,7 @@ printf("Enter:'type chicli-readme' for more.\n");
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
 					switch(detected_filetype){
 						case 2 : // case  2 : printf("DIR"); break;	// DIR
-							printf("Err: this is a dir.\n");
+							printf("Err: This is a dir.\n");
 						break;
 
 						case 16 : // case 16 : printf("SEQ"); break; // SEQ
@@ -2705,26 +2707,28 @@ printf("Enter:'type chicli-readme' for more.\n");
 						break;
 
 						default : // case  2 : printf("DIR"); break;	// DIR
-							printf("Err: unknown type.\n");
+							printf("Err: Type?\n");
 						//end default 
 					};//end switch
 				break;
 
 				case 3 :
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
-					if (detected_filetype == 255) {
-						printf("Err: unknown type.\n");
-						break;
-					};//end if 
+					// if (detected_filetype == 255) {
+					// 	printf("Err: unknown type.\n");
+					// 	break;
+					// };//end if 
 					if (matching("-hex",user_input_arg2_string)) {
 						type_hex(user_input_arg1_string); 
+					} else if (matching("-text",user_input_arg2_string)) {
+						type_text(user_input_arg1_string); // if SEQ use type 
 					} else {
-						printf("Unknown option: %s\n", user_input_arg2_string);
+						printf("Err arg3: %s\n", user_input_arg2_string);
 					};//end if 
 				break;
 
 			    default : 
-			    	printf("Err args:%i\n", number_of_user_inputs);
+			    	printf("Err args\n"); // printf("Err args:%i\n", number_of_user_inputs);
 			    //end default
 
 			};//end switch
@@ -3064,13 +3068,13 @@ Profile:");
 		// ********************************************************************************
 		} else if ( matching("debug-args",user_input_command_string) ) {
 
-			printf             ("Number of args:%i\n", argc-1);
+			printf             ("# of args:%i\n", argc-1);
 		 	//printf             ("PRG Name:%s\n"      , argv[0]);	
-		 	if (argc > 1)printf("Arg  1:%s\n"         , argv[ 1]);
-		 	if (argc > 2)printf("Arg  2:%s\n"         , argv[ 2]);
-		 	if (argc > 3)printf("Arg  3:%s\n"         , argv[ 3]);
-		 	if (argc > 4)printf("Arg  4:%s\n"         , argv[ 4]);
-		 	if (argc > 5)printf("Arg  5:%s\n"         , argv[ 5]);
+		 	if (argc > 1)printf("Arg1:%s\n"         , argv[ 1]);
+		 	if (argc > 2)printf("Arg2:%s\n"         , argv[ 2]);
+		 	if (argc > 3)printf("Arg3:%s\n"         , argv[ 3]);
+		 	if (argc > 4)printf("Arg4:%s\n"         , argv[ 4]);
+		 	if (argc > 5)printf("Arg5:%s\n"         , argv[ 5]);
 			// if (argc > 6)printf("Arg  6:%s\n"         , argv[ 6]);
 			// if (argc > 7)printf("Arg  7:%s\n"         , argv[ 7]);
 			// if (argc > 8)printf("Arg  8:%s\n"         , argv[ 8]);
