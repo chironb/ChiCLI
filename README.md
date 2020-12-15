@@ -87,6 +87,18 @@ Opportunities for Optimization of CPU and RAM Usage:
 - Write something that automatically opens and prints a text file, so I don't have to ask the user to enter: "type chicli-readme" but instead it just gets called when they enter: "help". 
 - Even more text file based help, and have it search for a certain tag in the text file. Have something like the user enter: "help alias" or "man alias" or "alias -h" or "alias --h" and it pulls up the section of the readme that has the relevant info. 
 
+
+Commodore Systems - Available Memory to cc65
+
+- https://www.cc65.org/doc/internal.txt
+
+<pre>
+Quick Summary
+PET : 31K of memory is available for C programs.
+C64 : 50K of memory is available for C programs.
+128 : 41K of memory is available for C programs.
+</pre>
+
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_del_star.png?raw=true)
@@ -819,8 +831,6 @@ CC65 Optimizations and Available Memory
 
 Optimization Links
 
-—————
-
 Docs for cc65 
 - https://cc65.github.io/doc/coding.html
 
@@ -839,14 +849,3 @@ nesdoug - NES Programming with cc65 - How cc65 works
 Programming NES games in C by Shiru
 - https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
 
-—————
-
-Commodore Systems - Available Memory to cc65
-- https://www.cc65.org/doc/internal.txt
-
-<pre>
-Quick Summary
-PET : 31K of memory is available for C programs.
-C64 : 50K of memory is available for C programs.
-128 : 41K of memory is available for C programs.
-</pre>
