@@ -13,7 +13,7 @@ You can download a disk image with this program and it's supporting Commodore re
 This is beta quality software. It comes with no warranty or guarantees of any kind.
 
 I’ve tried it with the following hardware: 
-- uIEC/SD by Jim Brain --> Buy One Here! --> http://store.go4retro.com/uiec-sd/
+- uIEC/SD by Jim Brain --> [Buy One Here!](http://store.go4retro.com/uiec-sd/)
 - IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive
 - Commodore 2031 via a Batteries Included IEEE-488 BusCardII
