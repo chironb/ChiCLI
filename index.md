@@ -1,7 +1,7 @@
 # ChiCLI
 ChiCLI v0.18 (c) 2020 Chiron Bramberger - A CLI for Commodore Computers!
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot.png?raw=true)
+[alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot.png?raw=true)
 
 This program works in a any that is similar to and inspired by Commodore DOS, AmigaDOS, MS-DOS, and Linux. 
 
