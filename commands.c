@@ -58,8 +58,23 @@ void type_text( unsigned char * file_to_type ) {
 	// I think I need to blank out the disk_sector_buffer right here.			
 	memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
 
-	strcpy (drive_command_string, file_to_type);
-	strcat (drive_command_string, ",r,s");
+	// if (detected_filetype == 
+
+			printf("Detected file: %s ", file_to_type );
+			detected_filetype = detect_filetype(file_to_type, TRUE);
+		
+			switch (detected_filetype) {
+				case  2 : /* bad */      break;	// DIR
+				case 16 : strcpy(detected_filetype_char,"s"); break; // SEQ
+				case 17 : strcpy(detected_filetype_char,"p"); break; // PRG
+				case 18 : strcpy(detected_filetype_char,"u"); break; // USR
+				case 19 : strcpy(detected_filetype_char,"l"); break; // REL // seems liek you need to pass L instaed of R 
+				default : printf("???"); //end default
+			};//end switch
+
+			strcpy (drive_command_string, file_to_type);
+			strcat (drive_command_string, ",r,");
+			strcat (drive_command_string, detected_filetype_char);
 
 	result = cbm_open(8, dev, CBM_READ, drive_command_string);
 

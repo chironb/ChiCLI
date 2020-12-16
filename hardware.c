@@ -63,19 +63,46 @@ extern unsigned char i;
 unsigned char  drive_detected[] = { 0 , 0 , 0 , 0}; 
 unsigned char  drive_detected_type[] = { 0 , 0 , 0 , 0}; // 0 = no drive detected, all others related to a specific drive
 
-unsigned char  cbm_error0_text[] = "Success.";
-unsigned char  cbm_error1_text[] = "Too many files.";
-unsigned char  cbm_error2_text[] = "File open.";
-unsigned char  cbm_error3_text[] = "File not open.";
-unsigned char  cbm_error4_text[] = "File not found.";
-unsigned char  cbm_error5_text[] = "Device not present.";
-unsigned char  cbm_error6_text[] = "Not input-file.";
-unsigned char  cbm_error7_text[] = "Not output-file.";
-unsigned char  cbm_error8_text[] = "Missing file-name.";
-unsigned char  cbm_error9_text[] = "Illegal device-number.";
-unsigned char cbm_error10_text[] = "RUN/STOP key pushed.";
-unsigned char cbm_error11_text[] = "General I/O-error.";
+unsigned char  cbm_error0_text[] = "Ok"; // "Ok";
+unsigned char  cbm_error1_text[] = "Too many files"; // "Too many files";
+unsigned char  cbm_error2_text[] = "File open"; // "File open";
+unsigned char  cbm_error3_text[] = "File not open"; // "File not open";
+unsigned char  cbm_error4_text[] = "File not found"; // "File?";
+unsigned char  cbm_error5_text[] = "Device not present"; // "Dev?";
+unsigned char  cbm_error6_text[] = "Not input-file"; // "!InFile";
+unsigned char  cbm_error7_text[] = "Not output-file"; // "!OutFile";
+unsigned char  cbm_error8_text[] = "Missing filename"; // "File-name?";
+unsigned char  cbm_error9_text[] = "Bad device #"; // "Bad dev#";
+unsigned char cbm_error10_text[] = "RUN/STOP pushed"; // "R/S press";
+unsigned char cbm_error11_text[] = "I/O-error"; // "ErrI/O";
 
+// NEW 
+// "Ok";		
+// "Files++";	
+// "Open?";		
+// "!Open?";	
+// "File?";		
+// "Dev?";		
+// "In-file";	
+// "Out-file";	
+// "Fname";		
+// "Dev#";		
+// "R/S";		
+// "Er:I/O";	
+
+// OLD // 
+// "Success."; // 
+// "Too many files."; // 
+// "File open."; // 
+// "File not open."; // 
+// "File not found."; // 
+// "Device not present."; // 
+// "Not input-file."; // 
+// "Not output-file."; // 
+// "Missing file-name."; // 
+// "Illegal device-number."; // 
+// "RUN/STOP key pushed."; // 
+// "General I/O-error."; // 
 
 const char command_set8[] = { 'u', '0', '>', 0x08 };
 const char command_set9[] = { 'u', '0', '>', 0x09 };
@@ -550,22 +577,23 @@ void process_status(char * input_string) {
 
 
 void display_cbm_error( unsigned char cbm_error_code ) {
-	printf("CBM Code #%i: ", cbm_error_code);
+	printf("CBM #%i: ", cbm_error_code);
 	switch (cbm_error_code) {
-		case  0 : printf("%s\n",  cbm_error0_text); break;
-		case  1 : printf("%s\n",  cbm_error1_text); break;
-		case  2 : printf("%s\n",  cbm_error2_text); break;
-		case  3 : printf("%s\n",  cbm_error3_text); break;
-		case  4 : printf("%s\n",  cbm_error4_text); break;
-		case  5 : printf("%s\n",  cbm_error5_text); break;
-		case  6 : printf("%s\n",  cbm_error6_text); break;
-		case  7 : printf("%s\n",  cbm_error7_text); break;
-		case  8 : printf("%s\n",  cbm_error8_text); break;
-		case  9 : printf("%s\n",  cbm_error9_text); break;
-		case 10 : printf("%s\n", cbm_error10_text); break;
-		case 11 : printf("%s\n", cbm_error11_text); break;
-		default : printf("Err ???\n");       //end default
+		case  0 : cputs( cbm_error0_text); break;
+		case  1 : cputs( cbm_error1_text); break;
+		case  2 : cputs( cbm_error2_text); break;
+		case  3 : cputs( cbm_error3_text); break;
+		case  4 : cputs( cbm_error4_text); break;
+		case  5 : cputs( cbm_error5_text); break;
+		case  6 : cputs( cbm_error6_text); break;
+		case  7 : cputs( cbm_error7_text); break;
+		case  8 : cputs( cbm_error8_text); break;
+		case  9 : cputs( cbm_error9_text); break;
+		case 10 : cputs(cbm_error10_text); break;
+		case 11 : cputs(cbm_error11_text); break;
+		default : cputs("Err?");       //end default
 	};//end switch	
+	cputc('\n');
 };//end func 
 
 
@@ -788,7 +816,7 @@ unsigned char detect_filetype(unsigned char * filename, unsigned char print_type
 
 	cbm_closedir(1); // if we made it this far, that means we never found the file.
 
-	printf("Error: file not found.\n"); 
+	printf("Error: File not found.\n"); 
 
 	return(255); 
 

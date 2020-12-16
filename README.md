@@ -17,8 +17,15 @@ I’ve tried it with the following hardware:
 - IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive
 - Commodore 2031 via a Batteries Included IEEE-488 BusCardII
+- Commodore SFD 1001 via a Batteries Included IEEE-488 BusCardII
 
 Latest News:
+- Updated type: added option -text to force it display the file as if it were a text file. Now type can auto-detect the filetype and display it accordingly, or it can be put into -hex mode or -text mode. 
+- Added a new shortcut alias rn for rename, and a new shortcut cler for clear. This is because if you type fast on a Commodore keyboard, certain key combinations tend to get lost, because the keyboard doesn't have any anti-ghosting diodes. For example pressing and holding R and then E blocks E for registering. Pressing and holding E then A blocks A. 
+- Made a little more room in RAM for type update, by re-writing the CBM error codes text to be shorter but mostly as informative. 
+- FIXED: Run command now supported running on any drives. NOTE: The command ./ does not, but that's because it's intended for a different purpose, basically letting you run commands that are small and external as if they were built into the system. BUG: It can only load files from the drive it was loaded from. Running programs from a different drive issue. Also, Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. I think the fix for one is the fix for both, which is to use the dracopy method for loading external programs. 
+- FIXED: If you set the date and time more than once, it gets screwy. Fix: needed to reset to zero the time offset variable in set_date();
+- FIXED: Displays both Aliases empty and aliases full. Process: start ChiCLI, set datetime, run screensaver, then alias (with none set). Fix was that result, a global var, wasn't being cleared before being used in the alias code. So it was assumed, erroniously, that it would be 0 unless changed by the testing for the alias list being full. This is the problem with global variables, obviously, but in such a limited system, it's faster and makes more sense to use them. 
 - FIXED: Doing the command 'type basic-program' would print out minus signs weird. Turns out, I entered another unicode character instead of a normal keyboard hyphen - character. I made a basic program to barf out every single command so I can check that I'm translating the tokens properly.
 - Added ss = screensaver to built-in aliases. 
 - FIXED: Command screensaver now respects the currently set text color as well. 
@@ -51,22 +58,22 @@ Latest News:
 - Added support for drive numbers 8 through 15.
 
 Known Bugs:
-- If you set the date and time more than once, it gets screwy
+- Fixed'em for now. Pretty cool, eh?
+
+Known Issues:
 - Tough one: debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
 Here are some links to help:
 https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
 https://github.com/cc65/cc65/blob/master/asminc/c64.inc
 
-Known Issues:
-- It can only load files from the drive it was loaded from. Running programs from a different drive issue  
-- Exomizer version works inconsistently with loading and running files from within ChiCLI. Not sure why, probably needs some tweaking in the way exomizer is configured in terms of memory layout. 
+Notes:
+- The exomiser version is not guaranteed to work properly. It is provided for people with disk drives but without any fast loaders of any kind. 
 
 Removals:
 - Due to trying to squeeze every feature into about 50K, the maximum aliases is now 8 (eight), but common ones are built-in now.
 - Due, again, to not having enough RAM, the hotkey command can only be 20 characters in size. 
 - Removed displaying the file name when using debug-args, since that's not working and isn't an easy fix at the moment
-- Had to remove a few built-in aliases for now because of the 16 limitation. 
-- Had to trim more text away from things like about, version, and licence.
+- Had to trim more text away from about and version. Also, help and licence simply suggest using the 'type' command to view the chicli-readme and chicli-licence files. 
 
 Opportunities for Optimization of CPU and RAM Usage:
 - The list command has lots of room to remove code and printf statements. 
@@ -79,6 +86,18 @@ Opportunities for Optimization of CPU and RAM Usage:
 - I should figure out where I can ditch printf for conio functions, where possible. 
 - Write something that automatically opens and prints a text file, so I don't have to ask the user to enter: "type chicli-readme" but instead it just gets called when they enter: "help". 
 - Even more text file based help, and have it search for a certain tag in the text file. Have something like the user enter: "help alias" or "man alias" or "alias -h" or "alias --h" and it pulls up the section of the readme that has the relevant info. 
+
+
+Commodore Systems - Available Memory to cc65
+
+- https://www.cc65.org/doc/internal.txt
+
+<pre>
+Quick Summary
+PET : 31K of memory is available for C programs.
+C64 : 50K of memory is available for C programs.
+128 : 41K of memory is available for C programs.
+</pre>
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
 
@@ -798,8 +817,7 @@ Example:
 debug-args
 
 Example output:
-Number of args:6
-Program Name: chicli
+Number of args:5
 Arg 1:arg1
 Arg 2:arg2 quoted
 Arg 3:arg3
@@ -812,8 +830,6 @@ Additional Resources:
 CC65 Optimizations and Available Memory 
 
 Optimization Links
-
-—————
 
 Docs for cc65 
 - https://cc65.github.io/doc/coding.html
@@ -833,14 +849,3 @@ nesdoug - NES Programming with cc65 - How cc65 works
 Programming NES games in C by Shiru
 - https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
 
-—————
-
-Commodore Systems - Available Memory to cc65
-- https://www.cc65.org/doc/internal.txt
-
-<pre>
-Quick Summary
-PET : 31K of memory is available for C programs.
-C64 : 50K of memory is available for C programs.
-128 : 41K of memory is available for C programs.
-</pre>
