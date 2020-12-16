@@ -98,6 +98,19 @@ C64 : 50K of memory is available for C programs.
 128 : 41K of memory is available for C programs.
 </pre>
 
+
+CC65 Optimizations and Available Memory 
+
+Optimization Links
+
+- [Docs for cc65](https://cc65.github.io/doc/coding.html)
+- [Really Great Guide Readable on GitHub](https://github.com/ilmenit/CC65-Advanced-Optimizations)
+- [Optimizing C array lookups for the 6502](http://8bitworkshop.com/blog/compilers/2019/03/17/cc65-optimization.html)
+- [Amateur Optimization Hour, part 2](https://coronax.wordpress.com/2018/09/13/amateur-optimization-hour-part-2/)
+- [nesdoug - NES Programming with cc65 - How cc65 works](https://nesdoug.com/2018/09/05/how-cc65-works/)
+- [Programming NES games in C by Shiru](https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm)
+
+
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_format.png?raw=true)
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_screenshot_del_star.png?raw=true)
@@ -823,17 +836,3 @@ Arg 3:arg3
 Arg 4: 
 ---------------------------------------
 </pre>
-
-Additional Resources:
-
-CC65 Optimizations and Available Memory 
-
-Optimization Links
-
-- [Docs for cc65](https://cc65.github.io/doc/coding.html)
-- [Really Great Guide Readable on GitHub](https://github.com/ilmenit/CC65-Advanced-Optimizations)
-- [Optimizing C array lookups for the 6502](http://8bitworkshop.com/blog/compilers/2019/03/17/cc65-optimization.html)
-- [Amateur Optimization Hour, part 2](https://coronax.wordpress.com/2018/09/13/amateur-optimization-hour-part-2/)
-- [nesdoug - NES Programming with cc65 - How cc65 works](https://nesdoug.com/2018/09/05/how-cc65-works/)
-- [Programming NES games in C by Shiru](https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm)
-
