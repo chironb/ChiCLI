@@ -7,14 +7,13 @@ This program works in a any that is similar to and inspired by Commodore DOS, Am
 
 It features a command line interface, which can list files, rename them, copy them, delete them, as well as view them, and with an UIEC device it can extract disk image files and copy them to a real floppy disk drive. It also features a hardware scanning system info tool, a screensaver with clock, the ability to view memory and files with a hex viewer, as well as load and run other from within. It can also change the drive number assignment for 1541 and UIEC drives, peek and poke memory, read and report keyboard key codes, set custom display colors, and execute user input dos commands, all without leaving the interface. Made in Canada. :-)
 
-You can download a disk image with this program and it's supporting Commodore readable text files here: 
-(https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64)
+[You can download a disk image with this program and it's supporting Commodore readable text files here.](https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64)
 
 This is beta quality software. It comes with no warranty or guarantees of any kind.
 
 I’ve tried it with the following hardware: 
-- uIEC/SD by Jim Brain --> [Buy One Here!](http://store.go4retro.com/uiec-sd/)
-- IDE64 tested by Leif Bloomquist --> https://github.com/LeifBloomquist
+- uIEC/SD by Jim Brain [Buy One Here!](http://store.go4retro.com/uiec-sd/)
+- IDE64 tested by [Leif Bloomquist](https://github.com/LeifBloomquist)
 - Commodore 1541 Disk Drive
 - Commodore 2031 via a Batteries Included IEEE-488 BusCardII
 - Commodore SFD 1001 via a Batteries Included IEEE-488 BusCardII
@@ -63,8 +62,8 @@ Known Bugs:
 Known Issues:
 - Tough one: debug-args: When using debug-args, or looking at argv[0] directly, the argv program name loads wrong text, usually something from a printf statement. It’s as if the storing of text for the printf statements are overwriting the part of memory where the file name is stored. 
 Here are some links to help:
-https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s
-https://github.com/cc65/cc65/blob/master/asminc/c64.inc
+[cc65/libsrc/c64/mainargs.s](https://github.com/cc65/cc65/blob/master/libsrc/c64/mainargs.s)
+[cc65/asminc/c64.inc](https://github.com/cc65/cc65/blob/master/asminc/c64.inc)
 
 Notes:
 - The exomiser version is not guaranteed to work properly. It is provided for people with disk drives but without any fast loaders of any kind. 
@@ -90,7 +89,7 @@ Opportunities for Optimization of CPU and RAM Usage:
 
 Commodore Systems - Available Memory to cc65
 
-- https://www.cc65.org/doc/internal.txt
+[CC65 Internal Doc](https://www.cc65.org/doc/internal.txt)
 
 <pre>
 Quick Summary
@@ -831,21 +830,10 @@ CC65 Optimizations and Available Memory
 
 Optimization Links
 
-Docs for cc65 
-- https://cc65.github.io/doc/coding.html
-
-Really Great Guide Readable on GitHub
-- https://github.com/ilmenit/CC65-Advanced-Optimizations
-
-Optimizing C array lookups for the 6502
-- http://8bitworkshop.com/blog/compilers/2019/03/17/cc65-optimization.html
-
-Amateur Optimization Hour, part 2
-- https://coronax.wordpress.com/2018/09/13/amateur-optimization-hour-part-2/
-
-nesdoug - NES Programming with cc65 - How cc65 works
-- https://nesdoug.com/2018/09/05/how-cc65-works/
-
-Programming NES games in C by Shiru
-- https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
+- [Docs for cc65](https://cc65.github.io/doc/coding.html)
+- [Really Great Guide Readable on GitHub](https://github.com/ilmenit/CC65-Advanced-Optimizations)
+- [Optimizing C array lookups for the 6502](http://8bitworkshop.com/blog/compilers/2019/03/17/cc65-optimization.html)
+- [Amateur Optimization Hour, part 2](https://coronax.wordpress.com/2018/09/13/amateur-optimization-hour-part-2/)
+- [nesdoug - NES Programming with cc65 - How cc65 works](https://nesdoug.com/2018/09/05/how-cc65-works/)
+- [Programming NES games in C by Shiru](https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm)
 
