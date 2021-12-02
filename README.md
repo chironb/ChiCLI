@@ -60,8 +60,8 @@ v1.R2 - Release Candidate 2 - Dec 1 2021
 - Updated:   The datetime command is seprate from the separate date and time commands.
 - Updated:   Screensaver to use RTC time. Wasn't needed - Worked automatically!
 - Updated:   Make logo show nothing instead of time if there’s no SD2IEC.
-- Updated:   Support for checking if RTC exists. If it doesn't in any way, everything is handled graciously.
-- Added:     A list-partitions command, which shows the names adn letters of available partitions on the device.
+- Updated:   Support for checking if RTC exists before doing time and date things.
+- Added:     A list-partitions command, which shows the names and letters of available partitions on the device.
 - Updated:   You can use the cd command to change drives and partitons!
 - Updated:   Abilty to abort a multi-file copy by pressing CTRL-C or RUNSTOP.
 - Updated:   Abilty to abort a multi-file delete by pressing CTRL-C or RUNSTOP.
