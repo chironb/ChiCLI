@@ -230,1123 +230,1123 @@ Programming NES games in C by Shiru
 
 <pre>
 ---------------------------------------
-cHIcli - qUICK cOMMAND lIST
+ChiCLI - Quick Command List
 ---------------------------------------
-./           EXIT       PWD
-=            FILEDATE   REBOOT
-ABOUT        FORMAT     RENAME
-ALIAS        HELP       RESTART
-CD           HEX2DEC    RMDIR
-CHIRP        HOTKEY     RUN
-CLEAR        INITIALIZE SCREENSAVER
-COLOR-SET    KEYCODES   SHUTDOWN
-COPY         LIST       STATUS
-DATE         LP         STOPWATCH
-DATETIME     MKDIR      SYS
-DEC2BIN      MOUNT      SYSINFO
-DEC2HEX      PARTITION  TIME
-DELETE       PEEK       TYPE
-DOS          PEEK-BIT   SD2IEC
-DRIVE-DETECT PEEKING    UNALIAS
-DRIVE-SET    POKE       UNMOUNT
-DUMP-MEM     POKE-BIT   VALIDATE
-ECHO         PROFILE    VIEW-MEM
+./           exit       pwd
+=            filedate   reboot
+about        format     rename
+alias        help       restart
+cd           hex2dec    rmdir
+chirp        hotkey     run
+clear        initialize screensaver
+color-set    keycodes   shutdown
+copy         list       status
+date         lp         stopwatch
+datetime     mkdir      sys
+dec2bin      mount      sysinfo
+dec2hex      partition  time
+delete       peek       type
+dos          peek-bit   sd2iec
+drive-detect peeking    unalias
+drive-set    poke       unmount
+dump-mem     poke-bit   validate
+echo         profile    view-mem
 
 
 ---------------------------------------
-cHIcli - bUILT-iN aLIAS lIST
+ChiCLI - Built-In Alias List
 ---------------------------------------
-CAT    --> TYPE
-CLS    --> CLEAR
-CP     --> COPY
-DEL/DL --> DELETE
-DIR    --> LIST
-ENDCLI --> EXIT
-HK     --> HOTKEY
-INIT   --> INITIALIZE
-LS     --> LIST
-LP     --> LIST-PARTITIONS
-MD     --> MAKE-DIR
-PART   --> PARTITION
-QUIT   --> EXIT
-RD     --> REMOVE-DIR
-REN    --> RENAME
-RM     --> DELETE
-RN     --> RENAME
-SS     --> SCREENSAVER
-SW     --> STOPWATCH
-VAL    --> VALIDATE
-VER    --> ABOUT
+cat    --> type
+cls    --> clear
+cp     --> copy
+del/dl --> delete
+dir    --> list
+endcli --> exit
+hk     --> hotkey
+init   --> initialize
+ls     --> list
+lp     --> list-partitions
+md     --> make-dir
+part   --> partition
+quit   --> exit
+rd     --> remove-dir
+ren    --> rename
+rm     --> delete
+rn     --> rename
+ss     --> screensaver
+sw     --> stopwatch
+val    --> validate
+ver    --> about
 
 ---------------------------------------
-PROFILE [pROFILE nUMBER]
+profile [Profile Number]
 ---------------------------------------
-1 - pet
-2 - vic-20
-3 - c64
-4 - c128
-5 - c128 - 2
-6 - bLACK ON wHITE (dEFAULT)
-7 - wHITE ON bLACK
-8 - gREY
+1 - PET
+2 - VIC-20
+3 - C64
+4 - C128
+5 - C128 - 2
+6 - Black on White (Default)
+7 - White on Black
+8 - Grey
 
 ---------------------------------------
-COLOR-SET [tEXT] [bACKGROUND] [bORDER]
+color-set [Text] [Background] [Border]
 ---------------------------------------
-1 - bLACK        9 - oRANGE
-2 - wHITE       10 - bROWN
-3 - rED         11 - lT. rED
-4 - cYAN        12 - dK. gREY
-5 - pURPLE      13 - gREY
-6 - gREEN       14 - lT. gREEN
-7 - bLUE        15 - lT. bLUE
-8 - yELLOW      16 - lT. gREY
+1 - Black        9 - Orange
+2 - White       10 - Brown
+3 - Red         11 - Lt. Red
+4 - Cyan        12 - Dk. Grey
+5 - Purple      13 - Grey
+6 - Green       14 - Lt. Green
+7 - Blue        15 - Lt. Blue
+8 - Yellow      16 - Lt. Grey
 
 ---------------------------------------
-cHIcli - qUICK cOMMAND eXAMPLES
+ChiCLI - Quick Command Examples
 ---------------------------------------
-> ./EXAMPLE
+> ./example
 > = 2 + 2
 > = 2 - 2
 > = 4 * 4
 > = 8 / 2
-> ABOUT
-> ALIAS
-> ALIAS L "LS -S"
-> ALIAS L -CLEAR
-> CD MISC-FOLDER
-> CD..
-> CD/
-> CHIRP
-> CLEAR
-> COLOR-SET 1 15 7
-> COPY * D08:
-> COPY * D08B:
-> COPY SOMEFILE SOMEDIR/
-> COPY SOMEFILE.TXT D08:
-> COPY SOMEFILE.TXT D08b:
-> COPY SOMEFILE.TXT SOMEFILECOPY.TXT
-> D08:
-> D09B:
-> DATE
-> DATETIME -SET
-> DEC2BIN 55
-> DEC2HEX 8000
-> DEL *
-> DEL SOME*
-> DEL SOMEFILE.TXT
-> DOS "VALIDATE0"
-> DRIVE-DETECT
-> DRIVE-SET -1541 10
-> DRIVE-SET -SD2IEC 11
-> DUMP-MEM 1000 2000 MEMORY.BIN
-> DUMP-MEM ROM KERNAL KERNAL.ROM
-> ECHO "cHIcli IS THE coolest!"
-> EXIT
-> FILEDATE CHICLI-README
-> FORMAT MYDISK 0
-> FORMAT MYDISK
-> FORMAT
-> FORMAT -Q MYDISK
-> FORMAT -Q
-> HELP
-> HEX2DEC FFFF
-> HOTKEY
-> HOTKEY 1 "LS -S"
-> HOTKEY 1 -CLEAR
-> INITIALIZE
-> KEYCODES
-> LIST
-> LIST -S
-> MKDIR TEST-DIR
-> MOUNT CHICLI-DISK.D64
-> PARTITION B
-> PEEK 1000
-> PEEK-BIT 65535 0
-> PEEKING 53266
-> POKE 1000 33
-> POKE-BIT 1000 3 1
-> PROFILE 1
-> PWD
-> REBOOT
-> RENAME OLDFILENAME NEWFILENAME
-> RESTART
-> RMDIR TEST-DIR
-> RUN HELLO-WORLD
-> SCREENSAVER
-> SHUTDOWN
-> STATUS
-> STOPWATCH
-> SYS 64738
-> SYSINFO
-> TIME
-> TYPE CHICLI
-> TYPE CHICLI -HEX
-> TYPE CHICLI-README
-> SD2IEC -HIDE-EXT
-> SD2IEC -SHOW-EXT
-> SD2IEC -SAVE
-> UNMOUNT
-> VALIDATE
-> VIEW-MEM 65535
-> VIEW-MEM 56296 56303
+> about
+> alias
+> alias l "ls -s"
+> alias l -clear
+> cd misc-folder
+> cd..
+> cd/
+> chirp
+> clear
+> color-set 1 15 7
+> copy * d08:
+> copy * d08b:
+> copy somefile somedir/
+> copy somefile.txt d08:
+> copy somefile.txt d08B:
+> copy somefile.txt somefilecopy.txt
+> d08:
+> d09b:
+> date
+> datetime -set
+> dec2bin 55
+> dec2hex 8000
+> del *
+> del some*
+> del somefile.txt
+> dos "validate0"
+> drive-detect
+> drive-set -1541 10
+> drive-set -sd2iec 11
+> dump-mem 1000 2000 memory.bin
+> dump-mem rom kernal kernal.rom
+> echo "ChiCLI is the COOLEST!"
+> exit
+> filedate chicli-readme
+> format mydisk 0
+> format mydisk
+> format
+> format -q mydisk
+> format -q
+> help
+> hex2dec ffff
+> hotkey
+> hotkey 1 "ls -s"
+> hotkey 1 -clear
+> initialize
+> keycodes
+> list
+> list -s
+> mkdir test-dir
+> mount chicli-disk.d64
+> partition b
+> peek 1000
+> peek-bit 65535 0
+> peeking 53266
+> poke 1000 33
+> poke-bit 1000 3 1
+> profile 1
+> pwd
+> reboot
+> rename oldfilename newfilename
+> restart
+> rmdir test-dir
+> run hello-world
+> screensaver
+> shutdown
+> status
+> stopwatch
+> sys 64738
+> sysinfo
+> time
+> type chicli
+> type chicli -hex
+> type chicli-readme
+> sd2iec -hide-ext
+> sd2iec -show-ext
+> sd2iec -save
+> unmount
+> validate
+> view-mem 65535
+> view-mem 56296 56303
 
 ---------------------------------------
-cHIcli - dETAILED hELP
+ChiCLI - Detailed Help
 ---------------------------------------
-user interface
+USER INTERFACE
 ---------------------------------------
-tEXT eNTRY
+Text Entry
 
-cHIcli USES CUSTOM ROUTINES TO
-MANAGE THE INPUT AND EDITING OF TEXT
-ON THE COMMAND LINE. iT AUTOMATICALLY
-INSERTS CHARACTERS, AND SUPPORTS 
-BACKSPACE AND DELETE. iT ALSO SUPPORTS
-CURSOR KEYS AND A HOME AND END KEYS.
+ChiCLI uses custom routines to
+manage the input and editing of text
+on the command line. It automatically
+inserts characters, and supports 
+backspace and delete. It also supports
+cursor keys and a home and end keys.
 
-tHE cOMMODORE CURSOR KEYS ARE SUPPORTED
-AS WELL AS EXTRA KEYS TO MAKE IT EASIER
-FOR PEOPLE WHO ARE COMING FROM THE
-lINUX OR wINDOWS KEYBOARD LAYOUTS.
+The Commodore cursor keys are supported
+as well as extra keys to make it easier
+for people who are coming from the
+Linux or Windows keyboard layouts.
 
-nOTE: 
-del AND home ARE TREATED THE SAME.
+Note: 
+DEL and HOME are treated the same.
 
-cursor-left ctrl+j - cURSOR lEFT
-cursor-left ctrl+l - cURSOR rIGHT
-cursor-up   ctrl+i - lAST eNTERED tEXT
-cursor-down ctrl+k - eRASE lINE
+CURSOR-LEFT CTRL+J - Cursor Left
+CURSOR-LEFT CTRL+L - Cursor Right
+CURSOR-UP   CTRL+I - Last Entered Text
+CURSOR-DOWN CTRL+K - Erase Line
 
-del ctrl+h         - bACKSPACE
-shift+del ctrl+:   - fORWARD dELETE
+DEL CTRL+H         - Backspace
+SHIFT+DEL CTRL+:   - Forward Delete
 
-ctrl+u             - sTART OF lINE
-ctrl+o             - eND OF lINE
+CTRL+U             - Start of Line
+CTRL+O             - End of Line
 
-runstop ctrl+c     - cANCELS INPUT
+RUNSTOP CTRL+C     - Cancels input
 ---------------------------------------
-tAB cOMPLETION
+Tab Completion
 
-cOMMODORE 64: uSE ctrl+lEFT-aRROW
+Commodore 64: Use CTRL+Left-Arrow
 
-oN THE cOMMODORE 64 THERE IS NO tab 
-KEY ON THE KEYBOARD. tHE CLOSEST IS THE
-left arrow KEY ABOVE THE ctrl KEY AT 
-THE FAR LEFT OF THE KEYBOARD. 
+On the Commodore 64 there is no TAB 
+key on the keyboard. The closest is the
+LEFT ARROW key above the CTRL key at 
+the far left of the keyboard. 
 
-iN ORDER TO ENTER A LEFT ARROW 
-CHARACTER, FOR EXAMPLE IF YOU NEED TO 
-LOAD A FILE NAME THAT CONTAINS THE 
-LEFT ARROW CHARACTER, YOU CAN PRESS:
-left arrow 
-TO ENTER THIS CHARACTER.
+In order to enter a left arrow 
+character, for example if you need to 
+load a file name that contains the 
+left arrow character, you can press:
+LEFT ARROW 
+to enter this character.
 
-tHE TAB COMPLETION WILL START SEARCHING
-THE CURRENT FOLDER FOR FILES WHOSE
-BEGINNING MATCH THE LAST STRING OF 
-TEXT ENTERED ON THE COMMAND LINE THAT'S
-SEPARATED BY AN EMPTY SPACE. 
+The tab completion will start searching
+the current folder for files whose
+beginning match the last string of 
+text entered on the command line that's
+separated by an empty space. 
 
-pLEASE NOTE: i'VE MADE THIS WAY FASTER
-NOW. hOWEVER, IF YOU HAVE AN sd2iec 
-WITH AN ENORMOUS NUMBER OF FILES, IT'S
-GOING TO TAKE TIME TO LOAD EACH FILE 
-NAME AND COMPARE IT TO THE TEXT YOU'RE
-TRYING TO AUTO-COMPLETE.
+Please note: I've made this way faster
+now. However, if you have an SD2IEC 
+with an enormous number of files, it's
+going to take time to load each file 
+name and compare it to the text you're
+trying to auto-complete.
 ---------------------------------------
-hOTKEYS
+Hotkeys
 
-hOTKEY MANAGES THE ABILITY TO ASSIGN
-COMMAND STRINGS TO THE FUNCTION KEYS. 
+Hotkey manages the ability to assign
+command strings to the function keys. 
 
-eXAMPLES:
-HOTKEY                  - lISTS HOTKEYS
-HOTKEY 1 "ECHO hI!"     - aSSIGNS f1
-HOTKEY 2 LS             - aSSIGNS f2
-HOTKEY 1 -CLEAR         - cLEARS f1
-HOTKEY -CLEAR           - cLEARS ALL
+Examples:
+hotkey                  - Lists hotkeys
+hotkey 1 "echo Hi!"     - Assigns F1
+hotkey 2 ls             - Assigns F2
+hotkey 1 -clear         - Clears F1
+hotkey -clear           - Clears all
 
-yOU CAN ALSO DO SOMETHING A LITTLE MORE
-COMPLEX LIKE THIS: 
+You can also do something a little more
+complex like this: 
 
-HOTKEY 1 = "ECHO ;cHIcli rULES!;"
+hotkey 1 = "echo ;ChiCLI Rules!;"
 
-tHE SEMI-COLON IS AUTOMATICALLY 
-SUBSTITUTED FOR QUOTES WHEN THE SYSTEM
-PROCESSES THE ECHO COMMAND. 
+The semi-colon is automatically 
+substituted for quotes when the system
+processes the echo command. 
 ---------------------------------------
-aLIASES
+Aliases
 
-aLIAS MANAGED THE ALIASING SYSTEM. yOU
-CAN SET YOUR OWN, CLEAR THEM, OR CLEAR
-ALL OF THE ALIASES. 
+Alias managed the aliasing system. You
+can set your own, clear them, or clear
+all of the aliases. 
 
-tHERE ARE A NUMBER OF PRE-CONFIGURED 
-ALIASES ALREADY SET, BASED ON COMMANDS
-FROM cOMMODORE dos, aMIGAdos, ms-dos,
-AND lINUX.
+There are a number of pre-configured 
+aliases already set, based on commands
+from Commodore DOS, AmigaDOS, MS-DOS,
+and Linux.
 
-ALIAS                 - lISTS ALIASES
-ALIAS HI "ECHO hI!"   - sETS AN ALIAS
-ALIAS VM VIEW-MEM     - sETS AN ALIAS
-ALIAS VM -CLEAR       - cLEARS AN ALIAS
-ALIAS -CLEAR          - cLEARS ALL
+alias                 - Lists aliases
+alias hi "echo Hi!"   - Sets an alias
+alias vm view-mem     - Sets an alias
+alias vm -clear       - Clears an alias
+alias -clear          - Clears all
 
-ALIAS CR = "ECHO ;cHIcli rULES!;"
+alias cr = "echo ;ChiCLI Rules!;"
 
-tHE SEMI-COLON IS AUTOMATICALLY 
-SUBSTITUTED FOR QUOTES WHEN THE SYSTEM
-PROCESSES THE ECHO COMMAND. 
+The semi-colon is automatically 
+substituted for quotes when the system
+processes the echo command. 
 ---------------------------------------
-aRGUMENTS
+Arguments
 
-cHIcli SUPPORTS ARGUMENTS PASSED BY 
-cOMMODORE bASIC. 
+ChiCLI supports arguments passed by 
+Commodore Basic. 
 
-iT USES THE FOLLOWING FORMAT: 
-run:rem arg1 "arg2 quoted" arg3 "" arg5
+It uses the following format: 
+RUN:REM ARG1 "ARG2 QUOTED" ARG3 "" ARG5
 
-sUPPORTED OPTIONS:
+Supported options:
 
-dISABLE dRIVE dETECT: -DDD
+Disable Drive Detect: -ddd
 
-tHIS DISABLED DRIVE DETECTION. tHIS IS
-ALSO DISABLED ONCE YOU CHANGE DRIVE 
-NUMBERS IN SOFTWARE. iN THE FUTURE, 
-THIS WILL BE ADDRESSED DIFFERENTLY. 
+This disabled drive detection. This is
+also disabled once you change drive 
+numbers in software. In the future, 
+this will be addressed differently. 
 
-eXAMPLE:
-load"chicli",8
-run:rem -ddd
+Example:
+LOAD"CHICLI",8
+RUN:REM -DDD
 
-sKIP tITLE: -SKIPTITLE OR -ST
+Skip Title: -skiptitle or -st
 
-tHIS SKIPS THE HARDWARE SCREEN GETS 
-YOU TO THE PROMPT FASTER. tHIS IS ALSO 
-CREATED FOR EXTERNAL PROGRAMS THAT ARE 
-LAUNCHED FROM IT AND THEN RE-LOAD AND 
-RE-RUN IT, CREATED A MORE SEAMLESS 
-EXPERIENCE. 
+This skips the hardware screen gets 
+you to the prompt faster. This is also 
+created for external programs that are 
+launched from it and then re-load and 
+re-run it, created a more seamless 
+experience. 
 
-eXAMPLE FROM bASIC:
-load"chicli",8
-run:rem -st
+Example from Basic:
+LOAD"CHICLI",8
+RUN:REM -ST
 
-eXAMPLE FROM WITHIN cHIcli:
-./CHICLI -ST
-RUN CHICLI -ST
+Example from within ChiCLI:
+./chicli -st
+run chicli -st
 ---------------------------------------
-cOMPRESSED cHIcli FOR fASTER lOADING
+Compressed ChiCLI for Faster Loading
 
-cHIcli CAN BE COMPRESSED USING VARIOUS
-CRUNCHING UTILITIES. 
+ChiCLI can be compressed using various
+crunching utilities. 
 
-eXOMIZER IS BEING TESTED WITH cHIcli,
-AND YOU CAN DOWNLOAD THE COMPRESSED
-VERSION CALLED CHICLI-EXO.PRG IN THE 
-PROJECT'S FOLDER. 
+Exomizer is being tested with ChiCLI,
+and you can download the compressed
+version called chicli-exo.prg in the 
+project's folder. 
 
-tHE PROGRAM IS COMPRESSED BY ABOUT 50%
-AND DECOMPRESSES IN ABOUT 5 SECONDS. 
+The program is compressed by about 50%
+and decompresses in about 5 seconds. 
 
-tHE PASSING OF ARGUMENTS TO A 
-COMPRESSED VERSION OF cHIcli HAS BEEN 
-TESTED AND WORKS.
+The passing of arguments to a 
+compressed version of ChiCLI has been 
+tested and works.
 ---------------------------------------
-commands
+COMMANDS
 ---------------------------------------
 ./
 
-tHIS LOADS AND RUNS A COMMAND AFTER 
-EXITING THE cHIcli SYSTEM. tHIS DOESN'T
-WORK AUTOCOMPLETE.
+This loads and runs a command after 
+exiting the ChiCLI system. This doesn't
+work autocomplete.
 
-eXAMPLE:
-./KONG-ARCADE
+Example:
+./kong-arcade
 ---------------------------------------
 =
 
-mATHS: tHE EQUALS COMMAND LETS YOU DO 
-VERY SIMPLE CALCULATIONS. iT'S LIMITED 
-TO INTEGERS AND ONLY TWO TERMS AND THE
-BASIC OPERATIONS OF PLUS, MINUS, 
-MULTIPLY, AND DIVIDE.
+Maths: The equals command lets you do 
+very simple calculations. It's limited 
+to integers and only two terms and the
+basic operations of plus, minus, 
+multiply, and divide.
 
-nOTE: yOU NEED TO HAVE SPACES BETWEEN
-THE COMMAND, TERMS, AND OPERATION.
-pLEASE SEE THE EXAMPLE BELOW.
+Note: You need to have spaces between
+the command, terms, and operation.
+Please see the example below.
 
-eXAMPLE: = 2 + 2
-eXAMPLE: = 2 - 2
-eXAMPLE: = 4 * 4
-eXAMPLE: = 8 / 2
+Example: = 2 + 2
+Example: = 2 - 2
+Example: = 4 * 4
+Example: = 8 / 2
 ---------------------------------------
-ABOUT
+about
 
-tHIS DISPLAYS INFORMATION ABOUT 
-THE SOFTWARE, AS WELL AS LINKS TO THE 
-PROJECT ON THE WEB.
+This displays information about 
+the software, as well as links to the 
+project on the web.
 
-eXAMPLE: ABOUT
+Example: about
 ---------------------------------------
-CD 
+cd 
 
-tHIS LET'S YOU CHANGE THE CURRENT 
-WORKING FOLDER. iT ALSO LETS YOU MOVE
-TO THE PREVIOUS OR ROOT FOLDERS
+This let's you change the current 
+working folder. It also lets you move
+to the previous or root folders
 
-YOU CAN ALSO CHANGE TO DIFFERENT 
-DEVICES AND PARTITIONS AS WELL.
+you can also change to different 
+devices and partitions as well.
 
-eXAMPLE: MOVE INTO A FOLDER
-CD SIDFILES
+Example: move into a folder
+cd sidfiles
 
-eXAMPLE: MOVE UP ONE FOLDER
-CD .. OR CD..
+Example: move up one folder
+cd .. or cd..
 
-eXAMPLE: MOVE TO THE ROOT FOLER
-CD /
+Example: move to the root foler
+cd /
 
-eXAMPLE: CHANGE TO DEVICE 9
-CD D09:
+Example: change to device 9
+cd d09:
 
-eXAMPLE: CHANGE TO:
-DEVICE 9 PARTITION B
-CD D09B:
+Example: change to:
+device 9 partition b
+cd d09b:
 ---------------------------------------
-CHIRP
+chirp
 
-pLAYS THE cHIcli STARTUP SOUND!
+Plays the ChiCLI startup sound!
 
-eXAMPLE: CHIRP
+Example: chirp
 ---------------------------------------
-CLEAR
+clear
 
-tHIS CLEARS THE SCREEN OF TEXT.
+This clears the screen of text.
 
-eXAMPLE: CLEAR
+Example: clear
 ---------------------------------------
-COLOR-SET
+color-set
 
-cHANGES THE CURRENT TEXT, BACKGROUND 
-AND BORDER COLORS, ALLOWING YOU TO SET
-EACH INDIVIDUALLY.
+Changes the current text, background 
+and border colors, allowing you to set
+each individually.
 
-COLOR-SET [tEXT] [bACKGROUND] [bORDER]
+color-set [Text] [Background] [Border]
 
-1 - bLACK        9 - oRANGE
-2 - wHITE       10 - bROWN
-3 - rED         11 - lT. rED
-4 - cYAN        12 - dK. gREY
-5 - pURPLE      13 - gREY
-6 - gREEN       14 - lT. gREEN
-7 - bLUE        15 - lT. bLUE
-8 - yELLOW      16 - lT. gREY
+1 - Black        9 - Orange
+2 - White       10 - Brown
+3 - Red         11 - Lt. Red
+4 - Cyan        12 - Dk. Grey
+5 - Purple      13 - Grey
+6 - Green       14 - Lt. Green
+7 - Blue        15 - Lt. Blue
+8 - Yellow      16 - Lt. Grey
 
-eXAMPLE: COLOR-SET 1 15 7
+Example: color-set 1 15 7
 ---------------------------------------
-COPY
+copy
 
-tHIS LET'S YOU COPY FILES. yOU CAN 
-ALSO USE * TO COPY ALL THE FILES 
-WITHIN THE CURRENT DISK, IMAGE, OR 
-DIRECTORY/FOLDER YOU ARE CURRENTLY IN, 
-TO ANOTHER DRIVE NUMBER. 
+This let's you copy files. You can 
+also use * to copy all the files 
+within the current disk, image, or 
+directory/folder you are currently in, 
+to another drive number. 
 
-fOLDERS MUST END WITH A SLASH / TO 
-SHOW THEY ARE FOLDERS AND NOT A NEW
-FILENAME FOR THE COPIED FILE.
+Folders must end with a slash / to 
+show they are folders and not a new
+filename for the copied file.
 
-yOU CAN ABORT MULTI-FILE COPYING
-BY PRESSING ctrl-c OR run/stop
-WHILE COPYING. nOTE: yOU MAY HAVE TO
-PRESS ctrl-c REPEATLY UNTIL IT
-STOPS.
+You can abort multi-file copying
+by pressing CTRL-C or RUN/STOP
+while copying. Note: You may have to
+press CTRL-C repeatly until it
+stops.
 
-eXAMPLES:
+Examples:
 
-cOPY A SINGLE FILE WITHIN THE CURRENT
-DIRECTORY (DUPLICATE):
-COPY SOMEFILE.TXT SOMEFILE-COPY.TXT
+Copy a single file within the current
+directory (duplicate):
+copy somefile.txt somefile-copy.txt
 
-cOPY A FILE INTO A FOLDER
-COPY HELLOWORLD TEST-DIR/HELLOWORLD
-COPY SOMEFILE /SOMEDIR/SOMEFILE
+Copy a file into a folder
+copy helloworld test-dir/helloworld
+copy somefile /somedir/somefile
 
-cOPY A FILE TO DRIVE 8:
-COPY SOMEFILE.TXT D8:
+Copy a file to drive 8:
+copy somefile.txt d8:
 
-cOPY ALL THE FILES IN THE CURRENT 
-DIRECTORY TO ANOTHER DRIVE:
-COPY * D08:
+Copy all the files in the current 
+directory to another drive:
+copy * d08:
 
-cOPY ALL THE FILES IN THE CURRENT
-DIRECTORY TO ANOTHER PARTITION ON THE
-SAME DEVICE:
-COPY * D08B:
+Copy all the files in the current
+directory to another partition on the
+same device:
+copy * d08b:
 ---------------------------------------
-D##: 
+d##: 
 
-cHANGES THE CURRENTLY ACTIVE DRIVE.
-tHIS IS THE DRIVE YOU'RE "IN".
+Changes the currently active drive.
+This is the drive you're "in".
 
-dRIVE NUMBERS 8 THROUGH 15 ARE 
-SUPPORTED, DEPENDING ON YOUR 
-HARDWARE.
+Drive numbers 8 through 15 are 
+supported, depending on your 
+hardware.
 
-eXAMPLE: D09:
+Example: d09:
 ---------------------------------------
-D##?: 
+d##?: 
 
-cHANGES THE CURRENTLY ACTIVE DRIVE.
-tHIS IS THE DRIVE YOU'RE "IN".
+Changes the currently active drive.
+This is the drive you're "in".
 
-tHE CHARACTER AFTER THE 2 DIGITS IS 
-THE PARTITION. uSE A FOR THE FIRST
-PARTITION, AND B FOR THE SECOND,
-ETC. tHE MAXIMUM PARTITIONS SUPPORTED
-IS 9, USING LETTERS A THROUGH I.
+The character after the 2 digits is 
+the partition. Use a for the first
+partition, and b for the second,
+etc. The maximum partitions supported
+is 9, using letters a through i.
 
-dRIVE NUMBERS 8 THROUGH 15 ARE 
-SUPPORTED, DEPENDING ON YOUR 
-HARDWARE.
+Drive numbers 8 through 15 are 
+supported, depending on your 
+hardware.
 
-eXAMPLE: D09B:
+Example: d09b:
 ---------------------------------------
-DATETIME
+datetime
 
-dISPLAYS THE CURRENT DATE AND TIME.
+Displays the current date and time.
 
-aLL TIME AND DATE HANDLING BY cHIcli
-IS DONE ON THE sd2iec DEVICE
-EXCLUSIVELY.
+All time and date handling by ChiCLI
+is done on the SD2IEC device
+exclusively.
 
-sOME VERSIONS OF THE sd2iec, DEPENDING
-ON HARDWARE OR FIRMWARE, HAVE A CLOCK
-BUILT INTO THE DEVICE. oNE VERSION HAS
-A SOFTWARE CLOCK THAT ONLY OPERATES
-WHILE THE DEVICE IS POWERED. oNCE IT IS
-POWERED OFF THE DATE AND TIME ARE LOST.
+Some versions of the SD2IEC, depending
+on hardware or firmware, have a clock
+built into the device. One version has
+a software clock that only operates
+while the device is powered. Once it is
+powered off the date and time are lost.
 
-hOWEVER, THERE ARE VERSIONS OF THE
-sd2iec THAT HAVE, OR CAN BE UPGRADED,
-WITH A REAL-TIME CLOCK (rtc).
+However, there are versions of the
+SD2IEC that have, or can be upgraded,
+with a real-time clock (RTC).
 
-cHIcli SUPPORTS BOTH. yOU CAN VIEW
-THE DATE AND TIME, AND EVEN SET THE
-CLOCK, ALL WITHOUT LEAVING THE
-ENVIRONMENT.
+ChiCLI supports both. You can view
+the date and time, and even set the
+clock, all without leaving the
+environment.
 
-tHE VERSIONS THAT SUPPORT SOME FORM OF
-A CLOCK, ALSO AUTOMATICALLY SAVE THE
-TIME STAMP WHEN FILES ARE CREATED OR
-MODIFIED ON THE sd CARD OF THE sd2iec.
+The versions that support some form of
+a clock, also automatically save the
+time stamp when files are created or
+modified on the SD card of the SD2IEC.
 
-aLSO SEE THE 'FILEDATE' COMMAND,
-AS IT ALLOWS YOU TO LOOK-UP A GIVEN
-FILE NAME AND GET IT'S TIME STAMP.
+Also see the 'filedate' command,
+as it allows you to look-up a given
+file name and get it's time stamp.
 
-tO SET THE DATE AND TIME USE THE
-PARAMETER "-SET".
+To set the date and time use the
+parameter "-set".
 
-eXAMPLE: DATETIME
-eXAMPLE: DATETIME -SET
+Example: datetime
+Example: datetime -set
 ---------------------------------------
-DEC2BIN
+dec2bin
 
-mATHS: cONVERTS FROM A DECIMAL NUMBER 
-TO A BINARY NUMBER.
+Maths: Converts from a decimal number 
+to a binary number.
 
-eXAMPLE: DEC2BIN 254
-oUTPUTS: bin:11111110
+Example: dec2bin 254
+Outputs: BIN:11111110
 ---------------------------------------
-DEC2HEX
+dec2hex
 
-mATHS: cONVERTS FROM A DECIMAL NUMBER 
-TO A HEXIDECIMAL NUMBER.
+Maths: Converts from a decimal number 
+to a hexidecimal number.
 
-eXAMPLE: DEC2HEX 234
-oUTPUTS: hex:00EA
+Example: dec2hex 234
+Outputs: HEX:00ea
 ---------------------------------------
-DELETE
+delete
 
-tHIS LET'S YOU DELETE FILES. yOU CAN 
-ALSO USE * TO DELETE ALL THE FILES 
-WITHIN THE CURRENT DISK, IMAGE, OR 
-FOLDER YOU ARE CURRENTLY IN.
+This let's you delete files. You can 
+also use * to delete all the files 
+within the current disk, image, or 
+folder you are currently in.
 
-yOU CAN ABORT MULTI-FILE DELETING
-BY PRESSING ctrl-c OR run/stop
-WHILE DELETING. nOTE: yOU MAY HAVE TO
-PRESS ctrl-c REPEATLY UNTIL IT
-STOPS.
+You can abort multi-file deleting
+by pressing CTRL-C or RUN/STOP
+while deleting. Note: You may have to
+press CTRL-C repeatly until it
+stops.
 
-eXAMPLES:
-DELETE SOMEFILE.TXT - dELETES A FILE
-DELETE *            - dELETES ALL FILES
-                      IN CURRENT FOLDER
+Examples:
+delete somefile.txt - Deletes a file
+delete *            - Deletes all files
+                      in current folder
 ---------------------------------------
-DOS
+dos
 
-tHIS LETS YOU EXECUTE A CUSTOM COMMAND
-INTENDED FOR A cOMMODORE dos DEVICE.
-iT EXPECTS A SECOND ARGUMENT TO BE THE
-COMMAND TO SEND TO THE CURRENTLY
-SELECTED DRIVE. iT USES THE COMMAND
-CHANNEL 1. iT PASSES THE GIVEN STRING
-DIRECTLY TO THE cOMMODORE dos DEVICE.
+This lets you execute a custom command
+intended for a Commodore DOS device.
+It expects a second argument to be the
+command to send to the currently
+selected drive. It uses the command
+channel 1. It passes the given string
+directly to the Commodore DOS device.
 
-nOTE: rEMEMBER THAT MOST EXAMPLES ARE
-GIVEN IN UPPER CASE BECAUSE THAT IS THE
-DEFAULT cOMMODORE bASIC STARTUP MODE.
-cOMMODORE dos EXPECTS LOWER CASE, SO
-WHEN USING THIS COMMAND IN cHIcli, YOU
-NEED TO USE LOWER CASE, AS IN THE 
-EXAMPLE GIVEN BELOW. 
+Note: Remember that most examples are
+given in upper case because that is the
+default Commodore Basic startup mode.
+Commodore DOS expects lower case, so
+when using this command in ChiCLI, you
+need to use lower case, as in the 
+example given below. 
 
-eXAMPLE: 
-DOS INITIALIZE0
+Example: 
+dos initialize0
 ---------------------------------------
-DRIVE-DETECT
+drive-detect
 
-gETS THE DRIVE NAME STRING FROM THE
-CURRENT DEVICE.
+Gets the drive name string from the
+current device.
 
-eXAMPLE: DRIVE-DETECT
+Example: drive-detect
 ---------------------------------------
-DRIVE-SET
+drive-set
 
-tHIS LETS YOU CHANGE THE DRIVE NUMBER 
-OF THE CURRENT DRIVE.
+This lets you change the drive number 
+of the current drive.
 
-fOR sd2iec DEVICES, YOU CAN USE THE
-SD2IEC-SAVE COMMAND TO MAKE THIS 
-CHANGE IN DEVICE NUMBER PERMANENT.
+For SD2IEC devices, you can use the
+sd2iec-save command to make this 
+change in device number permanent.
  
-eXAMPLES: 
-DRIVE-SET -1541 10
-DRIVE-SET -SD2IEC 11 
+Examples: 
+drive-set -1541 10
+drive-set -sd2iec 11 
 ---------------------------------------
-DUMP-MEM
+dump-mem
 
-tHIS LET'S YOU DUMP AN AREA OF MEMORY
-TO A FILE IN THE CURRENT DIRECTORY 
-YOU'RE IN. 
+This let's you dump an area of memory
+to a file in the current directory 
+you're in. 
 
-tHE FIRST ARGUMENT IS THE STARTING
-LOCATION IN MEMORY EXPRESSED AS A
-DECIMAL NUMBER. 
+The first argument is the starting
+location in memory expressed as a
+decimal number. 
 
-tHE SECOND IS THE ENDING ADDRESS IN
-MEMORY.
+The second is the ending address in
+memory.
 
-tHE FINAL ARGUMENT IS THE NAME OF THE
-FILE THAT SHOULD BE USED TO SAVE THE
-BYTES READ FROM MEMORY.
+The final argument is the name of the
+file that should be used to save the
+bytes read from memory.
 
-hERE'S AN EXAMPLE:
-DUMP-MEM 1000 2000 MEMORY.BIN
+Here's an example:
+dump-mem 1000 2000 memory.bin
 
-hOWEVER, THERE IS ALSO A SHORTCUT,
-FOR SITUATION WHEN YOU WANT TO
-SAVE THE CONTENT OF YOUR KERNAL OR
-basic romS. uSE "ROM" WITHOUT 
-QUOTE FOR THE FIRST ARGUMENT, AND
-EITHER "KERNAL" OR "BASIC" FOR 
-THE SECOND ARGUMENT. tHE THIRD
-ARGUMENT IS STILL THE FILE NAME.
+However, there is also a shortcut,
+for situation when you want to
+save the content of your kernal or
+BASIC ROMs. Use "rom" without 
+quote for the first argument, and
+either "kernal" or "basic" for 
+the second argument. The third
+argument is still the file name.
 
-hERE'S AN EXAMPLE:
-DUMP-MEM ROM KERNAL KERNAL.ROM
+Here's an example:
+dump-mem rom kernal kernal.rom
 ---------------------------------------
-ECHO
+echo
 
-dISPLAYS THE TEXT AS THE FIRST
-ARGUMENT. yOU CAN ALSO USE QUOTES
-AROUND THE TEXT YOU WANT ECHOED.
+Displays the text as the first
+argument. You can also use quotes
+around the text you want echoed.
 
-eXAMPLE: ECHO "cHIcli IS THE coolest!"
+Example: echo "ChiCLI is the COOLEST!"
 ---------------------------------------
-EXIT
+exit
 
-tHIS EXITS cHIcli.
+This exits ChiCLI.
 
-eXAMPLE: EXIT
+Example: exit
 ---------------------------------------
-FILEDATE
+filedate
 
-iF YOU HAVE AN sd2iec, IT IS CAPABLE
-OF DISPLAYING TIME STAMPS FOR A GIVEN
-FILE. tHIS COMMAND SHOWS YOU A TIME
-STAMP FOR THE FILE GIVEN, AS IT HAS
-BEEN RECORDED ON THE fat32 sd CARD.
-iF YOU DON'T HAVE A rtc INSTALLED ON
-YOUR sd2iec, THEN ANY FILES SAVED
-BY THE sd2iec ITSELF WHILE USING A
-cOMMODORE 64 WILL NOT HAVE ACCURATE
-TIME STAMPS. hOWEVER, ANY FILES SAVED
-ON THE sd BY A DEVICE WITH A CLOCK
-THAT'S SET CORRECTLY WILL HAVE THE
-CORRECT TIME FOR WHEN THE FILE WAS
-LAST MODIFIED.
+If you have an SD2IEC, it is capable
+of displaying time stamps for a given
+file. This command shows you a time
+stamp for the file given, as it has
+been recorded on the FAT32 SD card.
+If you don't have a RTC installed on
+your SD2IEC, then any files saved
+by the SD2IEC itself while using a
+Commodore 64 will not have accurate
+time stamps. However, any files saved
+on the SD by a device with a clock
+that's set correctly will have the
+correct time for when the file was
+last modified.
 
-aDDITIONALLY, IF YOUR sd2iec HAS THE
-SOFTWARE CLOCK ENABLED, AND THE TIME
-AND DATE HAVE BEEN SET SINCE IT WAS
-POWERED ON, THEN IT MAY BE POSSIBLE
-TO SAVE FILES WITH THE CORRECT TIME
-STAMP INFORMATION AS WELL.
+Additionally, if your SD2IEC has the
+software clock enabled, and the time
+and date have been set since it was
+powered on, then it may be possible
+to save files with the correct time
+stamp information as well.
 
-pLEASE NOTE, AS OF THE WRITING OF THIS
-DOCUMENT, IT IS POSSIBLE YOUR MODERN
-COMPUTER OR DEVICE WILL SAVE THE TIME
-STAMP INFORMATION IN utc AND THEN
-LOCALLY DISPLAY THE TIME STAMPS
-CORRECTLY FOR YOUR TIME ZONE. tHE
-sd2iec WILL DISPLAY WHATEVER TIME
-STAMP IS SAVED ON THE sd CARD, SO
-THERE MAY BE A DISCREPANCY BETWEEN
-THE SAVED TIME AND WHAT YOU EXPECTED.
+Please note, as of the writing of this
+document, it is possible your modern
+computer or device will save the time
+stamp information in UTC and then
+locally display the time stamps
+correctly for your time zone. The
+SD2IEC will display whatever time
+stamp is saved on the SD card, so
+there may be a discrepancy between
+the saved time and what you expected.
 
-aTTEMPTING TO ACCOUNT AND ADJUST FOR
-THIS IS BEYOND THE CURRENT SCOPE OF
-THIS PROGRAM, SINCE cHIcli HAS MOVED
-ALL TIME AND DATE HANDLING TO THE
-sd2iec DEVICE EXCLUSIVELY.
+Attempting to account and adjust for
+this is beyond the current scope of
+this program, since ChiCLI has moved
+all time and date handling to the
+SD2IEC device exclusively.
 
-eXAMPLE: FILEDATE CHICLI-README
+Example: filedate chicli-readme
 ---------------------------------------
-FORMAT
+format
 
-fORMAT A DISK, BASED ON THE DEVICE 
-YOUR CURRENTLY IN. 
-fIRST ARG IS THE DISK NAME.
-sECOND ARG IS THE DISK NUMBER
+Format a disk, based on the device 
+your currently in. 
+First arg is the disk name.
+Second arg is the disk number
 
-iF YOU OMIT THE NAME, FORMAT WILL 
-DEFAULT TO CALLING THE DISK BY THE 
-NAME "UNTITLED. iF YOU OMIT THE DISK
-id, FORMAT WILL GIVE IT "0" BY 
-DEFAULT.
+If you omit the name, format will 
+default to calling the disk by the 
+name "untitled. If you omit the disk
+ID, format will give it "0" by 
+default.
 
-tHE "FORMAT" COMMAND NOW SUPPORTS THE 
-cOMMODORE dos ABILITY TO DO A QUICK 
-FORMAT, INSTEAD OF A FULL FORMAT. uSE 
-FORMAT -Q DISKNAME TO QUICK FORMAT 
-A DISK CALLING IT DISKNAME.
+The "format" command now supports the 
+Commodore DOS ability to do a quick 
+format, instead of a full format. Use 
+format -q diskname to quick format 
+a disk calling it diskname.
 
-eXAMPLES: 
-FORMAT MYDISK 0
-FORMAT MYDISK
-FORMAT
-FORMAT -Q MYDISK
-FORMAT -Q
+Examples: 
+format mydisk 0
+format mydisk
+format
+format -q mydisk
+format -q
 ---------------------------------------
-HELP 
+help 
 
-dISPLAYS A QUICK LIST OF COMMANDS. 
-NOTE: tHE FILE CHICLI-README.TXT 
-CONTAINS DETAILED HELP.
+Displays a quick list of commands. 
+note: The file chicli-readme.txt 
+contains detailed help.
 
-eXAMPLE: HELP
+Example: help
 ---------------------------------------
-HEX2DEC
+hex2dec
 
-mATHS: cONVERTS FROM A HEXIDECIMAL 
-NUMBER TO A DECIMAL NUMBER.
+Maths: Converts from a hexidecimal 
+number to a decimal number.
 
-eXAMPLE: HEX2DEC ffff
-oUTPUTS: dec:65535
+Example: hex2dec FFFF
+Outputs: DEC:65535
 ---------------------------------------
-INITIALIZE
+initialize
 
-eXECUTES THE cOMMODORE dos DRIVE 
-COMMAND FOR INITIALIZE, BASED ON THE 
-CURRENT DRIVE.
+Executes the Commodore DOS drive 
+command for initialize, based on the 
+current drive.
 
-eXAMPLE: INITIALIZE
+Example: initialize
 ---------------------------------------
-KEYCODES
+keycodes
 
-dISPLAYS THE KEY CODE OF A KEY THAT'S 
-PRESSED IN DECIMAL VALUE. run/stop OR
-ctrl+c QUITS THE COMMAND.
+Displays the key code of a key that's 
+pressed in decimal value. RUN/STOP or
+CTRL+C quits the command.
 
-KEYCODES
+keycodes
 ---------------------------------------
-LIST
+list
 
-tHIS DISPLAYS A LISTING OF THE FILES 
-WITHIN THE DISK, IMAGE, OR FOLDER 
-YOU ARE CURRENTLY IN.
+This displays a listing of the files 
+within the disk, image, or folder 
+you are currently in.
 
-oPTION: -S
-tHIS LISTS THE CONTENTS IN A FORMAT
-THAT'S TWICE AS WIDE, SHOWING 2 FILES
-FOR EACH LINE OF THE SCREEN.
+Option: -s
+This lists the contents in a format
+that's twice as wide, showing 2 files
+for each line of the screen.
 
-eXAMPLE: LIST
-eXAMPLE: LIST -S
+Example: list
+Example: list -s
 ---------------------------------------
-LIST-PARTITIONS / LP
+list-partitions / lp
 
-THIS COMMAND LISTS THE PARTITIONS ON
-THE CURRENT DEVICE.
+this command lists the partitions on
+the current device.
 
-EXAMPLE:
-LP
+example:
+lp
 ---------------------------------------
-MKDIR
+mkdir
 
-mAKES A NEW, EMPTY DIRECTORY, USING 
-THE PROVIDED NAME.
+Makes a new, empty directory, using 
+the provided name.
 
-eXAMPLE: MKDIR GAME-IMAGES
+Example: mkdir game-images
 ---------------------------------------
-MOUNT
+mount
 
-tHIS MOUNTS A DISK IMAGE ON A sd2iec
-DEVICE, LIKE THE sd2iec. yOU CAN THEN
-COPY SOME OF ALL OF THE FILES TO A REAL
-FLOPPY DISK. 
+This mounts a disk image on a SD2IEC
+device, like the SD2IEC. You can then
+copy some of all of the files to a real
+floppy disk. 
 
-eXAMPLE: 
-MOUNT CHICLI-DISK.D64
+Example: 
+mount chicli-disk.d64
 ---------------------------------------
-PARTITION
+partition
 
-tHIS QUICKLY CHANGES THE CURRENT 
-PARTITION BASED ON THE SUPPLIED LETTER.
-tHE SHORTCUT "PART" MAKES USING THIS 
-HANDY TO CHANGE PARTITIONS FAST. oNLY
-WORKS ON DRIVES THAT SUPPORT PARTITIONS.
+This quickly changes the current 
+partition based on the supplied letter.
+The shortcut "part" makes using this 
+handy to change partitions fast. Only
+works on drives that support partitions.
 
-eXAMPLE: PARTITION B
+Example: partition b
 ---------------------------------------
-PEEK      
+peek      
 
-rETURNS THE VALUE STORED IN MEMORY AT
-THE GIVEN ADDRESS. wORKS JUST AS IN 
-cOMMODORE bASIC.
+Returns the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
 
-tHIS TAKES THE ADDRESS AS A 
-DECIMAL VALUE.
+This takes the address as a 
+decimal value.
 
-eXAMPLE: 
-PEEK 1000
+Example: 
+peek 1000
 ---------------------------------------
-PEEK-BIT
+peek-bit
 
-rETURNS THE VALUE OF A GIVEN BIT 
-STORED IN MEMORY AT THE GIVEN ADDRESS. 
+Returns the value of a given bit 
+stored in memory at the given address. 
 
-eXAMPLE: 
-PEEK 1024 2
-tHIS GRABS THE THIRD LEAST SIGNIFICANT 
-BIT FROM MEMORY ADDRESS 1024 IN 
-DECIMAL FORMAT.
+Example: 
+peek 1024 2
+This grabs the third least significant 
+bit from memory address 1024 in 
+decimal format.
 ---------------------------------------
-POKE
+poke
 
-uPDATES THE VALUE STORED IN MEMORY AT
-THE GIVEN ADDRESS. wORKS JUST AS IN 
-cOMMODORE bASIC.
+Updates the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
 
-tHIS VERSION TAKES THE ADDRESS AND 
-VALUE AS A DECIMAL NUMBER.
+This version takes the address and 
+value as a decimal number.
 
-eXAMPLE: 
-POKE 1000 33
+Example: 
+poke 1000 33
 ---------------------------------------
-POKE-BIT
+poke-bit
 
-wRITES THE VALUE OF A GIVEN BIT 
-STORED IN MEMORY AT THE GIVEN ADDRESS. 
+Writes the value of a given bit 
+stored in memory at the given address. 
 
-eXAMPLE: 
-PEEK 1024 2 1
-wRITES 1 TO THE THIRD LEAST SIGNIFICANT
-BIT FROM MEMORY ADDRESS 1024 IN
-DECIMAL FORMAT
+Example: 
+peek 1024 2 1
+Writes 1 to the third least significant
+bit from memory address 1024 in
+decimal format
 ---------------------------------------
-PROFILE    
+profile    
 
-cHANGES THE CURRENT TEXT, BACKGROUND 
-AND BORDER COLORS, TO ONE OF A SET OF
-PRE-DETERMINED PROFILES.
+Changes the current text, background 
+and border colors, to one of a set of
+pre-determined profiles.
 
-PROFILE [pROFILE nUMBER]
+profile [Profile Number]
 
-1 - pet    5 - c128 - 2
-2 - vic-20 6 - bLACK ON wHITE (dEFAULT)
-3 - c64    7 - wHITE ON bLACK
-4 - c128   8 - gREY
+1 - PET    5 - C128 - 2
+2 - VIC-20 6 - Black on White (Default)
+3 - C64    7 - White on Black
+4 - C128   8 - Grey
 
-eXAMPLE: 
-PROFILE 1
+Example: 
+profile 1
 ---------------------------------------
-PWD
+pwd
 
-sHOWS YOU THE CURRENTLY SET DEVICE 
-AND PARTITION.
+Shows you the currently set device 
+and partition.
 
-eXAMPLE: PWD
+Example: pwd
 ---------------------------------------
-REBOOT
+reboot
 
-tHIS RESTARTS THE cOMMODORE BY CALLING
-THE SYSTEM RESET VECTOR.
+This restarts the Commodore by calling
+the system reset vector.
 
-nOTE: iF YOU'RE USING A fAST lOAD
-CARTRIDGE, THIS WILL RESET WITHOUT
-fAST lOAD. yOU'LL HAVE TO SYS TO A
-SPECIAL VALUE TO RELOAD THE fAST lOAD
-CARTIDGE.
+Note: If you're using a Fast Load
+cartridge, this will reset without
+Fast Load. You'll have to sys to a
+special value to reload the Fast Load
+cartidge.
 
-nOTE: tHE ePYX fAST lOAD CARTRIDGE
-WILL NOT BE LOADED IF YOU CALL THE
-REBOOT COMMAND. tO RE-ENABLE IT,
-YOU NEED TO RUN THIS COMMAND IN
-cOMMOODRE bASIC: SYS 57194
+Note: The Epyx Fast Load cartridge
+will not be loaded if you call the
+reboot command. To re-enable it,
+you need to run this command in
+Commoodre Basic: sys 57194
 
-eXAMPLE: REBOOT
+Example: reboot
 ---------------------------------------
-RENAME 
+rename 
 
-rENAMES A FILE.
+Renames a file.
 
-iF A FILE IS USING A WEIRD OR HARD TO 
-ENTER CHARACTER, YOU CAN USE A WILDCARD
-TO RENAME IT.
+If a file is using a weird or hard to 
+enter character, you can use a wildcard
+to rename it.
 
-eXAMPLE: RENAME OLDFILENAME NEWFILENAME
-eXAMPLE: RENAME WEIRDFILE* FRIENDLYFILE
+Example: rename oldfilename newfilename
+Example: rename weirdfile* friendlyfile
 ---------------------------------------
-RESTART
+restart
 
-tHIS EXITS cHIcli AND AUTOMATICALLY
-LOADS AND RUNS cHIcli FROM DISK AGAIN.
+This exits ChiCLI and automatically
+loads and runs ChiCLI from disk again.
 
-eXAMPLE: RESTART
+Example: restart
 ---------------------------------------
-REMOVE-DIR
+remove-dir
 
-rEMVOE A DIRECTORY. 
+Remvoe a directory. 
 
-eXAMPLE: REMOVE-DIR TESTDIR
+Example: remove-dir testdir
 ---------------------------------------
-RUN 
+run 
 
-tHIS LOADS AND RUNS A COMMAND AFTER 
-EXITING THE cHIcli SYSTEM. yOU CAN USE
-TAB COMPLETION WITH THIS COMMAND.
+This loads and runs a command after 
+exiting the ChiCLI system. You can use
+tab completion with this command.
 
-iF A FILE IS USING A WEIRD OR HARD TO
-ENTER CHARACTER, YOU CAN USE A WILDCARD
-TO RUN IT.
+If a file is using a weird or hard to
+enter character, you can use a wildcard
+to run it.
 
-eXAMPLE: RUN KONG*
+Example: run kong*
 ---------------------------------------
-SCREENSAVER
+screensaver
 
-dISPLAYS A SCREENSAVER THAT IS A MOVING
-cOMMODORE INSPIRED LOGO.
+Displays a screensaver that is a moving
+Commodore inspired logo.
 
-tHE SCREENSAVER ALSO DISPLAYS THE DATE
-AND TIME, IF USED WITH AN sd2iec.
+The screensaver also displays the date
+and time, if used with an SD2IEC.
 
-yOU CAN ALSO ENABLE OR DISABLE WHETHER
-THE DATE AND/OR TIME IS DISPLAYED.
+You can also enable or disable whether
+the date and/or time is displayed.
 
-bY DEFAULT ONLY THE TIME IS DISPLAYED,
-AND ONLY IF A sd2iec SOFTWARE OR rtc
-CLOCK IS DETECTED.
+By default only the time is displayed,
+and only if a SD2IEC software or RTC
+clock is detected.
 
-yOU CAN USE THE FOLLOWING AGRUMENTS
-TO TOGGLE THE OPTIONS:
+You can use the following agruments
+to toggle the options:
 
--ENABLE-TIME
--ENABLE-DATE
--DISABLE-TIME
--DISABLE-DATE
+-enable-time
+-enable-date
+-disable-time
+-disable-date
 
-eXAMPLES:
-SCREENSAVER
-SCREENSAVER -DISABLE-TIME
-SCREENSAVER -ENABLE-DATE
+Examples:
+screensaver
+screensaver -disable-time
+screensaver -enable-date
 ---------------------------------------
-SHUTDOWN   
+shutdown   
 
-tHIS EXITS THE PROGRAM AND DISPLAYS
-A MESSAGE LETTING YOU KNOW IT'S SAFE
-TO TURN OFF YOUR cOMMODORE.  
+This exits the program and displays
+a message letting you know it's safe
+to turn off your Commodore.  
 
-eXAMPLE: SHUTDOWN
+Example: shutdown
 ---------------------------------------
-STATUS 
+status 
 
-tHIS RETRIVES THE STATUS OF THE 
-CURRENT DRIVE.
+This retrives the status of the 
+current drive.
 
-eXAMPLE: STATUS
+Example: status
 ---------------------------------------
-STOPWATCH
+stopwatch
 
-tHE "STOPWATCH" COMMAND STARTS WHEN 
-YOU RUN IT, AND WHEN RUN AGAIN, STOPS 
-AND OUTPUTS THE ELAPSED SECONDS SINCE 
-IT WAS LAST CALLED. iT RESETS ON THE 
-SECOND CALL AS WELL. tHE MAXIMUM TIME 
-IS ABOUT 18 MINS.
+The "stopwatch" command starts when 
+you run it, and when run again, stops 
+and outputs the elapsed seconds since 
+it was last called. It resets on the 
+second call as well. The maximum time 
+is about 18 mins.
 
-eXAMPLE: STOPWATCH
+Example: stopwatch
 ---------------------------------------
-SYS
+sys
 
-tHIS CAUSES EXECUTION TO JUMP TO THE 
-MEMORY LOCATION GIVEN. iT EXPECTS A
-NUMBER IN DECIMAL. tHIS WORKS JUST 
-LIKE THE cOMMODORE bASIC COMMAND.
+This causes execution to jump to the 
+memory location given. It expects a
+number in decimal. This works just 
+like the Commodore Basic command.
 
-eXAMPLE: SYS 64738
+Example: sys 64738
 ---------------------------------------
-SYSINFO
+sysinfo
 
-aTTEMPTS TO DETECT YOUR HARDWARE AND
-DISPLAYS INFORMATION ABOUT YOUR SYSTEM.
-iT ASSUMES THAT YOU'VE GOT A STANDARD
-STOCK cOMMODORE. iT ALSO PLAYS A CHIME
-BASED ON THE CHIME USED ON THE 
-cOMMODORE pet AND cOMMODORE pc 
-COMPUTERS.
+Attempts to detect your hardware and
+displays information about your system.
+It assumes that you've got a standard
+stock Commodore. It also plays a chime
+based on the chime used on the 
+Commodore PET and Commodore PC 
+computers.
 
-iT WILL ALSO DETECT IF THE SYSTEM IS 
-RUNNING UNDER EMULATION. aLTHOUGH IT'S
-NOT INFALLIBLE, IT WILL RECOGNISE 
-vice AS WELL AS tHEc64.
+It will also detect if the system is 
+running under emulation. Although it's
+not infallible, it will recognise 
+VICE as well as TheC64.
 
-fEEL FREE TO DONATE ADDITIONAL HARDWARE
-IF YOU'D LIKE MORE SPECIALIZED SYSTEMS
-TO BE RECOGNISED.
+Feel free to donate additional hardware
+if you'd like more specialized systems
+to be recognised.
 
-eXAMPLE: SYSINFO
+Example: sysinfo
 ---------------------------------------
-TIME
+time
 
-dISPLAYS THE CURRENT TIME.
+Displays the current time.
 
-tO SET THE DATE AND TIME USE THE
-COMMAND DATETIME WITH THE
-PARAMETER "-SET".
+To set the date and time use the
+command datetime with the
+parameter "-set".
 
-eXAMPLE: TIME
+Example: time
 ---------------------------------------
-TYPE
+type
 
-tHIS IS A FILE VIEWER. iT CAN DISPLAY
-FILES IN THE FORMATS seq, prg, OR ANY
-OTHER TYPE OF FILE. 
+This is a file viewer. It can display
+files in the formats SEQ, PRG, or any
+other type of file. 
 
-iT ATTEMPTS TO AUTO-DETECT THE FILE 
-TYPE AND SHOWS THE RELEVANT OUTPUT.
+It attempts to auto-detect the file 
+type and shows the relevant output.
 
-fOR seq FILES, IT DISPLAYS THEM AS IF
-THEY WERE TEXT FILES. 
+For SEQ files, it displays them as if
+they were text files. 
 
-fOR prg FILES, IT DISPLAYS THEM AS 
-cOMMODORE bASIC WOULD DISPLAY THEM.
-iT SUBSTITUTES THE CODES FOR THEIR 
-RELATED BASIC TOKENS.
+For PRG files, it displays them as 
+Commodore Basic would display them.
+It substitutes the codes for their 
+related basic tokens.
 
-iF YOU'D LIKE TO VIEW THE FILE'S RAW
-HEXIDECIMAL VALUES, YOU CAN APPEND
--HEX AS THE LAST ARGUMENT. 
+If you'd like to view the file's raw
+hexidecimal values, you can append
+-hex as the last argument. 
 
-eXAMPLE: 
-TYPE CHICLI
-TYPE CHICLI-README
-TYPE CHICLI -HEX
+Example: 
+type chicli
+type chicli-readme
+type chicli -hex
 ---------------------------------------
-SD2IEC
+sd2iec
 
-tHIS COMMAND DOES sd2iec SPECIFIC 
-FUNCTIONS. tHE SECOND ARGUMENT
-DETERMINES WHICH FUNCTION YOU'RE
-CALLING ON THE DEVICE.
+This command does SD2IEC specific 
+functions. The second argument
+determines which function you're
+calling on the device.
 
--HIDE-EXT
+-hide-ext
 
-tHIS IS A SD2IEC SPECIFIC SETTING THAT
-CAUSES IT TO HIDE FILES ENDING IN
-cOMMODORE dos EXTENSIONS, SUCH AS
-.PRG OR .SEQ AND INSTEAD AUTOMATICALLY
-REPORTS THEM TO THE SYSTEM AS IF THEY
-WERE IN FACT THAT TYPE OF FILE.
+This is a sd2iec specific setting that
+causes it to hide files ending in
+Commodore DOS extensions, such as
+.prg or .seq and instead automatically
+reports them to the system as if they
+were in fact that type of file.
 
-pLEASE SEE YOUR SD2IEC DOCUMENTATION.
+Please see your sd2iec documentation.
 
-eXAMPLE:
-SD2IEC -HIDE-EXT
+Example:
+sd2iec -hide-ext
 
--SHOW-EXT
+-show-ext
 
-tHIS IS A SD2IEC SPECIFIC SETTING THAT
-CAUSES IT TO SHOW FILES ENDING IN 
-cOMMODORE dos EXTENSIONS, SUCH AS
-.PRG OR .SEQ AND REPORTS ALL FILES 
-AS prg FILES UNLESS cOMMODORE dos
-AS SET SPECIFICALLY.
+This is a sd2iec specific setting that
+causes it to show files ending in 
+Commodore DOS extensions, such as
+.prg or .seq and reports all files 
+as PRG files unless Commodore DOS
+as set specifically.
 
-pLEASE SEE YOUR SD2IEC DOCUMENTATION. 
+Please see your sd2iec documentation. 
 
-eXAMPLE: 
-SD2IEC -SHOW-EXT
+Example: 
+sd2iec -show-ext
 
--SAVE
+-save
 
-sAVES THE CURRENT SETTINGS TO THE 
-sd2iec. fOR EXAMPLE, IF YOU RE-ASSIGN
-THE sd2iec DEVICE 10, THE NEXT TIME
-THE DEVICE IS POWER-CYCLED, IT WILL
-REVERT BACK TO IT'S PREVIOUS SETTING.
-hOWEVER, USING THIS COMMAND, YOU CAN 
-CAUSE IT TO SAVE THE CURRENT SETTINGS.
-tHEREFORE, IN OUR EXAMPLE, WHEN THE 
-DEVICE IS POWER-CYCLED, IT WILL START
-UP SET TO DEVICE 10.
+Saves the current settings to the 
+SD2IEC. For example, if you re-assign
+the SD2IEC device 10, the next time
+the device is power-cycled, it will
+revert back to it's previous setting.
+However, using this command, you can 
+cause it to save the current settings.
+Therefore, in our example, when the 
+device is power-cycled, it will start
+up set to device 10.
 
-eXAMPLE: 
-SD2IEC -SAVE
+Example: 
+sd2iec -save
 ---------------------------------------
-UNMOUNT
+unmount
 
-tHIS UNMOUNTS A PREVIOUSLY MOUNTED 
-DISK IMAGE. iT AUTOMATICALLY POPS YOU 
-BACK TO THE PREVIOUS FOLDER. 
+This unmounts a previously mounted 
+disk image. It automatically pops you 
+back to the previous folder. 
 
-eXAMPLE: UNMOUNT
+Example: unmount
 ---------------------------------------
-VALIDATE
+validate
 
-eXECUTES THE cOMMODORE dos DRIVE 
-COMMAND FOR VALIDATE, BASED ON THE 
-CURRENT DRIVE.
+Executes the Commodore DOS drive 
+command for validate, based on the 
+current drive.
 
-eXAMPLE: VALIDATE
+Example: validate
 ---------------------------------------
-VIEW-MEM   
+view-mem   
 
-dISPLAYS MEMORY IN HEXIDECIMAL AND IN 
-PLAIN TEXT VALUE.
+Displays memory in hexidecimal and in 
+plain text value.
 
-eXAMPLE: VIEW-MEM A000
+Example: view-mem a000
 ---------------------------------------
 
-i HAD FUN MAKING cHIcli AND i HOPE YOU
-ENJOY USING IT!
+I had fun making ChiCLI and I hope you
+enjoy using it!
 
-- cHIRON bRAMBERGER
+- Chiron Bramberger
 
 ---------------------------------------
 </pre>
