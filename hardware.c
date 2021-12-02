@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2020 by: Chiron Bramberger
+// (c) 2021 by: Chiron Bramberger
 //
 // ********************************************************************************
 
@@ -37,6 +37,7 @@
 
 extern unsigned int  error_number      ;
 extern unsigned char error_message[32] ;
+extern unsigned char error_message2[32];
 extern unsigned int  error_track       ;
 extern unsigned int  error_block       ;
 
@@ -54,27 +55,40 @@ extern unsigned char current_bordercolor;
 extern unsigned char have_device_numbers_changed ; // False - the druive nubmers  haven't been change in software, True - they have, so don't drive detect
 extern unsigned char i;
 
+extern unsigned char  drive_detected[8];
+extern unsigned char  drive_detected_type[8];
+
 
 // ********************************************************************************
 // PRIVATE VARIABLES
 // ********************************************************************************
-
-// 0 == not scanned , 1 == detected , 2 == NOT detected (and therefore do not attempt to read a status, which would lock up the Commodore 64)
-unsigned char  drive_detected[] = { 0 , 0 , 0 , 0}; 
-unsigned char  drive_detected_type[] = { 0 , 0 , 0 , 0}; // 0 = no drive detected, all others related to a specific drive
 
 unsigned char  cbm_error0_text[] = "Ok"; // "Ok";
 unsigned char  cbm_error1_text[] = "Too many files"; // "Too many files";
 unsigned char  cbm_error2_text[] = "File open"; // "File open";
 unsigned char  cbm_error3_text[] = "File not open"; // "File not open";
 unsigned char  cbm_error4_text[] = "File not found"; // "File?";
-unsigned char  cbm_error5_text[] = "Device not present"; // "Dev?";
+unsigned char  cbm_error5_text[] = "Dev?";
 unsigned char  cbm_error6_text[] = "Not input-file"; // "!InFile";
 unsigned char  cbm_error7_text[] = "Not output-file"; // "!OutFile";
-unsigned char  cbm_error8_text[] = "Missing filename"; // "File-name?";
-unsigned char  cbm_error9_text[] = "Bad device #"; // "Bad dev#";
-unsigned char cbm_error10_text[] = "RUN/STOP pushed"; // "R/S press";
-unsigned char cbm_error11_text[] = "I/O-error"; // "ErrI/O";
+unsigned char  cbm_error8_text[] = "File-name?";
+unsigned char  cbm_error9_text[] = "Bad dev#"; // "Bad dev#";
+unsigned char cbm_error10_text[] = "R/S hit"; // "R/S press";
+unsigned char cbm_error11_text[] = "ErI/O";
+
+
+// unsigned char  cbm_error0_text[] = "Ok";
+// unsigned char  cbm_error1_text[] = "Files++!";
+// unsigned char  cbm_error2_text[] = "Open?";
+// unsigned char  cbm_error3_text[] = "!Open?";
+// unsigned char  cbm_error4_text[] = "File?";
+// unsigned char  cbm_error5_text[] = "Dev?";
+// unsigned char  cbm_error6_text[] = "!InFile";
+// unsigned char  cbm_error7_text[] = "!OutFile";
+// unsigned char  cbm_error8_text[] = "Fname?";
+// unsigned char  cbm_error9_text[] = "Bad Dev#";
+// unsigned char cbm_error10_text[] = "R/S!";
+// unsigned char cbm_error11_text[] = "ErI/O!";
 
 // NEW 
 // "Ok";		
@@ -104,18 +118,38 @@ unsigned char cbm_error11_text[] = "I/O-error"; // "ErrI/O";
 // "RUN/STOP key pushed."; // 
 // "General I/O-error."; // 
 
-const char command_set8[] = { 'u', '0', '>', 0x08 };
-const char command_set9[] = { 'u', '0', '>', 0x09 };
-const char command_set10[] = { 'u', '0', '>', 0x0A };
-const char command_set11[] = { 'u', '0', '>', 0x0B }; 
+//TODO: I think this needs to be applied to the drives 12 through 15, and also, should be done in a way better way
+
+// FORMAT FOR CHANGING DEVICE NUMBER:
+// PRINT#file#, "M-W:" CHR$(119) CHR$(0) CHR$(2) CHR$(address + 32) CHR$(address+64)
+// EXAMPLE OF CHANGING DEVICE NUMBER (FROM 8 TO 9):
+// 10 OPEN 15, 8, 15
+// 20 PRINT# 15, "M-W" CHR$(119) CHR$(0) CHR$(2) CHR$(9 + 32) CHR$(9 + 64)
+
+char command_set[]         = { 'u' , '0' , '>' , 0x08 };
+
+// const char cdrive_command_set[] = { 'm' , '-' , 'w' , ':', 119 , 0 , 2 };
+// char cdrive_command_set_final[] = { 'x' , 'x' , 'x' , 'x' , 'x' , 'x' , 'x', 'x' };
+
+// const char command_set8[]         = { 'u' , '0' , '>' , 0x08 };
+// const char command_set9[]         = { 'u' , '0' , '>' , 0x09 };
+// const char command_set10[]        = { 'u' , '0' , '>' , 0x0A };
+// const char command_set11[]        = { 'u' , '0' , '>' , 0x0B };
+
+// const char command_set12[]        = { 'u' , '0' , '>' , 0x0C };
+// const char command_set13[]        = { 'u' , '0' , '>' , 0x0D };
+// const char command_set14[]        = { 'u' , '0' , '>' , 0x0E };
+// const char command_set15[]        = { 'u' , '0' , '>' , 0x0F };
 
 const char cdrive_command_set8[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; // we need to this bypass cc65 remapping ascii to petscii
 const char cdrive_command_set9[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  9+32 ,  9+64 };
 const char cdrive_command_set10[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 10+32 , 10+64 };
 const char cdrive_command_set11[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 11+32 , 11+64 };
+const char cdrive_command_set12[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 12+32 , 12+64 };
+const char cdrive_command_set13[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 13+32 , 13+64 };
+const char cdrive_command_set14[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 14+32 , 14+64 };
+const char cdrive_command_set15[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 15+32 , 15+64 };
 
-
-       
 
 
 
@@ -294,9 +328,10 @@ unsigned char detect_sid(void) {
 	unsigned char likely_8580 				 = 0;
 	unsigned char likely_6581 				 = 0;
 
+    //if ( (PEEK(0xD400) != 0x00) && (PEEK(0xD401) != 0x00) ) return(0); // These locations will float if no SID is installed, and should be 0 if there is a SID.
 
 	D41B_before = PEEK(0xD41B); // Record iniital value 
-	   
+
 	for (i = 0 ; i < 255 ; ++i) {
 
 		POKE(0xD011, 0x0B); 		// Load 0x0B into 0xD011(53265) - Disable VIC-II
@@ -407,6 +442,7 @@ unsigned char detect_cpu(void) {
 	// Detect SID to guess that it's a Commodore 64C or not 
 	// Detect a Commodore 128 --> Address 0xD030 (53296) is always 255 on a non-Commodore 128 6502 CPU 
 
+	// TODO: This can be faster and shorter.
 	if (getcpu() == 0 ) { 
 		if        (gotten_cpu == 0 && PEEK(0) == 47 && PEEK(0xD030)  != 255) { return(9 ); // 9   MOS 8502 (Commodore 128)
 		} else if (gotten_cpu == 0 && PEEK(0) == 47 && sid_detected == 2  )  { return(10); // 10  MOS 8500 (Commodore 64C)
@@ -434,11 +470,11 @@ unsigned char detect_kernal(void) {
 
 	//  Format for list:
 
-	//  Address: 901227-01 (Commodore 64 KERNAL R1, $FF80 content $AA)
-	//           901227-02 (Commodore 64 KERNAL R2, $FF80 content $00)
-	//           901227-03 (Commodore 64 KERNAL R3, $FF80 content $03)
-	//           ??????-?? (SX-64 or DX-64 KERNAL, $FF80 content $43)
-	//           ??????-?? (4064 aka PET 64 aka Educator 64, $FF80 content $64)
+	//  Address: 901227-01 (Commodore 64 KERNAL R1,  $FF80 content $AA)
+	//           901227-02 (Commodore 64 KERNAL R2,  $FF80 content $00)
+	//           901227-03 (Commodore 64 KERNAL R3,  $FF80 content $03)
+	//           ??????-?? (SX-64 or DX-64 KERNAL,   $FF80 content $43)
+	//           ??????-?? (4064 PET 64 Educator 64, $FF80 content $64)
 
 	// The KERNAL ROM R1 was obviously used only in early NTSC systems. It lacks the PAL/NTSC detection, 
 	// and always uses white color while clearing the screen. 
@@ -446,25 +482,42 @@ unsigned char detect_kernal(void) {
 
 	// NTSC 0 PAL 1
 
+    // kernal.sx.251104-04.bin 2018-03-07 8192
+    //     This 8-kilobyte ROM is the Commodore SX-64 KERNAL, which is based on
+    //     901227-03.
+
 	unsigned char kernal_value = 0;
-	kernal_value = PEEK(0xFF80);
+	kernal_value = PEEK(0xFF80); // 65408
 
 			switch (kernal_value) {
 
-				case 0xAA : 		// 901227-01 (Commodore 64 KERNAL R1, $FF80 content $AA)	
-					return(1);
-			    break;
+				case 0xAA : return(1); break;		// 901227-01 (C64   KERNAL R1, $FF80=$AA 65408=170)
 
-				case 0x00 : 		// 901227-02 (Commodore 64 KERNAL R2, $FF80 content $00)		
- 					return(2);
-			    break;
+				case 0x00 : return(2); break;		// 901227-02 (C64   KERNAL R2, $FF80=$00 65408=  0)
 
-				case 0x03 : 		// 901227-03 (Commodore 64 KERNAL R3, $FF80 content $03)
- 					return(3);
-			    break;			    			    
-					
-			    default : 
-			    	return(0); // Error, don't know why we are getting this output 
+				case 0x03 :							// 901227-03 (C64   KERNAL R3, $FF80=$03 65408=  3)
+					// If KERNAL R3 and KERNAL start-up screen text is "MO" then it's a regular C64
+					if (        PEEK(58497L)==77 && PEEK(58498L)==79 ) {
+						return(3);
+					} else if ( PEEK(58497L)==68 && PEEK(58498L)==79 && PEEK(58677L)==6 ) { // $E535: (default cursor colour) 901227-03: $0E (light blue) 251104-04: $06 (dark blue)
+						return(11);
+					// Else if JIFFYDOS!
+					} else if ( PEEK(58497L)==68 && PEEK(58498L)==79 ) {
+						return(10);
+					// Else if JiffyDOS for SX-64!
+					} else if ( PEEK(58497L)==83 && PEEK(58498L)==88 ) { // 251104-01 !!! Early SX-64 Kernal ROM!
+						return(5);
+					// Something weird, we shouldn't ever get this output.
+					} else {
+						return(255); 
+					};//end-if
+				break;
+
+				case 0x43 : return(4); break;		// 251104-04 (SX-64 KERNAL R3, $FF80=$43 65408= 67)
+
+				case 0x64 : return(6); break;		// 251104-04 (4064  KERNAL ??, $FF80=$64 65408=100)
+
+			    default   : return(0); break;  	    // Error, don't know why we are getting this output 
 
 			};//end switch 
 
@@ -549,19 +602,22 @@ unsigned char detect_model(void) {
 	// 	cbm_close (1);
 	// };//end if
 
+//				case 0x64 : return(6); break;		// 251104-04 (4064 PET 64 Educator 64 KERNAL ??, $FF80 content $64)
 
-			
-	if        (detected_cpu == 9 && sid_detected == 1 && detected_1571 == 1)       { return(0); // Model: Commodore 128D       CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Anything other than 1571 
-	} else if (detected_cpu == 9 && sid_detected == 1)                             { return(1); // Model: Commodore 128        CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Must have 1571 
-    } else if (detected_cpu == 9 && sid_detected == 1)                             { return(2); // Model: Commodore 128DCR     CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 8580 Drive: Must have 1571 
-	} else if (ntscpal_detected == 0 && sid_detected == 1 && kernal_detected == 1) { return(3); // Model: Commodore 64 (Early) \n"); if NTSC + 6581 + KERNAL R1 901227-01 --> C64 (Early) --> VIC-II 6567	
-	} else if (ntscpal_detected == 0 && sid_detected == 1 )                        { return(4); // Model: Commodore 64         \n"         if NTSC + 6581 + KERNAL R2 901227-02 --> C64 		   --> VIC-II 6567
-	} else if (ntscpal_detected == 0 && sid_detected == 2 )                        { return(5); // Model: Commodore 64C        \n"        if NTSC + 8580 + Any		 	       --> C64C 	   --> VIC-II 8562
-	} else if (ntscpal_detected == 1 && sid_detected == 1 )                        { return(6); // Model: Commodore 64         \n"         if PAL  + 6581 + Any 			       --> C64 		   --> VIC-II 6569/6572/6573
-	} else if (ntscpal_detected == 1 && sid_detected == 2 )                        { return(7); // Model: Commodore 64C        \n"        if PAL  + 8580 + Any		  		   --> C64C 	   --> VIC-II 8565
+
+	if        (kernal_detected == 4 || kernal_detected == 5 || kernal_detected == 11 ) { return(8); // Model: Commodore SX-64 251104-01 or 251104-04 Kernal ROM
+	} else if (kernal_detected == 6)                                                   { return(9); // Model: Educator 64
+	} else if (detected_cpu    == 9  && sid_detected == 1 && detected_1571   == 1)     { return(0); // Model: Commodore 128D       CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Anything other than 1571 
+	} else if (detected_cpu    == 9  && sid_detected == 1)                             { return(1); // Model: Commodore 128        CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Must have 1571 
+    } else if (detected_cpu    == 9  && sid_detected == 1)                             { return(2); // Model: Commodore 128DCR     CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 8580 Drive: Must have 1571 
+	} else if (ntscpal_detected == 0 && sid_detected == 1 && kernal_detected == 1)     { return(3); // Model: Commodore 64 (Early) \n"); if NTSC + 6581 + KERNAL R1 901227-01 --> C64 (Early) --> VIC-II 6567	
+	} else if (ntscpal_detected == 0 && sid_detected == 1 )                            { return(4); // Model: Commodore 64         \n"         if NTSC + 6581 + KERNAL R2 901227-02 --> C64 		   --> VIC-II 6567
+	} else if (ntscpal_detected == 0 && sid_detected == 2 )                            { return(5); // Model: Commodore 64C        \n"        if NTSC + 8580 + Any		 	       --> C64C 	   --> VIC-II 8562
+	} else if (ntscpal_detected == 1 && sid_detected == 1 )                            { return(6); // Model: Commodore 64         \n"         if PAL  + 6581 + Any 			       --> C64 		   --> VIC-II 6569/6572/6573
+	} else if (ntscpal_detected == 1 && sid_detected == 2 )                            { return(7); // Model: Commodore 64C        \n"        if PAL  + 8580 + Any		  		   --> C64C 	   --> VIC-II 8565
 	};//end if 
 
-};//end func 
+};//end func
 
 
 // ********************************************************************************
@@ -612,6 +668,14 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 
 	unsigned char cbm_result = 255; // we need to do this 
 
+		// // reset all the drives
+		// for (i == 8 ; i <= 15 ; i++) {
+		// 	get_drive_type(i) = 0;
+		// };//end-for
+
+	set_drive_detection(device_number,0);
+	set_drive_type(device_number,0);
+
 	if (have_device_numbers_changed == TRUE) { 
 		printf("Detect disabled.\n");
 		return(254); //this means the detection never ran, because drives have changed
@@ -622,9 +686,9 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	switch (cbm_result) { 
 		case 0 : 
 			set_drive_detection(device_number,1); // successfully detected
-	    break;				
-				
-		case 5 : 				
+	    break;
+
+		case 5 :
 			set_drive_detection(device_number,2); // NOT detected // 0 == not scanned , 1 == detected , 2 == scanned but NOT detected
 			//display_cbm_error(cbm_result);  
 			//printf("Drive D%i is not detected.\n", device_number); // everything is okay, and we go the drive identity 
@@ -632,17 +696,33 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 			return(255); // returns a code that means we didn't see teh drive 
 	    break;
 
-		default : 				
+		default :
 			set_drive_detection(device_number,0); // unknown failure; 0 == not successfully scanned either way 
-	    //end default	    
+	    //end default
 	};//end switch
 
-	wait_one_second(); // we need to wait a second for teh drive to reset itself. If we don't do this, the computer freezes up when we send the drive a command too soon.
+
+	#define DRIVE_RESET_WAIT_TIME 23000
+
+	wait(DRIVE_RESET_WAIT_TIME);
+	//wait_one_second(); // we need to wait a second for teh drive to reset itself. If we don't do this, the computer freezes up when we send the drive a command too soon.
+
+
+
+
 
 	result = cbm_open(1, device_number, 15, "");
 	// printf("");
 	// printf("%i",result);
-	wait_one_second();
+	
+	
+	// Why do we wait here? 
+	// wait(DRIVE_RESET_WAIT_TIME);
+	//wait_one_second();
+	
+	
+	
+	
 	// do {
 
 		// read_bytes = cbm_read(1, disk_sector_buffer, sizeof(disk_sector_buffer));
@@ -667,28 +747,96 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 
 	process_status(disk_sector_buffer); 	
 
-	if        ( matching( "cbm dos v2.6 1541" , error_message) ) { 
-		set_drive_type(device_number, DRIVE_1541 );
+	// printf("error_message:%s\n",error_message);
+	// 
+	// printf("error_message[ 0]:%i\n",error_message[ 0]);
+	// printf("error_message[ 1]:%i\n",error_message[ 1]);
+	// printf("error_message[13]:%i\n",error_message[13]);
+	// printf("error_message[14]:%i\n",error_message[14]);
+	// printf("error_message[20]:%i\n",error_message[20]);
+	// printf("error_message[21]:%i\n",error_message[21]);
 
-	} else if ( matching( "uiec v0.11.3"      , error_message) ) {
+	if        ( matching( "cbm dos v2.6 1541", error_message) ) { 
+		set_drive_type(device_number, DRIVE_1541);
+		strcpy(error_message2,"CBM DOS v2.6 1541");
+		// Final string:
+		strcpy(error_message,error_message2);
+
+
+
+	// We want to detec the beginning "uiec" so we know it's an SD2IEC, and maybe display "SD2IEC v0.11.3"
+	// } else if ( matching( "uiec v0.11.3"      , error_message) ) {
+	// Looks like "uiec v0.10.3" -->	v0.10.3 	sd2iec release version 0.10.3 	was the firmware that came with my SD2IEC.
+	// Start displaying at position 6
+	} else if ( (error_message[0]=='u' && \
+ 				 error_message[1]=='i' && \
+ 				 error_message[2]=='e' && \
+ 				 error_message[3]=='c'    ) ){
 		set_drive_type(device_number, DRIVE_UIEC );
+		strcpy(error_message2,"SD2IEC v");
+		//output from position 6 until the end.
+		string_add_character(error_message2,error_message[ 6]);
+		string_add_character(error_message2,error_message[ 7]);
+		string_add_character(error_message2,error_message[ 8]);
+		string_add_character(error_message2,error_message[ 9]);
+		string_add_character(error_message2,error_message[10]);
+		string_add_character(error_message2,error_message[11]);
+		// Final string:
+		strcpy(error_message,error_message2);
+
+	// We want to detec the middle "ATENTDEAD" and only display something like: "SD2IEC v1.0.0 24"
+	// Use position 8 to 12 (inclusive)
+	// Use position 24, 25
+	// Test 0,1 (SD) & 13,14 (AT) & 20,21 (AD)
+	} else if ( (error_message[0] == 83  && \
+ 				 error_message[1] == 68  && \
+ 				 error_message[13]== 97  && \
+ 				 error_message[14]== 116 && \
+ 				 error_message[20]== 97  && \
+ 				 error_message[21]== 100    ) ){
+
+		// printf("WTF???\n");
+
+	// } else if ( matching( "SD2IEC V1.0.0ATENTDEAD0-24", error_message) ) { 
+		set_drive_type(device_number, DRIVE_UIEC );
+		strcpy(error_message2,"SD2IEC v");
+		string_add_character(error_message2,error_message[ 8]);
+		string_add_character(error_message2,error_message[ 9]);
+		string_add_character(error_message2,error_message[10]);
+		string_add_character(error_message2,error_message[11]);
+		string_add_character(error_message2,error_message[12]);
+		// string_add_character(error_message2,' ');
+		// string_add_character(error_message2,error_message[24]);
+		// string_add_character(error_message2,error_message[25]);
+		// Final string:
+		strcpy(error_message,error_message2);
+
+	} else if ( matching( "copyright cbm dos v10 1581", error_message) ) {
+	    strcpy(error_message2,"CBM DOS v10 1581");
+		// Final string:
+		strcpy(error_message,error_message2);
+
+	} else {
+		strupper(error_message); // make the string upper case
 
 	};//end if 	
 
-	strupper(error_message); // make the string upper case
+
+
+    error_message[22]='\0'; // GitHub Issue#???: Text too makes it look bad: SD2IEC V1.0.0ATENTDEAD0-24 - Testing: // strcpy(error_message,"SD2IEC V1.0.0ATENTDEAD0-24");
 
 	if ( display_status == TRUE ) {
 		if ( result == 2 && error_number == 73 ) {		
-			printf("D%i: %s\n", device_number, error_message ); //  everything is okay, and we go the drive identity 
+			printf("%i %s\n", device_number, error_message ); //  everything is okay, and we go the drive identity 
 		} else {
 			display_cbm_error(cbm_result); // yes, so do it 
-			printf("Drive D%i Error:\n", device_number);
+			printf("Drv D%i Er:\n", device_number);
 			printf("E#:%i TR:%i BL:%i\n", error_number, error_track , error_block );
 			printf("ED:%s\n", error_message );
 		};//end if 
 	} else if ( display_status == 3 ) {
 		if ( result == 2 && error_number == 73 ) {		
-			printf("D%i: %s", device_number, error_message ); //  everything is okay, and we go the drive identity 
+			printf("%02i %s", device_number, error_message ); //  everything is okay, and we go the drive identity 
 		};//end if 
 	};//end if 
 
@@ -707,12 +855,12 @@ unsigned char get_status(unsigned char device_number, unsigned char display_stat
 	};//end if 
 
 	if (get_drive_detection(device_number) == 0) { // 0 == not scanned , 1 == detected , 2 == scanned but NOT detected (and therefore do not attempt to read a status, which would lock up the Commodore 64)
-		printf("Detecting drive...\n");
+		printf("Detecting...\n");
 		detect_drive(device_number,display_status);
 	};//endif 
 
 	if (get_drive_detection(device_number) == 2) {
-		printf("Err: not detected.\n");
+		printf("Err!\n");// Error not detected
 		return(255);
 	};//endif 
 
@@ -727,12 +875,13 @@ unsigned char get_status(unsigned char device_number, unsigned char display_stat
 	cbm_close(1);
 
 	if ( display_status == TRUE ) {
+	    printf("Device:%i ", device_number);
 		if ( result == 0 && error_number == 0 ) {
-			printf("Drive D%i Status ok.\n", device_number);
+			printf("Status ok.\n");
 		} else {
-			printf("Drive D%i Error:\n", device_number);
-			printf("E#:%i TR:%i BL:%i\n", error_number, error_track , error_block );
-			printf("ED:%s\n", error_message );
+			//printf("Device:\n", device_number);
+			printf("\nE#:%i TR:%i BL:%i\nED:%s\n", error_number, error_track , error_block, error_message);
+			//printf("ED:%s\n", error_message );
 		};//end if 
 	};//end if 
 
@@ -755,7 +904,7 @@ void change_drive(unsigned char device_number) {
 		};//end if 
 		chdir(&dev);
 	} else {
-		printf("Detect disabled.\n");
+		printf("Drive detect disabled.\n"); // Detect disabled.
 		dev = device_number; // TODO: there has to be a better, safer way.
 	};//end if 
 
@@ -770,14 +919,14 @@ unsigned char detect_filetype(unsigned char * filename, unsigned char print_type
 	for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
 
 		if (result != 0) {
-			printf("Err cbm_opendir:%i\n", result);
+			printf("Er cbm_o:%i\n", result);
 			break;
 		};//end if 
 
 	    result = cbm_readdir(1, &dir_ent);
 
 		if (number_of_files != 0 || number_of_files != 2 ) { //  0 dir_ent.name ==  DISK NAME  //  2 dir_ent.size == FREE DISK SPACE 
-			 		 
+
 	    	if ( matching(dir_ent.name,filename) ) { // current file == filename we want
 
 	    		if (print_typefile == TRUE) {
@@ -792,11 +941,11 @@ unsigned char detect_filetype(unsigned char * filename, unsigned char print_type
 					};//end switch
 
 					printf(" ");
-				    
+
 					switch (dir_ent.access) {
 						case CBM_A_RO : printf("R");   break; // R
 						case CBM_A_WO : printf("W");   break; // W
-						case CBM_A_RW : printf("R/W"); break; // R/W								
+						case CBM_A_RW : printf("R/W"); break; // R/W
 						default       : printf("???"); //end default
 					};//end switch
 
@@ -816,7 +965,7 @@ unsigned char detect_filetype(unsigned char * filename, unsigned char print_type
 
 	cbm_closedir(1); // if we made it this far, that means we never found the file.
 
-	printf("Error: File not found.\n"); 
+	printf("Er: no file.\n");//file nto found  
 
 	return(255); 
 
@@ -829,32 +978,65 @@ unsigned char detect_filetype(unsigned char * filename, unsigned char print_type
 void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number) {
 
 	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
-
+    
+    // printf("This is test");//25 bytes over
+    // printf("123456789012345678901234567890");//25 bytes over
+	
 	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends 
 
 	result = cbm_open(1, old_drive_number, 15, "");
+	// 
+	// printf("before: cdrive_command_set_final: %s size:%u \n",cdrive_command_set_final,sizeof(cdrive_command_set_final));
+	// strcpy(cdrive_command_set_final, cdrive_command_set);
+	// 
 
-	if (strcmp(new_drive_number, "8") == 0 ) {
-		cbm_write (1, cdrive_command_set8, sizeof (cdrive_command_set8));
-		// new_drive_number = 8;
-		//strcat(drive_command_string, "`"); //this gets mapped 08 <-> 14
-		// printf("wtf9\n");
-	} else if (strcmp(new_drive_number, "9") == 0 ) {  
-		cbm_write (1, cdrive_command_set9, sizeof (cdrive_command_set9));
-		// new_drive_number = 9;
-		//strcat(drive_command_string, "\x09"); //no mapping 09 <-> 09
-		// printf("wtf9\n");
-	} else if (strcmp(new_drive_number, "10") == 0 ) { 
-		cbm_write (1, cdrive_command_set10, sizeof (cdrive_command_set10));
-		// new_drive_number = 10;
-		//strcat(drive_command_string, "\x0D");  //no mapping 0A <-> 0D
-		// printf("wtf10\n");
-	} else if (strcmp(new_drive_number, "11") == 0 ) {
-		cbm_write (1, cdrive_command_set11, sizeof (cdrive_command_set11));
-		// new_drive_number = 11;
-		//strcat(drive_command_string, "\x11");  //no mapping 0B <-> 11
-		// printf("wtf11\n");
-	};//end if 
+ //    switch( atoi(new_drive_number) ) { //{ 'm' , '-' , 'w' ,':' , 119 , 0 , 2 , 8+32 , 8+64 };
+ //        case  8 : cdrive_command_set_final[6] = ( 8+32) ; cdrive_command_set_final[7] = ( 8+64); break;
+ //        case  9 : cdrive_command_set_final[6] = ( 9+64) ; cdrive_command_set_final[7] = ( 9+64); break;
+ //        case 10 : cdrive_command_set_final[6] = (10+64) ; cdrive_command_set_final[7] = (10+64); break;
+ //        case 11 : cdrive_command_set_final[6] = (11+64) ; cdrive_command_set_final[7] = (11+64); break;
+ //        case 12 : cdrive_command_set_final[6] = (12+64) ; cdrive_command_set_final[7] = (12+64); break;
+ //        case 13 : cdrive_command_set_final[6] = (13+64) ; cdrive_command_set_final[7] = (13+64); break;
+ //        case 14 : cdrive_command_set_final[6] = (14+64) ; cdrive_command_set_final[7] = (14+64); break;
+ //        case 15 : cdrive_command_set_final[6] = (15+64) ; cdrive_command_set_final[7] = (15+64); break;
+ //    };//end_switch
+ //    printf("after: cdrive_command_set_final: %s size:%u \n",cdrive_command_set_final,sizeof(cdrive_command_set_final));
+    // cbm_write(1, cdrive_command_set_final, sizeof(cdrive_command_set_final) );
+
+    switch( atoi(new_drive_number) ) {
+        case 8  : cbm_write (1, cdrive_command_set8,  sizeof(cdrive_command_set8)  ); break;
+        case 9  : cbm_write (1, cdrive_command_set9,  sizeof(cdrive_command_set9)  ); break;
+        case 10 : cbm_write (1, cdrive_command_set10, sizeof(cdrive_command_set10) ); break;
+        case 11 : cbm_write (1, cdrive_command_set11, sizeof(cdrive_command_set11) ); break;
+        
+        case 12 : cbm_write (1, cdrive_command_set12, sizeof(cdrive_command_set11) ); break;
+        case 13 : cbm_write (1, cdrive_command_set13, sizeof(cdrive_command_set12) ); break;
+        case 14 : cbm_write (1, cdrive_command_set14, sizeof(cdrive_command_set13) ); break;
+        case 15 : cbm_write (1, cdrive_command_set15, sizeof(cdrive_command_set14) ); break;
+    };//end_switch
+        
+        
+	// if (strcmp(new_drive_number, "8") == 0 ) {
+	// 	cbm_write (1, cdrive_command_set8, sizeof (cdrive_command_set8));
+	// 	// new_drive_number = 8;
+	// 	//strcat(drive_command_string, "`"); //this gets mapped 08 <-> 14
+	// 	// printf("wtf9\n");
+	// } else if (strcmp(new_drive_number, "9") == 0 ) {  
+	// 	cbm_write (1, cdrive_command_set9, sizeof (cdrive_command_set9));
+	// 	// new_drive_number = 9;
+	// 	//strcat(drive_command_string, "\x09"); //no mapping 09 <-> 09
+	// 	// printf("wtf9\n");
+	// } else if (strcmp(new_drive_number, "10") == 0 ) { 
+	// 	cbm_write (1, cdrive_command_set10, sizeof (cdrive_command_set10));
+	// 	// new_drive_number = 10;
+	// 	//strcat(drive_command_string, "\x0D");  //no mapping 0A <-> 0D
+	// 	// printf("wtf10\n");
+	// } else if (strcmp(new_drive_number, "11") == 0 ) {
+	// 	cbm_write (1, cdrive_command_set11, sizeof (cdrive_command_set11));
+	// 	// new_drive_number = 11;
+	// 	//strcat(drive_command_string, "\x11");  //no mapping 0B <-> 11
+	// 	// printf("wtf11\n");
+	// };//end if 
 
 	// printf("drive_command_string: %s\n", drive_command_string);
 
@@ -868,7 +1050,7 @@ void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number)
 		//printf("cbm_open result: %i\n", result);
 		printf("Drive set.\n");
 	} else {
-		printf("Unknown error.\n");
+		printf("Er.\n");
 	};//end if 
 };//end func 
 
@@ -883,29 +1065,53 @@ void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) 
 
 	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends 
 
-	result = cbm_open(1, old_drive_number, 15, "");
+    switch( atoi(new_drive_number) ) {
+        case  8 : command_set[3] = (0x08) ; break;
+        case  9 : command_set[3] = (0x09) ; break;
+        case 10 : command_set[3] = (0x0A) ; break;
+        case 11 : command_set[3] = (0x0B) ; break;
+        case 12 : command_set[3] = (0x0C) ; break;
+        case 13 : command_set[3] = (0x0D) ; break;
+        case 14 : command_set[3] = (0x0E) ; break;
+        case 15 : command_set[3] = (0x0F) ; break;
+    };//end_switch
 
-	if (strcmp(new_drive_number, "8") == 0 ) {
-		cbm_write (1, command_set8, sizeof (command_set8));
-		// new_drive_number = 8;
-		//strcat(drive_command_string, "`"); //this gets mapped 08 <-> 14
-		// printf("wtf9\n");
-	} else if (strcmp(new_drive_number, "9") == 0 ) {  
-		cbm_write (1, command_set9, sizeof (command_set9));
-		// new_drive_number = 9;
-		//strcat(drive_command_string, "\x09"); //no mapping 09 <-> 09
-		// printf("wtf9\n");
-	} else if (strcmp(new_drive_number, "10") == 0 ) { 
-		cbm_write (1, command_set10, sizeof (command_set10));
-		// new_drive_number = 10;
-		//strcat(drive_command_string, "\x0D");  //no mapping 0A <-> 0D
-		// printf("wtf10\n");
-	} else if (strcmp(new_drive_number, "11") == 0 ) {
-		cbm_write (1, command_set11, sizeof (command_set11));
-		// new_drive_number = 11;
-		//strcat(drive_command_string, "\x11");  //no mapping 0B <-> 11
-		// printf("wtf11\n");
-	};//end if 
+	result = cbm_open(1, old_drive_number, 15, "");
+    cbm_write(1, command_set, sizeof(command_set) );
+
+ //    switch( atoi(new_drive_number) ) {
+ //        case 8  : cbm_write (1, command_set8,  sizeof (command_set8)  ); break;
+ //        case 9  : cbm_write (1, command_set9,  sizeof (command_set9)  ); break;
+ //        case 10 : cbm_write (1, command_set10, sizeof (command_set10) ); break;
+ //        case 11 : cbm_write (1, command_set11, sizeof (command_set11) ); break;
+ //        
+ //        case 12 : cbm_write (1, command_set12, sizeof (command_set12) ); break;
+ //        case 13 : cbm_write (1, command_set13, sizeof (command_set13) ); break;
+ //        case 14 : cbm_write (1, command_set14, sizeof (command_set14) ); break;
+ //        case 15 : cbm_write (1, command_set15, sizeof (command_set15) ); break;
+ //    };//end_switch
+
+	// if (strcmp(new_drive_number, "8") == 0 ) {
+	// 	cbm_write (1, command_set8, sizeof (command_set8));
+	// 	// new_drive_number = 8;
+	// 	//strcat(drive_command_string, "`"); //this gets mapped 08 <-> 14
+	// 	// printf("wtf9\n");
+	// } else if (strcmp(new_drive_number, "9") == 0 ) {  
+	// 	cbm_write (1, command_set9, sizeof (command_set9));
+	// 	// new_drive_number = 9;
+	// 	//strcat(drive_command_string, "\x09"); //no mapping 09 <-> 09
+	// 	// printf("wtf9\n");
+	// } else if (strcmp(new_drive_number, "10") == 0 ) { 
+	// 	cbm_write (1, command_set10, sizeof (command_set10));
+	// 	// new_drive_number = 10;
+	// 	//strcat(drive_command_string, "\x0D");  //no mapping 0A <-> 0D
+	// 	// printf("wtf10\n");
+	// } else if (strcmp(new_drive_number, "11") == 0 ) {
+	// 	cbm_write (1, command_set11, sizeof (command_set11));
+	// 	// new_drive_number = 11;
+	// 	//strcat(drive_command_string, "\x11");  //no mapping 0B <-> 11
+	// 	// printf("wtf11\n");
+	// };//end if 
 
 	// printf("drive_command_string: %s\n", drive_command_string);
 

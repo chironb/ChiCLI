@@ -27,9 +27,9 @@
 #endif 
 
 
-extern unsigned char disk_sector_buffer[255]; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
-extern unsigned char 	  drive_command_string[MAX_LENGTH_COMMAND]	;
-extern unsigned char 	  drive_command_string2[MAX_LENGTH_COMMAND]	;
+extern unsigned char disk_sector_buffer    [MAX_DISK_SECTOR_BUFFER] ; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
+extern unsigned char drive_command_string  [MAX_LENGTH_COMMAND]	    ;
+extern unsigned char drive_command_string2 [MAX_LENGTH_COMMAND]	    ;
 extern unsigned char get_key ;
 extern unsigned char result ;
 extern unsigned char dev ;
@@ -62,7 +62,7 @@ void type_text( unsigned char * file_to_type ) {
 
 			printf("Detected file: %s ", file_to_type );
 			detected_filetype = detect_filetype(file_to_type, TRUE);
-		
+
 			switch (detected_filetype) {
 				case  2 : /* bad */      break;	// DIR
 				case 16 : strcpy(detected_filetype_char,"s"); break; // SEQ
@@ -147,7 +147,7 @@ void type_prg( unsigned char * file_to_type ) {
 			strcat (drive_command_string, ",r,p");
 
 			//printf("\n");
-			
+
 			// I think I need to blank out the disk_sector_buffer right here.			
 			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
 
@@ -208,7 +208,7 @@ void type_prg( unsigned char * file_to_type ) {
 
 					if (disk_sector_buffer[i] == 0 && previous_byte == 0) { // we are at the end of the program 
 						//printf("\nEnd of program.\n");						
-						printf("\nFooter:0x%04X\n", (disk_sector_buffer[i]*256)+previous_byte);
+						// printf("\nFooter:0x%04X\n", (disk_sector_buffer[i]*256)+previous_byte);
 						//goto jump here beacuse it's the end of the basic stub (even though there's more file) 	
 						goto type_prg_exit_point;	
 					};//end if
@@ -225,7 +225,8 @@ void type_prg( unsigned char * file_to_type ) {
 						case second_header_byte :
 							//printf("%i\n",disk_sector_buffer[i]); // use previous to output "Pointer to beginning of "next" BASIC line, in low-byte/high-byte order"
 							// don't need to store anything in previous byte
-							printf("Header:0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
+							// printf("Header:0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
+							printf("0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
 							spot_in_prg++; 						   // increment spot_in_prg
 						break;
 
@@ -323,7 +324,7 @@ void type_prg( unsigned char * file_to_type ) {
 								case 181 : printf("int"    ); break;
 								case 182 : printf("abs"    ); break;
 								case 183 : printf("usr"    ); break;
-								case 184 : printf("fre"    ); break;																	
+								case 184 : printf("fre"    ); break;
 								case 185 : printf("pos"    ); break;
 								case 186 : printf("sqr"    ); break;
 								case 187 : printf("rnd"    ); break;
@@ -367,7 +368,7 @@ void type_prg( unsigned char * file_to_type ) {
 					};//end switch
 
 
-					
+
 
 
 				};//end for 
@@ -399,6 +400,15 @@ void type_hex( unsigned char * file_to_type ) {
 				case 19 : strcpy(detected_filetype_char,"l"); break; // REL // seems liek you need to pass L instaed of R 
 				default : printf("???"); //end default
 			};//end switch
+
+			// switch (detected_filetype) { // this only saves 4 bytes
+			// 	case  2 : /* bad */      break;	// DIR
+			// 	case 16 : detected_filetype_char[0]='s';detected_filetype_char[1]='\0'; break; // SEQ
+			// 	case 17 : detected_filetype_char[0]='p';detected_filetype_char[1]='\0'; break; // PRG
+			// 	case 18 : detected_filetype_char[0]='u';detected_filetype_char[1]='\0'; break; // USR
+			// 	case 19 : detected_filetype_char[0]='l';detected_filetype_char[1]='\0'; break; // REL // seems liek you need to pass L instaed of R 
+			// 	default : printf("???"); //end default
+			// };//end switch
 
 			strcpy (drive_command_string, file_to_type);
 			strcat (drive_command_string, ",r,");

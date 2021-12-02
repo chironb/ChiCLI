@@ -40,11 +40,8 @@
 // ********************************************************************************
 
 #define set_drive_detection(drive,detected) drive_detected[drive-8] = detected
-
 #define get_drive_detection(drive) drive_detected[drive-8]
-
 #define set_drive_type(drive,type) drive_detected_type[drive-8] = type
-
 #define get_drive_type(drive) drive_detected_type[drive-8]
 
 // DRIVE TYPE MACROS
@@ -86,13 +83,13 @@
 #define DRIVE_HD_2000 0xC2 
 
 // Modern SD Card Drives
-#define    DRIVE_UIEC 0xEC // *****
+#define  DRIVE_UIEC   0xEC // *****
 #define  DRIVE_PI1541 0x1E // !!!!!
 
 // DRIVE TYPE STRINGS
-#define DRIVE_2031_NAME    "Commodore 2031"
-#define DRIVE_SFD1001_NAME "Commodore SFD 1001"
-#define DRIVE_1541_NAME    "Commodore 1541"
+#define DRIVE_2031_NAME    "C 2031" // removed Commodore from these
+#define DRIVE_SFD1001_NAME "C SFD 1001"
+#define DRIVE_1541_NAME    "C 1541"
 #define DRIVE_UIEC_NAME    "uIEC"
 #define DRIVE_PI1541_NAME  "Pi1541"
 

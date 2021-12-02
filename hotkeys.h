@@ -17,9 +17,11 @@
 // HOTKEYS MACRO FUNCTIONS 
 // ********************************************************************************
 
-#define set_hotkey(N,S) (strcpy(hotkeys_list[N-1],S))
+// #define set_hotkey(N,S) (strcpy(hotkeys_list[N-1],S))
 
-#define clear_hotkey(N) (memset(hotkeys_list[N-1], 0, sizeof(hotkeys_list[N-1]))
+#define set_hotkey(N,S) ( strncpy(hotkeys_list[N-1],S,(MAX_HOTKEY_LENGTH-1)) )
+
+#define clear_hotkey(N) ( memset(hotkeys_list[N-1],'\0',sizeof(hotkeys_list[N-1])) )
 
 
 #define clear_all_hotkeys()							       \
@@ -35,29 +37,36 @@
 //end macro func 
 
 
-#define display_hotkeys() 						   \
-	(printf("F1 = %s\n", hotkeys_list[0])); \
-	(printf("F2 = %s\n", hotkeys_list[1])); \
-	(printf("F3 = %s\n", hotkeys_list[2])); \
-	(printf("F4 = %s\n", hotkeys_list[3])); \
-	(printf("F5 = %s\n", hotkeys_list[4])); \
-	(printf("F6 = %s\n", hotkeys_list[5])); \
-	(printf("F7 = %s\n", hotkeys_list[6])); \
-	(printf("F8 = %s\n", hotkeys_list[7])); \
-//end macro func 						 
-		
+#define display_hotkeys() 										\
+	(printf("F1 = %s\n", hotkeys_list[0]));						\
+	(printf("F2 = %s\n", hotkeys_list[1]));						\
+	(printf("F3 = %s\n", hotkeys_list[2]));						\
+	(printf("F4 = %s\n", hotkeys_list[3]));						\
+	(printf("F5 = %s\n", hotkeys_list[4]));						\
+	(printf("F6 = %s\n", hotkeys_list[5]));						\
+	(printf("F7 = %s\n", hotkeys_list[6]));						\
+	(printf("F8 = %s\n", hotkeys_list[7]));						\
+	printf("Maximum hotkey length:%u\nTotal hotkey slots:%u\n",	\
+	        MAX_HOTKEY_LENGTH,MAX_HOTKEYS);						\
+//end-macro-func
+
 
 #define load_hotkey_command(N) 													\
 	if (strlen(hotkeys_list[N-1]) > 0) {                                   		\
-			strncpy(entered_keystrokes,hotkeys_list[N-1],MAX_LENGTH_COMMAND); 	\
-	   		hotkeys_list[N-1][MAX_LENGTH_COMMAND-1] = '\0';                   	\
+		strncpy(entered_keystrokes,hotkeys_list[N-1],MAX_HOTKEY_LENGTH-1); 	    \
+	   	hotkeys_list[N-1][MAX_HOTKEY_LENGTH-1] = '\0'; /* WTF does this do? */  \
 		replace_characters(entered_keystrokes, '\"', ' ');                		\
 		replace_characters(entered_keystrokes, ';', '\"');                		\
+		gotox(0);                                                               \
+		while( wherex() != SCREEN_RIGHT_EDGE-1 ) cputc(' '); \
+		gotox(0); \
+		printf("> %s\n",entered_keystrokes);                                    \
 	} else { 										                      		\
-			gotox(position_at_prompt_x);                                    	\
-			gotoy(position_at_prompt_y);                                    	\
-			cputc(' '); 								                      	\
-			printf("\nHotkey F%i unset.\nTry the 'hotkey' command.\n",N);      	\
+		gotox(0);                                    	    \
+		gotoy(position_at_prompt_y);                                    	    \
+		while( wherex() != SCREEN_RIGHT_EDGE-1 ) cputc(' '); \
+		gotox(0);                                    	    \
+		printf("> \nF%i is unset.\nUse 'hotkey' to set it.\n",N);              \
 	}/*end if*/																	\
-//end macro func 							   
+//end macro func
 

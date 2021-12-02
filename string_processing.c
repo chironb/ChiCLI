@@ -31,7 +31,7 @@
 // STRING PROCESSING FUNCTIONS
 // ********************************************************************************
 
-unsigned char string_add_character ( unsigned char * input_string , unsigned char character_to_add ) {
+unsigned char 	string_add_character ( unsigned char * input_string , unsigned char character_to_add ) {
 
 	unsigned char string_length;
 	string_length = strlen(input_string);
@@ -177,7 +177,7 @@ unsigned char display_blank_substring( unsigned char * string_to_display , unsig
 
 	string_length = strlen(string_to_display); 
 
-	for (i = positon_to_start; i < string_length ; i++) {
+	for (i = positon_to_start; i <= string_length ; i++) { // note: the <= isn't a mistake. We want to clear the string AND the cursor character! This does that.
 
 		if ( wherex() == SCREEN_RIGHT_EDGE && wherey() == SCREEN_BOTTOM_EDGE) {
 			printf("\n"); 				//scroll the display once 
@@ -229,7 +229,7 @@ void process_quotes(unsigned char * input_string , unsigned char * output_string
 			quote_status = 1;
 			output_string[j] = ' ';
 			j++;
-		
+
 		} else if ( input_string[i] == '\"' && quote_status == 1) { 	// end of quoted area
 			quote_status = 0;
 			output_string[j] = ' ';
