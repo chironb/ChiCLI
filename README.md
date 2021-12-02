@@ -15,7 +15,7 @@ ChiCLI - Features List:
 - View and manage files and floppies on any drive: type, run, rename, copy, delete, format, validate, and initialize.
 - Copy all files within a folder or disk to another device using the * wildcard. Use this to extract an entire disk image to a folder or floppy disk on supported device.
 - Change drive device number of 1541 drives and SD2IEC devices.
-- Advanced file management on support devices: make directory, remove directory, rename directories, mount disk images, extract files from disk images and copy them to a folder on the same device, view and access partitions, and detect device type.
+- Advanced file management on supported devices: make directory, remove directory, rename directories, mount disk images, extract files from disk images and copy them to a folder on the same device, view and access partitions, and detect device type.
 - View date and time on SD2IEC, view file date and time stamps, set the time and date on RTC supported devices. Show the time and if wanted date on a built-in screen saver.
 - Change and save settings on an SD2IEC, such as device number and whether to hide or show file extensions.
 - View memory, peek and poke memory, repeatedly peek at memory, and save memory ranges as a file. Can be used to dump your Commodore 64 kernal ROM to a file.
