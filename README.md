@@ -1,5 +1,6 @@
 # ChiCLI
-ChiCLI v1.R2 (c) 2021 Chiron Bramberger - A CLI for Commodore Computers!
+ChiCLI v1.R2 (c) 2021 Chiron Bramberger
+A CLI for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_R2_screenshot.png?raw=true)
 
