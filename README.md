@@ -51,7 +51,7 @@ Testing successfully with the following hardware:
 - Commodore Flyer Internet Modem --> http://www.retroswitch.com/products/flyer/
 
 Latest News:
-v1.R2 - Release Candidate 2 - Dec 2021 TBD
+v1.R2 - Release Candidate 2 - Dec 1 2021
 - Optimized: *PACKS -EVEN MORE- IN A SINGLE APPLICATION!* Even more optimizations!
 - Added:     Support for reading RTC from an RTC upgraded SD2IEC!!!
 - Added:     Support for setting RTC.
