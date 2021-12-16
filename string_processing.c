@@ -288,20 +288,38 @@ unsigned char is_string_only_numbers(unsigned char * input_string ) {
 	unsigned char i  = 0;
 
 	for (i = 0 ; i < strlen(input_string) ; i++) {
-		if (input_string[i] == '0' || 
-			input_string[i] == '1' || 
-			input_string[i] == '2' || 
-			input_string[i] == '3' || 
-			input_string[i] == '4' || 
-			input_string[i] == '5' || 
-			input_string[i] == '6' || 
-			input_string[i] == '7' || 
-			input_string[i] == '8' || 
-			input_string[i] == '9'    ) { 	//found a non-zero character	
-				// do nothing 	
-		} else {	
-				return(0);
-		};//end if  		
+
+		// if (input_string[i] == '0' || 
+		// 	input_string[i] == '1' || 
+		// 	input_string[i] == '2' || 
+		// 	input_string[i] == '3' || 
+		// 	input_string[i] == '4' || 
+		// 	input_string[i] == '5' || 
+		// 	input_string[i] == '6' || 
+		// 	input_string[i] == '7' || 
+		// 	input_string[i] == '8' || 
+		// 	input_string[i] == '9'    ) { 	//found a non-zero character	
+		// 		// do nothing 	
+		// } else {	
+		// 		return(0);
+		// };//end if  		
+
+		// This saved 117 bytes compared to the above if statement
+		// TODO: Also... this is cheap and stupid. There's for sure a better way.
+		switch(input_string[i]) {
+			case '0' : ;
+			case '1' : ;
+			case '2' : ;
+			case '3' : ;
+			case '4' : ;
+			case '5' : ;
+			case '6' : ;
+			case '7' : ;
+			case '8' : ;
+			case '9' : break;
+			default  : return(0); break;
+		};//end-switch
+
 	};//end for 
 
 	return(1); 								// is_string_only_zeros == TRUE (1) means the stirng is only zeros, otherwise FALSE (0) means there's more than zeros

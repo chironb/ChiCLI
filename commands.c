@@ -26,6 +26,99 @@
 #include "hardware.h"
 #endif 
 
+// I did this!
+// This could be optimized so that there's a smaller than 7 char string array per entry,
+// and then a small list of exceptions, so that the overall array can take up less memory.
+// For example: only "restore" is length 7.
+// 76 * 7 = 532
+// 76 * 6 = 456 (Saves 76 bytes, but adds one if else statement and printf statement, total actual savings: 54 bytes!)
+// Trying to save more would create more code because we'd have to deal with multiple cases.
+// Since only one string is 7 chars long, this works out nicely!
+// 0 = 128 to 75 = 203
+// TODO: There must be a way to do this where each string has a variable length.
+// Probably pointers to strings. Might not save that much?
+// 76 * 2 = 152 for the pointers + like half the text maybe so 266 = 418? Not that much better then what I've done I think.
+// But maybe I should test it anyway!
+// I made a mistake. This should have been 1 character more than the longest string, because you need
+// the string terminator \0 or you get that weird double printing bug.
+unsigned char basic_tokens[76][7] = {
+	"end"    ,
+	"for"    ,
+	"next"   ,
+	"data"   ,
+	"input#" , /* input# bug here? */
+	"input"  , /* input bug here? */
+	"dim"    ,
+	"read"   ,
+	"let"    ,
+	"goto"   ,
+	"run"    ,
+	"if"     ,
+	""       , /* RESTORE is handled manually to save the length of this array */
+	"gosub"  ,
+	"return" , /* bug here? */
+	"rem"    , /* bug here? */
+	"stop"   ,
+	"on"     ,
+	"wait"   ,
+	"load"   ,
+	"save"   ,
+	"verify" , /* bug here? */
+	"def"    , /* bug here? */
+	"poke"   ,
+	"print#" , /* bug here? */
+	"print"  , /* bug here? */
+	"cont"   ,
+	"list"   ,
+	"clr"    ,
+	"cmd"    ,
+	"sys"    ,
+	"open"   ,
+	"close"  ,
+	"get"    ,
+	"new"    ,
+	"tab("   ,
+	"to"     ,
+	"fn"     ,
+	"spc("   ,
+	"then"   ,
+	"not"    ,
+	"step"   ,
+	"+"      ,
+	"-"      ,
+	"*"      ,
+	"/"      ,
+	"^"      ,
+	"and"    ,
+	"or"     ,
+	">"      ,
+	"="      ,
+	"<"      ,
+	"sgn"    ,
+	"int"    ,
+	"abs"    ,
+	"usr"    ,
+	"fre"    ,
+	"pos"    ,
+	"sqr"    ,
+	"rnd"    ,
+	"log"    ,
+	"exp"    ,
+	"cos"    ,
+	"sin"    ,
+	"tan"    ,
+	"atn"    ,
+	"peek"   ,
+	"len"    ,
+	"str$"   ,
+	"val"    ,
+	"asc"    ,
+	"chr$"   ,
+	"left$"  ,
+	"right$" , /* bug here? */
+	"mid$"   , /* bug here? */
+	"go"
+};//end-array
 
 extern unsigned char disk_sector_buffer    [MAX_DISK_SECTOR_BUFFER] ; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
 extern unsigned char drive_command_string  [MAX_LENGTH_COMMAND]	    ;
@@ -129,48 +222,33 @@ void type_text( unsigned char * file_to_type ) {
 };//end func 
 
 
-
-
 void type_prg( unsigned char * file_to_type ) {
 
-			// this section was helped by me studying this code: 
+			// I was helped in this section by studying this code:
 			// https://github.com/doj/dracopy/blob/master/src/cat.c
-			// as well as this website
+			// As well as this website:
 			// https://wpguru.co.uk/2014/06/reading-and-writing-sequential-data-on-the-commodore-1541/
-
-			// for Commodore 64 Basic 2.0 info, I used this: 
+			// for Commodore 64 Basic 2.0 info, I used this:
 			// https://www.c64-wiki.com/wiki/BASIC_token
-
-			//printf("%i", wherey());
 
 			strcpy (drive_command_string, file_to_type);
 			strcat (drive_command_string, ",r,p");
 
-			//printf("\n");
-
-			// I think I need to blank out the disk_sector_buffer right here.			
+			// Blank out the disk_sector_buffer, so there isn't any garbage characters in it.
 			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
 
 			result = cbm_open(8, dev, CBM_READ, drive_command_string);
-
-		    //displayed_count = 0;//this is two becuase we alrieady displaeyd two lines of text 
-
-
 
 			spot_in_prg = first_header_byte;
 
 			do {
 				read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
 
-				// loop over buffer and barf out bytes to the screen 
-
-				for (i = 0 ; i < read_bytes ; i++) {
-
-					//printf("%i", wherey());
+				for (i = 0 ; i < read_bytes ; i++) { // loop over buffer and barf out bytes to the screen
 
 					if (wherey() == 24) {
 
-						printf("     * Press any key to continue *"); 			
+						printf("     * Press any key to continue *");
 						do {
 							//nothing
 						} while (kbhit() == 0);//end do 
@@ -182,37 +260,16 @@ void type_prg( unsigned char * file_to_type ) {
 						};//end if 
 
 						gotox(0);
-						printf("                                       ");
+						printf("                                       "); // TODO: There's gotta be a better way of doing this!
 						gotox(0);
 						clrscr();
-						//displayed_count = 0;
 
 					};//end if
 
-
-					// // the following if for type-prg functionality 
-					// #define first_header_byte  				0 
-					// #define second_header_byte 				1
-					// #define first_basic_line_address_byte   2
-					// #define second_basic_line_address_byte  3
-					// #define first_basic_line_number_byte    4
-					// #define second_basic_line_number_byte   5
-					// #define body_bytes         				6
-					// #define end_of_line_byte   				7
-					// #define end_of_prg_byte    				8
-					// unsigned char spot_in_prg = 0;
-					// unsigned char previous_byte = ' ';
-
-					// do things here
-
-
-					if (disk_sector_buffer[i] == 0 && previous_byte == 0) { // we are at the end of the program 
-						//printf("\nEnd of program.\n");						
-						// printf("\nFooter:0x%04X\n", (disk_sector_buffer[i]*256)+previous_byte);
-						//goto jump here beacuse it's the end of the basic stub (even though there's more file) 	
-						goto type_prg_exit_point;	
+					if (disk_sector_buffer[i] == 0 && previous_byte == 0) { // We are at the end of the program 
+						printf("\nFooter:0x%04X\n", (disk_sector_buffer[i]*256)+previous_byte); // This prints out the actual footer. But it should always be the same.
+						goto type_prg_exit_point; // goto jump here beacuse it's the end of the basic stub (even though there's more file)
 					};//end if
-
 
 					switch ( spot_in_prg ) {
 
@@ -225,13 +282,10 @@ void type_prg( unsigned char * file_to_type ) {
 						case second_header_byte :
 							//printf("%i\n",disk_sector_buffer[i]); // use previous to output "Pointer to beginning of "next" BASIC line, in low-byte/high-byte order"
 							// don't need to store anything in previous byte
-							// printf("Header:0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
-							printf("0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
+							printf("Header:0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
+							// printf("0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte);
 							spot_in_prg++; 						   // increment spot_in_prg
 						break;
-
-
-
 
 						case first_basic_line_address_byte :
 							//printf("A:%i",disk_sector_buffer[i]); // use previous to output "Pointer to beginning of "next" BASIC line, in low-byte/high-byte order"
@@ -246,7 +300,7 @@ void type_prg( unsigned char * file_to_type ) {
 							//THIS ENABLES SHOWING TEH ADDRESS of each basic line 
 							//printf("A:%04X|", (disk_sector_buffer[i]*256)+previous_byte);
 							spot_in_prg++; 						   // increment spot_in_prg
-						break;						
+						break;
 
 						case first_basic_line_number_byte :
 							//printf("L:%i",disk_sector_buffer[i]); // use previous to output "Pointer to beginning of "next" BASIC line, in low-byte/high-byte order"
@@ -261,127 +315,124 @@ void type_prg( unsigned char * file_to_type ) {
 							spot_in_prg++; 						   // increment spot_in_prg
 						break;	
 
-
-
-
+						// Fuck it. Time to make this an array!
+						// The initial lookup code saved 775 bytes,
+						// and the "restore" exception case
+						// saved another 54 bytes!
+						// This 775 + 54 saved a total of 829 bytes!!!
 
 						case body_bytes :
-							switch ( disk_sector_buffer[i] ) {
-								case   0 : printf("\n"     ); previous_byte = disk_sector_buffer[i]; spot_in_prg = first_basic_line_address_byte; break;
-								case 128 : printf("end"    ); break;
-								case 129 : printf("for"    ); break;
-								case 130 : printf("next"   ); break;
-								case 131 : printf("data"   ); break;
-								case 132 : printf("input#" ); break;
-								case 133 : printf("input"  ); break;
-								case 134 : printf("dim"    ); break;
-								case 135 : printf("read"   ); break;
-								case 136 : printf("let"    ); break;
-								case 137 : printf("goto"   ); break;
-								case 138 : printf("run"    ); break;
-								case 139 : printf("if"     ); break;
-								case 140 : printf("restore"); break;
-								case 141 : printf("gosub"  ); break;
-								case 142 : printf("return" ); break;
-								case 143 : printf("rem"    ); break;
-								case 144 : printf("stop"   ); break;
-								case 145 : printf("on"     ); break;
-								case 146 : printf("wait"   ); break;
-								case 147 : printf("load"   ); break;
-								case 148 : printf("save"   ); break;
-								case 149 : printf("verify" ); break;
-								case 150 : printf("def"    ); break;
-								case 151 : printf("poke"   ); break;
-								case 152 : printf("print#" ); break;
-								case 153 : printf("print"  ); break;
-								case 154 : printf("cont"   ); break;
-								case 155 : printf("list"   ); break;
-								case 156 : printf("clr"    ); break;
-								case 157 : printf("cmd"    ); break;
-								case 158 : printf("sys"    ); break;
-								case 159 : printf("open"   ); break;
-								case 160 : printf("close"  ); break;
-								case 161 : printf("get"    ); break;
-								case 162 : printf("new"    ); break;
-								case 163 : printf("tab("   ); break;
-								case 164 : printf("to"     ); break;
-								case 165 : printf("fn"     ); break;
-								case 166 : printf("spc("   ); break;
-								case 167 : printf("then"   ); break;
-								case 168 : printf("not"    ); break;
-								case 169 : printf("step"   ); break;
-								case 170 : printf("+"      ); break;
-								case 171 : printf("-"      ); break; // TODO: Check if something is wrong with this??? THIS: − isn't a hyphen but a unicode thingy 
-								case 172 : printf("*"      ); break;
-								case 173 : printf("/"      ); break;
-								case 174 : printf("%c", 94 ); break; // ↑ - up arrow --> http://sta.c64.org/cbm64pet.html
-								case 175 : printf("and"    ); break;
-								case 176 : printf("or"     ); break;
-								case 177 : printf(">"      ); break;
-								case 178 : printf("="      ); break;
-								case 179 : printf("<"      ); break;
-								case 180 : printf("sgn"    ); break;
-								case 181 : printf("int"    ); break;
-								case 182 : printf("abs"    ); break;
-								case 183 : printf("usr"    ); break;
-								case 184 : printf("fre"    ); break;
-								case 185 : printf("pos"    ); break;
-								case 186 : printf("sqr"    ); break;
-								case 187 : printf("rnd"    ); break;
-								case 188 : printf("log"    ); break;
-								case 189 : printf("exp"    ); break;
-								case 190 : printf("cos"    ); break;
-								case 191 : printf("sin"    ); break;
-								case 192 : printf("tan"    ); break;
-								case 193 : printf("atn"    ); break;
-								case 194 : printf("peek"   ); break;
-								case 195 : printf("len"    ); break;
-								case 196 : printf("str$"   ); break;
-								case 197 : printf("val"    ); break;
-								case 198 : printf("asc"    ); break;
-								case 199 : printf("chr$"   ); break;
-								case 200 : printf("left$"  ); break;
-								case 201 : printf("right$" ); break;
-								case 202 : printf("mid$"   ); break;
-								case 203 : printf("go"     ); break;
-							    default  : printf( "%c", disk_sector_buffer[i] ); // this needs to be way better obviously...
-							};// end switch
+							if ( disk_sector_buffer[i] == 0 ) {
+								printf("\n"); 
+								previous_byte = disk_sector_buffer[i]; 
+								spot_in_prg = first_basic_line_address_byte;
+							} else if ( disk_sector_buffer[i] == 140 ) { 	 // Handled manually, to save the overall size of the array.
+								printf("restore");							 // This string is 7 chars, which is the only one. So we make the max length of each string 6 chars instead of 7.
+							} else if ( disk_sector_buffer[i] >= 128 && disk_sector_buffer[i] <= 203 ) {
+								//printf("i%u:");
+								printf("%s",basic_tokens[ disk_sector_buffer[i]-128 ]);
+							} else {
+							    printf( "%c", disk_sector_buffer[i] ); // this needs to be way better obviously...
+							};//end-if
+
+							// switch ( disk_sector_buffer[i] ) {
+							// 	case   0 : printf("\n"     ); previous_byte = disk_sector_buffer[i]; spot_in_prg = first_basic_line_address_byte; break;
+							// 	case 128 : printf("end"    ); break;
+							// 	case 129 : printf("for"    ); break;
+							// 	case 130 : printf("next"   ); break;
+							// 	case 131 : printf("data"   ); break;
+							// 	case 132 : printf("input#" ); break; /* bug here? */
+							// 	case 133 : printf("input"  ); break; /* bug here? */
+							// 	case 134 : printf("dim"    ); break;
+							// 	case 135 : printf("read"   ); break;
+							// 	case 136 : printf("let"    ); break;
+							// 	case 137 : printf("goto"   ); break;
+							// 	case 138 : printf("run"    ); break;
+							// 	case 139 : printf("if"     ); break;
+							// 	case 140 : printf("restore"); break;
+							// 	case 141 : printf("gosub"  ); break;
+							// 	case 142 : printf("return" ); break;
+							// 	case 143 : printf("rem"    ); break;
+							// 	case 144 : printf("stop"   ); break;
+							// 	case 145 : printf("on"     ); break;
+							// 	case 146 : printf("wait"   ); break;
+							// 	case 147 : printf("load"   ); break;
+							// 	case 148 : printf("save"   ); break;
+							// 	case 149 : printf("verify" ); break; /* bug here? */
+							// 	case 150 : printf("def"    ); break; /* bug here? */
+							// 	case 151 : printf("poke"   ); break;
+							// 	case 152 : printf("print#" ); break; /* bug here? */
+							// 	case 153 : printf("print"  ); break; /* bug here? */
+							// 	case 154 : printf("cont"   ); break;
+							// 	case 155 : printf("list"   ); break;
+							// 	case 156 : printf("clr"    ); break;
+							// 	case 157 : printf("cmd"    ); break;
+							// 	case 158 : printf("sys"    ); break;
+							// 	case 159 : printf("open"   ); break;
+							// 	case 160 : printf("close"  ); break;
+							// 	case 161 : printf("get"    ); break;
+							// 	case 162 : printf("new"    ); break;
+							// 	case 163 : printf("tab("   ); break;
+							// 	case 164 : printf("to"     ); break;
+							// 	case 165 : printf("fn"     ); break;
+							// 	case 166 : printf("spc("   ); break;
+							// 	case 167 : printf("then"   ); break;
+							// 	case 168 : printf("not"    ); break;
+							// 	case 169 : printf("step"   ); break;
+							// 	case 170 : printf("+"      ); break;
+							// 	case 171 : printf("-"      ); break; // TODO: Check if something is wrong with this??? THIS: − isn't a hyphen but a unicode thingy 
+							// 	case 172 : printf("*"      ); break;
+							// 	case 173 : printf("/"      ); break;
+							// 	case 174 : printf("%c", 94 ); break; // ↑ - up arrow --> http://sta.c64.org/cbm64pet.html
+							// 	case 175 : printf("and"    ); break;
+							// 	case 176 : printf("or"     ); break;
+							// 	case 177 : printf(">"      ); break;
+							// 	case 178 : printf("="      ); break;
+							// 	case 179 : printf("<"      ); break;
+							// 	case 180 : printf("sgn"    ); break;
+							// 	case 181 : printf("int"    ); break;
+							// 	case 182 : printf("abs"    ); break;
+							// 	case 183 : printf("usr"    ); break;
+							// 	case 184 : printf("fre"    ); break;
+							// 	case 185 : printf("pos"    ); break;
+							// 	case 186 : printf("sqr"    ); break;
+							// 	case 187 : printf("rnd"    ); break;
+							// 	case 188 : printf("log"    ); break;
+							// 	case 189 : printf("exp"    ); break;
+							// 	case 190 : printf("cos"    ); break;
+							// 	case 191 : printf("sin"    ); break;
+							// 	case 192 : printf("tan"    ); break;
+							// 	case 193 : printf("atn"    ); break;
+							// 	case 194 : printf("peek"   ); break;
+							// 	case 195 : printf("len"    ); break;
+							// 	case 196 : printf("str$"   ); break;
+							// 	case 197 : printf("val"    ); break;
+							// 	case 198 : printf("asc"    ); break;
+							// 	case 199 : printf("chr$"   ); break;
+							// 	case 200 : printf("left$"  ); break;
+							// 	case 201 : printf("right$" ); break; /* bug here? */
+							// 	case 202 : printf("mid$"   ); break; /* bug here? */
+							// 	case 203 : printf("go"     ); break;
+							//     default  : printf( "%c", disk_sector_buffer[i] ); // this needs to be way better obviously...
+							// };// end switch
+
 							// DO NOT increment spot_in_prg becuase we don't know if we are finished yet
 						break;
 
-						// case end_of_line_byte :
-						// 	if (previous_byte == 0) { // we are at the end of the program 
-						// 		printf("\n End of program.\n\n");// output a newline and maybe an end of program messager
-						// 		// might need to break out of a loop here, in case there is other stuff at the end of the basic program 
-						// 	} else {
-						// 		// this is the end of a basic line, so output a newline to teh screen 
-						// 		printf("\n");//
-						// 		previous_byte = disk_sector_buffer[i]; // store in previous character, because we will need it if we reach the end of the program 
-						// 	};//end if
-						// 	spot_in_prg = first_basic_line_address_byte; 						   // iwe have finished a line, so reset back to the begging of a line status, not beginning of file status 
-						// break;
-
-						default : 
+						default :
 							printf("?");
-							//spot_in_prg++; 						   // increment spot_in_prg
+						break;
 
 					};//end switch
 
-
-
-
-
-				};//end for 
+				};//end for
 
 			} while( read_bytes == sizeof(disk_sector_buffer) ); //end do loop
 
-
-			//jump to here beacuse it's the end of the basic stub (even though there's more file) 
+			//jump to here beacuse it's the end of the basic stub (even though there's more file)
 			type_prg_exit_point: 
 
-			cbm_close (8);
-
-			//printf("Display complete.\n");
+			cbm_close (8); // printf("Display complete.\n");
 
 };//end func 
 

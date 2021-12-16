@@ -58,39 +58,42 @@ extern unsigned char i;
 extern unsigned char  drive_detected[8];
 extern unsigned char  drive_detected_type[8];
 
-
+extern unsigned char files_per_screen;
+extern unsigned char listing_string[10];
+extern unsigned char par;
+            
 // ********************************************************************************
 // PRIVATE VARIABLES
 // ********************************************************************************
 
-unsigned char  cbm_error0_text[] = "Ok"; // "Ok";
-unsigned char  cbm_error1_text[] = "Too many files"; // "Too many files";
-unsigned char  cbm_error2_text[] = "File open"; // "File open";
-unsigned char  cbm_error3_text[] = "File not open"; // "File not open";
-unsigned char  cbm_error4_text[] = "File not found"; // "File?";
-unsigned char  cbm_error5_text[] = "Dev?";
-unsigned char  cbm_error6_text[] = "Not input-file"; // "!InFile";
-unsigned char  cbm_error7_text[] = "Not output-file"; // "!OutFile";
-unsigned char  cbm_error8_text[] = "File-name?";
-unsigned char  cbm_error9_text[] = "Bad dev#"; // "Bad dev#";
-unsigned char cbm_error10_text[] = "R/S hit"; // "R/S press";
-unsigned char cbm_error11_text[] = "ErI/O";
-
-
-// unsigned char  cbm_error0_text[] = "Ok";
-// unsigned char  cbm_error1_text[] = "Files++!";
-// unsigned char  cbm_error2_text[] = "Open?";
-// unsigned char  cbm_error3_text[] = "!Open?";
-// unsigned char  cbm_error4_text[] = "File?";
+// unsigned char  cbm_error0_text[] = "Ok"; // "Ok";
+// unsigned char  cbm_error1_text[] = "Too many files"; // "Too many files";
+// unsigned char  cbm_error2_text[] = "File open"; // "File open";
+// unsigned char  cbm_error3_text[] = "File not open"; // "File not open";
+// unsigned char  cbm_error4_text[] = "File not found"; // "File?";
 // unsigned char  cbm_error5_text[] = "Dev?";
-// unsigned char  cbm_error6_text[] = "!InFile";
-// unsigned char  cbm_error7_text[] = "!OutFile";
-// unsigned char  cbm_error8_text[] = "Fname?";
-// unsigned char  cbm_error9_text[] = "Bad Dev#";
-// unsigned char cbm_error10_text[] = "R/S!";
-// unsigned char cbm_error11_text[] = "ErI/O!";
+// unsigned char  cbm_error6_text[] = "Not input-file"; // "!InFile";
+// unsigned char  cbm_error7_text[] = "Not output-file"; // "!OutFile";
+// unsigned char  cbm_error8_text[] = "File-name?";
+// unsigned char  cbm_error9_text[] = "Bad dev#"; // "Bad dev#";
+// unsigned char cbm_error10_text[] = "R/S hit"; // "R/S press";
+// unsigned char cbm_error11_text[] = "ErI/O";
 
-// NEW 
+
+unsigned char  cbm_error0_text[] = "Ok";
+unsigned char  cbm_error1_text[] = "Files++!";
+unsigned char  cbm_error2_text[] = "Open?";
+unsigned char  cbm_error3_text[] = "!Open?";
+unsigned char  cbm_error4_text[] = "File?";
+unsigned char  cbm_error5_text[] = "Dev?";
+unsigned char  cbm_error6_text[] = "!InFile";
+unsigned char  cbm_error7_text[] = "!OutFile";
+unsigned char  cbm_error8_text[] = "Fname?";
+unsigned char  cbm_error9_text[] = "Bad Dev#";
+unsigned char cbm_error10_text[] = "R/S!";
+unsigned char cbm_error11_text[] = "ErI/O!";
+
+// NEW 	
 // "Ok";		
 // "Files++";	
 // "Open?";		
@@ -141,16 +144,16 @@ char command_set[]         = { 'u' , '0' , '>' , 0x08 };
 // const char command_set14[]        = { 'u' , '0' , '>' , 0x0E };
 // const char command_set15[]        = { 'u' , '0' , '>' , 0x0F };
 
-const char cdrive_command_set8[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; // we need to this bypass cc65 remapping ascii to petscii
-const char cdrive_command_set9[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  9+32 ,  9+64 };
-const char cdrive_command_set10[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 10+32 , 10+64 };
-const char cdrive_command_set11[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 11+32 , 11+64 };
-const char cdrive_command_set12[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 12+32 , 12+64 };
-const char cdrive_command_set13[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 13+32 , 13+64 };
-const char cdrive_command_set14[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 14+32 , 14+64 };
-const char cdrive_command_set15[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 15+32 , 15+64 };
+// const char cdrive_command_set8[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; // we need to this bypass cc65 remapping ascii to petscii
+// const char cdrive_command_set9[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  9+32 ,  9+64 };
+// const char cdrive_command_set10[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 10+32 , 10+64 };
+// const char cdrive_command_set11[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 11+32 , 11+64 };
+// const char cdrive_command_set12[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 12+32 , 12+64 };
+// const char cdrive_command_set13[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 13+32 , 13+64 };
+// const char cdrive_command_set14[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 14+32 , 14+64 };
+// const char cdrive_command_set15[] = { 'm' , '-' , 'w' , 119 , 0 , 2 , 15+32 , 15+64 };
 
-
+char cdrive_command_set[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; // we need to this bypass cc65 remapping ascii to petscii
 
 
 // ********************************************************************************
@@ -284,19 +287,19 @@ unsigned char detect_sid(void) {
 	// https://codebase64.org/doku.php?id=base:detecting_sid_type_-_safe_method
 
 	// ;SID DETECTION ROUTINE
-		
+
 	// 	;By SounDemon - Based on a tip from Dag Lem.
 	// 	;Put together by FTC after SounDemons instructions
 	// 	;...and tested by Rambones and Jeff.
-		
+
 	// 	; - Don't run this routine on a badline
 	// 	; - Won't work in VICE (always detects 6581) unless resid-fp emulation is enabled
-		
+
 	// 	sei		;No disturbing interrupts
 	// 	lda #$ff
 	// 	cmp $d012	;Don't run it on a badline.
 	// 	bne *-3
-		
+
 	// 	;Detection itself starts here	
 	// 	lda #$ff	;Set frequency in voice 3 to $ffff 
 	// 	sta $d412	;...and set testbit (other bits doesn't matter) in $d012 to disable oscillator
@@ -316,31 +319,31 @@ unsigned char detect_sid(void) {
 	unsigned char i 						 = 0; // For looping
 
 	unsigned char D41B_before  				 = 0;
-	unsigned char D41B_after   				 = 0;	
+	unsigned char D41B_after   				 = 0;
 
-	unsigned char one_D41B_after_value       = 0;	
-	unsigned char one_D41B_after_frequency   = 0;	
-	unsigned char two_D41B_after_value       = 0;	
+	unsigned char one_D41B_after_value       = 0;
+	unsigned char one_D41B_after_frequency   = 0;
+	unsigned char two_D41B_after_value       = 0;
 	unsigned char two_D41B_after_frequency   = 0;
-	unsigned char three_D41B_after_value     = 0;	
+	unsigned char three_D41B_after_value     = 0;
 	unsigned char three_D41B_after_frequency = 0;
 
 	unsigned char likely_8580 				 = 0;
 	unsigned char likely_6581 				 = 0;
 
-    //if ( (PEEK(0xD400) != 0x00) && (PEEK(0xD401) != 0x00) ) return(0); // These locations will float if no SID is installed, and should be 0 if there is a SID.
+    // if ( (PEEK(0xD400) != 0x00) && (PEEK(0xD401) != 0x00) ) return(0); // These locations will float if no SID is installed, and should be 0 if there is a SID.
 
 	D41B_before = PEEK(0xD41B); // Record iniital value 
 
 	for (i = 0 ; i < 255 ; ++i) {
 
 		POKE(0xD011, 0x0B); 		// Load 0x0B into 0xD011(53265) - Disable VIC-II
-		POKE(0xD412, 0xFF); 		// Load 0xFF into 0xD412   		- Set frequency in voice 3 to $ffff 		
-		POKE(0xD40E, 0xFF); 		// Load 0xFF into 0xD40E   		- ...and set testbit (other bits doesn't matter) in $d012 to disable oscillator		
-		POKE(0xD40F, 0xFF); 		// Load 0xFF into 0xD40F		
-		POKE(0xD412, 0x20); 		// Load 0x20 into 0xD412        - Sawtooth wave and gatebit OFF to start oscillator again.		
+		POKE(0xD412, 0xFF); 		// Load 0xFF into 0xD412   		- Set frequency in voice 3 to $ffff
+		POKE(0xD40E, 0xFF); 		// Load 0xFF into 0xD40E   		- ...and set testbit (other bits doesn't matter) in $d012 to disable oscillator
+		POKE(0xD40F, 0xFF); 		// Load 0xFF into 0xD40F
+		POKE(0xD412, 0x20); 		// Load 0x20 into 0xD412        - Sawtooth wave and gatebit OFF to start oscillator again.
 		POKE(0xD011, 0x1B); 		// Load 0x1B into 0xD011(53265) - Enable VIC-II
-		D41B_after = PEEK(0xD41B);	// Record current value 
+		D41B_after = PEEK(0xD41B);	// Record current value
 
 		// check curent value to see if it's sotred
 		if 			( D41B_after == one_D41B_after_value ) { 	// does teh current value equal slot one's value 
@@ -394,39 +397,37 @@ unsigned char detect_sid(void) {
 	// printf ("three_D41B_after_value:    H:0x%02X D:%u\n", 	three_D41B_after_value,		three_D41B_after_value		);
 	// printf ("three_D41B_after_frequency:#:%u\n", 			three_D41B_after_frequency,	three_D41B_after_frequency	);	
 
-
 	// Scan for 8580 --> 0x08 & any of 0x33 0x32
 	if (one_D41B_after_value == 0x08 || two_D41B_after_value == 0x08 || three_D41B_after_value == 0x08) {
 		++likely_8580;
 	};//end if 
-	
+
 	if (one_D41B_after_value == 0x32 || two_D41B_after_value == 0x32 || three_D41B_after_value == 0x32) {
 		++likely_8580;
 	};//end if 
 
-	
 	// Scan for 6581 --> 0x09 & any of 0x34 0x33
 	if (one_D41B_after_value == 0x09 || two_D41B_after_value == 0x09 || three_D41B_after_value == 0x09) {
 		++likely_6581;
-	};//end if 
-	
+	};//end if
+
 	if (one_D41B_after_value == 0x34 || two_D41B_after_value == 0x34 || three_D41B_after_value == 0x34) {
 		++likely_6581;
-	};//end if 
+	};//end if
 
 	// Codes:
 	// 1 - 6581
-	// 2 - 8580 
+	// 2 - 8580
 	// 0 - Undetermined
 	if (likely_6581 > likely_8580) {
-		return(1); 
+		return(1);
 	} else if (likely_8580 > likely_6581) {
-		return(2); 
-	} else { 
-		return(0); 
-	};// end if 	
+		return(2);
+	} else {
+		return(0);
+	};// end if
 
-};//end func 
+};//end func
 
 
 unsigned char detect_cpu(void) {
@@ -756,14 +757,20 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// printf("error_message[20]:%i\n",error_message[20]);
 	// printf("error_message[21]:%i\n",error_message[21]);
 
+	// ********************
+	// COMMODORE 1541
+	// ********************
 	if        ( matching( "cbm dos v2.6 1541", error_message) ) { 
 		set_drive_type(device_number, DRIVE_1541);
-		strcpy(error_message2,"CBM DOS v2.6 1541");
-		// Final string:
-		strcpy(error_message,error_message2);
+		// strcpy(error_message2,"CBM DOS v2.6 1541");
+		// strcpy(error_message,error_message2);
+		strupper(error_message); // make the string upper case
+		error_message[8] = 'v';
 
 
-
+	// ********************
+	// SD2IEC OLD FIRMWARE
+	// ********************
 	// We want to detec the beginning "uiec" so we know it's an SD2IEC, and maybe display "SD2IEC v0.11.3"
 	// } else if ( matching( "uiec v0.11.3"      , error_message) ) {
 	// Looks like "uiec v0.10.3" -->	v0.10.3 	sd2iec release version 0.10.3 	was the firmware that came with my SD2IEC.
@@ -784,6 +791,10 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 		// Final string:
 		strcpy(error_message,error_message2);
 
+
+	// ********************
+	// SD2IEC NEW FIRMWARE
+	// ********************
 	// We want to detec the middle "ATENTDEAD" and only display something like: "SD2IEC v1.0.0 24"
 	// Use position 8 to 12 (inclusive)
 	// Use position 24, 25
@@ -795,12 +806,10 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
  				 error_message[20]== 97  && \
  				 error_message[21]== 100    ) ){
 
-		// printf("WTF???\n");
-
-	// } else if ( matching( "SD2IEC V1.0.0ATENTDEAD0-24", error_message) ) { 
-		set_drive_type(device_number, DRIVE_UIEC );
+		// } else if ( matching( "SD2IEC V1.0.0ATENTDEAD0-24", error_message) ) { 
+		set_drive_type(device_number, DRIVE_UIEC);
 		strcpy(error_message2,"SD2IEC v");
-		string_add_character(error_message2,error_message[ 8]);
+		string_add_character(error_message2,error_message[ 8]); // TODO: Dude... like... strncpy error_message+8
 		string_add_character(error_message2,error_message[ 9]);
 		string_add_character(error_message2,error_message[10]);
 		string_add_character(error_message2,error_message[11]);
@@ -811,22 +820,79 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 		// Final string:
 		strcpy(error_message,error_message2);
 
-	} else if ( matching( "copyright cbm dos v10 1581", error_message) ) {
-	    strcpy(error_message2,"CBM DOS v10 1581");
-		// Final string:
-		strcpy(error_message,error_message2);
 
+	// ********************
+	// COMMODORE 1581
+	// ********************
+	} else if ( matching( "copyright cbm dos v10 1581", error_message) ) {
+		set_drive_type(device_number, DRIVE_1581);
+	    // strcpy(error_message,"CBM DOS v10 1581");
+		// strcpy(error_message,error_message2);
+		strncpy(error_message,error_message+10,17);
+		strupper(error_message); // make the string upper case
+		error_message[8] = 'v';
+
+
+	// ********************
+	// MSD SD-2
+	// ********************
+	} else if ( matching( "m.s.d. dos v2.3", error_message) ) {
+		set_drive_type(device_number, DRIVE_SD2);
+		// strcpy(error_message2,"M.S.D. DOS v2.3");
+		// strcpy(error_message,error_message2);
+		strupper(error_message); // make the string upper case
+		error_message[11] = 'v';
+
+
+	// ********************
+	// COMMODORE 4040
+	// ********************
+	} else if ( matching( "cbm dos v2", error_message) ) {
+		set_drive_type(device_number, DRIVE_4040);
+		// strcpy(error_message2,"CBM DOS v2");
+		// strcpy(error_message,error_message2);
+		strupper(error_message); // make the string upper case
+		error_message[8] = 'v';
+
+
+	// ********************
+	// COMMODORE 2031
+	// ********************
+	} else if ( matching( "cbm dos v2.6 2031", error_message) ) {
+		set_drive_type(device_number, DRIVE_2031);
+		// strcpy(error_message2,"CBM DOS v2.6 2031");
+		// strcpy(error_message,error_message2);
+		strupper(error_message); // make the string upper case
+		error_message[8] = 'v';
+
+
+	// ********************
+	// COMMODORE SFD-1001
+	// ********************
+	} else if ( matching( "cbm dos v2.7", error_message) ) {
+		set_drive_type(device_number, DRIVE_SFD1001);
+		// strcpy(error_message2,"CBM DOS v2.7");
+		// strcpy(error_message,error_message2);
+		strupper(error_message); // make the string upper case
+		error_message[8] = 'v';
+
+
+	// ********************
+	// UNKNOWN DRIVE
+	// ********************
 	} else {
 		strupper(error_message); // make the string upper case
+
 
 	};//end if 	
 
 
 
+    // TODO: This should go into a section below, so we only cut it off at length 22 when it's being displayed as part of the sysinfo or title screen.
     error_message[22]='\0'; // GitHub Issue#???: Text too makes it look bad: SD2IEC V1.0.0ATENTDEAD0-24 - Testing: // strcpy(error_message,"SD2IEC V1.0.0ATENTDEAD0-24");
 
-	if ( display_status == TRUE ) {
-		if ( result == 2 && error_number == 73 ) {		
+	if ( display_status == TRUE ) { // This is what runs when I call this from the command line.
+		if ( result == 2 && error_number == 73 ) {
 			printf("%i %s\n", device_number, error_message ); //  everything is okay, and we go the drive identity 
 		} else {
 			display_cbm_error(cbm_result); // yes, so do it 
@@ -834,8 +900,11 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 			printf("E#:%i TR:%i BL:%i\n", error_number, error_track , error_block );
 			printf("ED:%s\n", error_message );
 		};//end if 
-	} else if ( display_status == 3 ) {
-		if ( result == 2 && error_number == 73 ) {		
+	} else if ( display_status == 3 ) { // This is what runs when it gets called from within sysinfo. Special case. So like TRUE display it, FALSE, don't display it, 3 just for sysinfo
+		// NEW! Mon Dec 13 505PM
+		// This is to try and address the weird display of null strings with that stupid /6_O string.
+		// TODO: This is a kludgy fix. The /6_O string.it whatever I see when there's some weird unuised or unformatted or wahtever string fuckl I hate this. It matches some text starting rigth at 0x0000 so WTF??? it's like a null pointer or somethign but it's not. Fuck fuck fuck.
+		if ( result == 2 && error_number == 73 && strlen(error_message) != 4 ) {
 			printf("%02i %s", device_number, error_message ); //  everything is okay, and we go the drive identity 
 		};//end if 
 	};//end if 
@@ -866,8 +935,13 @@ unsigned char get_status(unsigned char device_number, unsigned char display_stat
 
 	result = cbm_open(1, device_number, 15, "");
 
+	// printf("device_number:%u\n",device_number);
+	// printf("result:%u\n",result);
+
 	do {
+		// printf("1? ");
 		read_bytes = cbm_read(1, disk_sector_buffer, sizeof(disk_sector_buffer));
+		// printf("2? ");
 	} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
 
 	process_status(disk_sector_buffer); 
@@ -887,19 +961,21 @@ unsigned char get_status(unsigned char device_number, unsigned char display_stat
 
 	return(error_number); // either there's no drive, and we return 255, or we just send what the drive sends us in error_number
 
-};//end func 
+};//end func
 
 
 void change_drive(unsigned char device_number) {
 
 	unsigned char device_result = 0;
 
-	if (have_device_numbers_changed == FALSE) { 
+	if (have_device_numbers_changed == FALSE) {
+
 		device_result = get_status(device_number, TRUE);
+
 		if (device_result != 255) {
-			dev = getfirstdevice ();
+			dev = getfirstdevice();
 			while (dev != device_number) {			
-				dev = getnextdevice (dev);			
+				dev = getnextdevice(dev);			
 			};//end while 
 		};//end if 
 		chdir(&dev);
@@ -914,7 +990,18 @@ void change_drive(unsigned char device_number) {
 
 unsigned char detect_filetype(unsigned char * filename, unsigned char print_typefile) {
 
-	result = cbm_opendir(1, dev); // need to deal with errors here
+	// result = cbm_opendir(1, dev); // need to deal with errors here
+
+	strcpy(listing_string,"$"); // Load directory "$", load drive 0 dir "$0", drive 1 "$1".
+
+	if (get_drive_type(dev) == DRIVE_UIEC) {
+		// printf("Detected SD2IEC!\n");
+		string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+	} else {
+		string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+	};//end-if
+
+	result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
 
 	for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
 
@@ -982,6 +1069,8 @@ void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number)
     // printf("This is test");//25 bytes over
     // printf("123456789012345678901234567890");//25 bytes over
 	
+	unsigned char new_drive_number_as_int;
+	
 	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends 
 
 	result = cbm_open(1, old_drive_number, 15, "");
@@ -1003,19 +1092,26 @@ void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number)
  //    printf("after: cdrive_command_set_final: %s size:%u \n",cdrive_command_set_final,sizeof(cdrive_command_set_final));
     // cbm_write(1, cdrive_command_set_final, sizeof(cdrive_command_set_final) );
 
-    switch( atoi(new_drive_number) ) {
-        case 8  : cbm_write (1, cdrive_command_set8,  sizeof(cdrive_command_set8)  ); break;
-        case 9  : cbm_write (1, cdrive_command_set9,  sizeof(cdrive_command_set9)  ); break;
-        case 10 : cbm_write (1, cdrive_command_set10, sizeof(cdrive_command_set10) ); break;
-        case 11 : cbm_write (1, cdrive_command_set11, sizeof(cdrive_command_set11) ); break;
-        
-        case 12 : cbm_write (1, cdrive_command_set12, sizeof(cdrive_command_set11) ); break;
-        case 13 : cbm_write (1, cdrive_command_set13, sizeof(cdrive_command_set12) ); break;
-        case 14 : cbm_write (1, cdrive_command_set14, sizeof(cdrive_command_set13) ); break;
-        case 15 : cbm_write (1, cdrive_command_set15, sizeof(cdrive_command_set14) ); break;
-    };//end_switch
-        
-        
+    // switch( atoi(new_drive_number) ) {
+    //     case 8  : cbm_write (1, cdrive_command_set8,  sizeof(cdrive_command_set8)  ); break;
+    //     case 9  : cbm_write (1, cdrive_command_set9,  sizeof(cdrive_command_set9)  ); break;
+    //     case 10 : cbm_write (1, cdrive_command_set10, sizeof(cdrive_command_set10) ); break;
+    //     case 11 : cbm_write (1, cdrive_command_set11, sizeof(cdrive_command_set11) ); break;
+    //     
+    //     case 12 : cbm_write (1, cdrive_command_set12, sizeof(cdrive_command_set11) ); break;
+    //     case 13 : cbm_write (1, cdrive_command_set13, sizeof(cdrive_command_set12) ); break;
+    //     case 14 : cbm_write (1, cdrive_command_set14, sizeof(cdrive_command_set13) ); break;
+    //     case 15 : cbm_write (1, cdrive_command_set15, sizeof(cdrive_command_set14) ); break;
+    // };//end_switch
+
+
+	// const char cdrive_command_set[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; // we need to this bypass cc65 remapping ascii to petscii
+	new_drive_number_as_int = atoi(new_drive_number);
+	cdrive_command_set[6] = new_drive_number_as_int+32;
+	cdrive_command_set[7] = new_drive_number_as_int+64;
+	cbm_write (1, cdrive_command_set,  sizeof(cdrive_command_set)  );
+
+
 	// if (strcmp(new_drive_number, "8") == 0 ) {
 	// 	cbm_write (1, cdrive_command_set8, sizeof (cdrive_command_set8));
 	// 	// new_drive_number = 8;
@@ -1058,15 +1154,15 @@ void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number)
 
 
 
-
+// TODO: Maybe this should all be a part of the drive-set section, instead of costly functions.
 void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) {
 
-	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
 
-	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends 
+	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends. 	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
+
 
     switch( atoi(new_drive_number) ) {
-        case  8 : command_set[3] = (0x08) ; break;
+        case  8 : command_set[3] = (0x08) ; break; // Are you fucking kidding me? I wrote this? WTF? I must have been too tired to think.
         case  9 : command_set[3] = (0x09) ; break;
         case 10 : command_set[3] = (0x0A) ; break;
         case 11 : command_set[3] = (0x0B) ; break;
@@ -1076,8 +1172,11 @@ void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) 
         case 15 : command_set[3] = (0x0F) ; break;
     };//end_switch
 
-	result = cbm_open(1, old_drive_number, 15, "");
-    cbm_write(1, command_set, sizeof(command_set) );
+	result = cbm_open(15, old_drive_number, 15, "");
+    cbm_write(15, command_set, sizeof(command_set) );
+	cbm_close(15);
+
+
 
  //    switch( atoi(new_drive_number) ) {
  //        case 8  : cbm_write (1, command_set8,  sizeof (command_set8)  ); break;
@@ -1119,7 +1218,7 @@ void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) 
 
 	//result = cbm_open(1, drive_number, 15, drive_command_string);
 	//result = cbm_open(1, drive_number, 15, user_input_arg2-48);
-	cbm_close(1);
+	// cbm_close(1);
 
 	if (result == 0) {
 		//printf("cbm_open result: %i\n", result);
@@ -1128,6 +1227,50 @@ void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) 
 		printf("Unknown error.\n");
 	};//end if 
 };//end func 
+
+
+
+
+// MSD SD-2
+/************************************************************
+
+From the MSD SD-2 Manual:
+
+CHANGING THE DEVICE NUMBER BY SOFTWARE
+The device number is changed by performing a MEMORY-WRITE to
+locations $0077 and $0078. The MEMORY-WRITE command for changing
+the device number is performed after the error channel has been
+opened and has the following format:
+
+PRINT#<file#>"M-W"CHR$(119)CHR$(0)CHR$(2)CHR$(dv+32)CHR$(dv+64)
+
+The dv represents the device number that is desired. An example of
+a simple routine for changing the device number to device number 9
+is given below:
+
+10 OPEN 15,8,15
+20 PRINT#15,"M-W"CHR$(119)CHR$(0)CHR$(2)CHR$(9+32)CHR$(9+64)
+30 END
+
+It is usually desirable to change the device number in hardware
+unless a temporary change is all that is desired. In order to use
+the software method, only one drive can be powered on, its device
+number changed, then another drive powered on and its device
+number changed until all drives are on. If this procedure is not
+followed, the disk drives will conflict with each other.
+
+************************************************************/
+
+
+
+
+
+
+
+
+
+
+
 
 
 

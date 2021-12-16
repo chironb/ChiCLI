@@ -2,11 +2,13 @@
 
 A CLI for Commodore Computers!
 
-![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_R2_screenshot.png?raw=true)
+![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_R3_screenshot.png?raw=true)
 
-ChiCLI v1.R2 (c) 2021 Chiron Bramberger
+ChiCLI v1.R3 (c) 2021 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, similar to and inspired by: AmigaDOS, Commodore DOS, MS-DOS, and Linux.
+
+Pronunciation of ChiCLI: ky see-elle-eye
 
 ChiCLI - Features List:
 
@@ -40,17 +42,43 @@ Testing successfully with the following hardware:
 - The Commodore SX-64
 - TheC64 Mini hardware, which is based on Linux and VICE
 - VICE: Emulated Commodore machines: 64, 64C, SX-64, 4064, NTSC, PAL
-- SD2IEC by Jim Brain --> Get One Here --> http://store.go4retro.com/uiec-sd/
+- SD2IEC by Jim Brain --> Get One Here --> http://store.go4retro.com/uiec-sd/ (Not Sponsored)
 - IDE64 tested by Leif Bloomquist --> Leif's GitHub --> https://github.com/LeifBloomquist
 - Commodore 1541 Disk Drive with stock ROM
+- MSD SD-2 Disk Drive via Serial IEC
+- MSD SD-2 Disk Drive via a Batteries Included IEEE-488 BusCardII
 - Commodore 2031 via a Batteries Included IEEE-488 BusCardII
+- Commodore 4040 via a Batteries Included IEEE-488 BusCardII
 - Commodore SFD 1001 via a Batteries Included IEEE-488 BusCardII
 - VICE: Emulated Commodore drives: 1541, 1541-II, 1570, 1571
-- Commodore 64 and Commodore 1541 with JiffyDOS installed in both
+- Commodore 64 and Commodore 1541 with JiffyDOS installed
 - Commodore 64 with Epyx Fast Load and Super Snapshot 4
-- Commodore Flyer Internet Modem --> http://www.retroswitch.com/products/flyer/
+- Commodore Flyer Internet Modem --> http://www.retroswitch.com/products/flyer/ (Not Sponsored)
 
-Latest News:
+Latest News and Changelog:
+
+v1.R3 - Release Candidate 3 - Dec 16 2021
+- Optimized: *NOW A SUPER-CHARGED JAM-PACKED MEGA-APPLICATION!* I'm always optimizing to squeeze in more commands!
+- Added:     The changename command, which lets you change the name of a disk without formatting it. This only works on 1541, 2031, and SD-2 drives.
+- Added:     The changeid command, which lets you change the ID of a disk without formatting it. This only works on 1541, 2031, and SD-2 drives.
+- Added:     The diskcopy command, which executes a diskcopy from the source drive a (or drive 0) to the target drive b (drive 1), on dual drives that support it, such as the 4040 and the SD-2.
+- Added:     The dumpmem command, which let's you dump a section of memory to disk.
+- Added:     The vars command, which shows a list of the bytes that can be used for certain system functions, for example how many characters can be used in a hotkey or alias.
+- Updated:   The Commodore 4040 is now tested on real hardware and supported.
+- Updated:   The MSD SD-2 is now tested on real hardware and supported.
+- Updated:   The list / dir command now works in long or short mode, and you can use wildcards to get matching listing. By default, dir uses two column mode, and list uses one column mode, like in the Amiga Shell.
+- Updated:   The driveset command now detects what device you're on and automatically uses the right code for that device. Currently supports the SD2IEC, 1541 and SD-2 drives.
+- Updated:   The changelabel, changeid, and driveset commands to only work on supported devices.
+- Updated:   The command names so that no commands have hyphens in them. Just makes it hard to type when you're muscle memory is from modern keyboards, since the Commodore 64 has switched plus and minus key's positions.
+- Updated:   The type command to take up less room when outputting BASIC listings. Also some a bug fix for this.
+- Updated:   The logo function now displays the logo using way less code and memory. It's saved as a bitmap array and a line color list. It doesn't have diagonal color pattern anymore, which I preferred, but it's worth the savings!
+- Fixed:     Bug in dumpmem where it always saves to partition / drive 0, which works fine on any SD2IEC partition, but doesn't work on SD-2 or 4040.
+- Fixed:     Bug in the updated type command for BASIC.
+- Fixed:     The copy command had a weird, hard to re-create bug, whereby you would press 'y' to continue, but it would abort instead. This is identified and fixed.
+- Fixed:     The BusCard II no longer outputs junky characters for devices that aren't installed.
+- Issue:     The Commodore 4040: Disks cannot be renamed or ID changed using the changename or changeid commands. The Commodore DOS on these early drives works differently and will need some effort to work around.
+- Issue:     The hardware detection may hang on ridiculous systems for people who run on crazy shenanigans hardware! First noticed an issue on a 1541 Ultimate. Since I don't offically support non-standard Commodore 64 configurations, this is technically outside the scope of this application. Therefore, I'll try to address for the final 1.0 version, but no promises. I think it's hanging on the drive detection, because what I saw had the SID detection completed, but was otherwise hung.
+
 v1.R2 - Release Candidate 2 - Dec 1 2021
 - Optimized: *PACKS -EVEN MORE- IN A SINGLE APPLICATION!* Even more optimizations!
 - Added:     Support for reading RTC from an RTC upgraded SD2IEC!!!
@@ -229,29 +257,29 @@ Programming NES games in C by Shiru
 - https://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
 
 <pre>
----------------------------------------
-ChiCLI - Quick Command List
----------------------------------------
-./           exit       pwd
-=            filedate   reboot
-about        format     rename
-alias        help       restart
-cd           hex2dec    rmdir
-chirp        hotkey     run
-clear        initialize screensaver
-color-set    keycodes   shutdown
-copy         list       status
-date         lp         stopwatch
-datetime     mkdir      sys
-dec2bin      mount      sysinfo
-dec2hex      partition  time
-delete       peek       type
-dos          peek-bit   sd2iec
-drive-detect peeking    unalias
-drive-set    poke       unmount
-dump-mem     poke-bit   validate
-echo         profile    view-mem
+----- ChiCLI - Quick Command List -----
 
+   ./          driveset   profile
+   =           dumpmem    pwd
+   about       echo       reboot
+   alias       exit       rename
+   cd          filedate   restart
+   changeid    format     rmdir
+   changelabel help       run
+   chirp       hex2dec    screensaver
+   clear       hotkey     sd2iec
+   colorset    initialize shutdown
+   copy        keycodes   status
+   d##:        list       stopwatch
+   d##?:       ld         sys
+   date        mkdir      sysinfo
+   datetime    mount      time
+   dec2bin     part       type
+   dec2hex     peek       unalias
+   delete      peekbit    unmount
+   diskcopy    peeking    validate
+   dos         poke       vars
+   drivedetect pokebit    viewmem
 
 ---------------------------------------
 ChiCLI - Built-In Alias List
@@ -265,9 +293,9 @@ endcli --> exit
 hk     --> hotkey
 init   --> initialize
 ls     --> list
-lp     --> list-partitions
+ld     --> lp
 md     --> make-dir
-part   --> partition
+part   --> drive
 quit   --> exit
 rd     --> remove-dir
 ren    --> rename
@@ -317,9 +345,11 @@ ChiCLI - Quick Command Examples
 > cd misc-folder
 > cd..
 > cd/
+> changelabel new-disk-name
+> changeid fx
 > chirp
 > clear
-> color-set 1 15 7
+> colorset 1 15 7
 > copy * d08:
 > copy * d08b:
 > copy somefile somedir/
@@ -335,12 +365,15 @@ ChiCLI - Quick Command Examples
 > del *
 > del some*
 > del somefile.txt
+> diskcopy
 > dos "validate0"
-> drive-detect
-> drive-set -1541 10
-> drive-set -sd2iec 11
-> dump-mem 1000 2000 memory.bin
-> dump-mem rom kernal kernal.rom
+> drive a
+> drive b
+> drivedetect
+> driveset 10
+> driveset 11
+> dumpmem 1000 2000 memory.bin
+> dumpmem rom kernal kernal.rom
 > echo "ChiCLI is the COOLEST!"
 > exit
 > filedate chicli-readme
@@ -358,14 +391,18 @@ ChiCLI - Quick Command Examples
 > keycodes
 > list
 > list -s
+> list -l
+> list *.d64
+> list -s *.d64
+> list *.d64 -l
 > mkdir test-dir
 > mount chicli-disk.d64
-> partition b
+> part b
 > peek 1000
-> peek-bit 65535 0
+> peekbit 65535 0
 > peeking 53266
 > poke 1000 33
-> poke-bit 1000 3 1
+> pokebit 1000 3 1
 > profile 1
 > pwd
 > reboot
@@ -388,8 +425,10 @@ ChiCLI - Quick Command Examples
 > sd2iec -save
 > unmount
 > validate
-> view-mem 65535
-> view-mem 56296 56303
+> vars
+> viewmem 65535
+> viewmem 56296 56303
+> viewmem rom kernal
 
 ---------------------------------------
 ChiCLI - Detailed Help
@@ -497,14 +536,14 @@ alias cr = "echo ;ChiCLI Rules!;"
 
 The semi-colon is automatically 
 substituted for quotes when the system
-processes the echo command. 
+processes the echo command.
 ---------------------------------------
 Arguments
 
-ChiCLI supports arguments passed by 
-Commodore Basic. 
+ChiCLI supports arguments passed by
+Commodore Basic.
 
-It uses the following format: 
+It uses the following format:
 RUN:REM ARG1 "ARG2 QUOTED" ARG3 "" ARG5
 
 Supported options:
@@ -537,35 +576,63 @@ Example from within ChiCLI:
 ./chicli -st
 run chicli -st
 ---------------------------------------
-Compressed ChiCLI for Faster Loading
-
-ChiCLI can be compressed using various
-crunching utilities. 
-
-Exomizer is being tested with ChiCLI,
-and you can download the compressed
-version called chicli-exo.prg in the 
-project's folder. 
-
-The program is compressed by about 50%
-and decompresses in about 5 seconds. 
-
-The passing of arguments to a 
-compressed version of ChiCLI has been 
-tested and works.
----------------------------------------
 COMMANDS
 ---------------------------------------
-./
+./ Command
 
-This loads and runs a command after 
+This loads and runs a command after
 exiting the ChiCLI system. This doesn't
-work autocomplete.
+work with autocomplete.
 
-Example:
-./kong-arcade
+The was created with the assumption
+that external commands will be created
+to work with ChiCLI. The intention is
+that an external command or program
+could be called, and passed arguments,
+and that this program would then run
+ChiCLI in a special mode that doesn't
+clear the screen and display the output
+of sysinfo.
+
+For a detailed example, I'd like to
+eventually create ChiEdit, which is a
+text editor program to compliment
+ChiCLI. If you wanted to use it, you
+would type:
+
+./chiedit some-file.txt
+
+...and this would start the text
+editor and open the some-file.txt file
+for editing. Then, once you've finished
+and saved the file, and then exited
+the program, the program would know
+that it was called from within ChiCLI
+and automatically run ChiCLI again,
+but this time without the sysinfo
+title screen.
+
+You can also use this with any program
+you'd like, however, you might have
+to use the "run" command instead, if
+for some reason the program doesn't
+work properly when called using the
+"./" method.
+
+Although this looks like a very UNIX
+or POSIX method, it's just a command
+with the name "./" and doesn't work
+with complex paths. It may support
+this in the future. The reason you
+can't just call a file by it's name,
+as you would in MS-DOS, is that would
+involve scanning the entire current
+directory for PRG files that can
+actually be executed. This would take
+too long on slow drives and make the
+whole of ChiCLI less responsive.
 ---------------------------------------
-=
+= MATHS COMMAND
 
 Maths: The equals command lets you do 
 very simple calculations. It's limited 
@@ -582,7 +649,7 @@ Example: = 2 - 2
 Example: = 4 * 4
 Example: = 8 / 2
 ---------------------------------------
-about
+ABOUT COMMAND
 
 This displays information about 
 the software, as well as links to the 
@@ -590,7 +657,7 @@ project on the web.
 
 Example: about
 ---------------------------------------
-cd 
+CD COMMAND
 
 This let's you change the current 
 working folder. It also lets you move
@@ -615,19 +682,51 @@ Example: change to:
 device 9 partition b
 cd d09b:
 ---------------------------------------
-chirp
+CHANGELABEL COMMAND
+
+This command let's you change the name
+or label of a 1541 formatted or
+compatible floppy disk.
+
+Currently supported drives:
+- Commodore 1541
+- Commodore SFD 1001
+- MSD SD-2
+
+Drives that should work but don't:
+- Commodore 4040
+
+Example: changelabel new-disk
+---------------------------------------
+CHANGEID COMMAND
+
+This command let's you change the ID
+of a 1541 formatted or compatible
+floppy disk.
+
+Currently supported drives:
+- Commodore 1541
+- Commodore SFD 1001
+- MSD SD-2
+
+Drives that should work but don't:
+- Commodore 4040
+
+Example: changeid fx
+---------------------------------------
+CHIRP COMMAND
 
 Plays the ChiCLI startup sound!
 
 Example: chirp
 ---------------------------------------
-clear
+CLEAR COMMAND
 
 This clears the screen of text.
 
 Example: clear
 ---------------------------------------
-color-set
+COLORSET COMMAND
 
 Changes the current text, background 
 and border colors, allowing you to set
@@ -646,7 +745,7 @@ color-set [Text] [Background] [Border]
 
 Example: color-set 1 15 7
 ---------------------------------------
-copy
+COPY COMMAND
 
 This let's you copy files. You can 
 also use * to copy all the files 
@@ -686,7 +785,7 @@ directory to another partition on the
 same device:
 copy * d08b:
 ---------------------------------------
-d##: 
+D##: COMMAND
 
 Changes the currently active drive.
 This is the drive you're "in".
@@ -697,10 +796,15 @@ hardware.
 
 Example: d09:
 ---------------------------------------
-d##?: 
+D##?: COMMAND
 
 Changes the currently active drive.
 This is the drive you're "in".
+
+This is the recommended way to change
+drives and devices, even when only
+one drive or partition exists on any
+given device.
 
 The character after the 2 digits is 
 the partition. Use a for the first
@@ -714,7 +818,7 @@ hardware.
 
 Example: d09b:
 ---------------------------------------
-datetime
+DATETIME COMMAND
 
 Displays the current date and time.
 
@@ -753,7 +857,7 @@ parameter "-set".
 Example: datetime
 Example: datetime -set
 ---------------------------------------
-dec2bin
+DEC2BIN COMMAND
 
 Maths: Converts from a decimal number 
 to a binary number.
@@ -761,7 +865,7 @@ to a binary number.
 Example: dec2bin 254
 Outputs: BIN:11111110
 ---------------------------------------
-dec2hex
+DEC2HEX COMMAND
 
 Maths: Converts from a decimal number 
 to a hexidecimal number.
@@ -769,7 +873,7 @@ to a hexidecimal number.
 Example: dec2hex 234
 Outputs: HEX:00ea
 ---------------------------------------
-delete
+DELETE COMMAND
 
 This let's you delete files. You can 
 also use * to delete all the files 
@@ -787,7 +891,7 @@ delete somefile.txt - Deletes a file
 delete *            - Deletes all files
                       in current folder
 ---------------------------------------
-dos
+DOS COMMAND
 
 This lets you execute a custom command
 intended for a Commodore DOS device.
@@ -808,27 +912,36 @@ example given below.
 Example: 
 dos initialize0
 ---------------------------------------
-drive-detect
+DRIVEDETECT COMMAND
 
 Gets the drive name string from the
 current device.
 
 Example: drive-detect
 ---------------------------------------
-drive-set
+DRIVESET COMMAND
 
 This lets you change the drive number 
 of the current drive.
 
+The current drive is automatically
+detected and the right method is
+used if the drive is supported.
+
 For SD2IEC devices, you can use the
 sd2iec-save command to make this 
 change in device number permanent.
- 
-Examples: 
-drive-set -1541 10
-drive-set -sd2iec 11 
+
+Currently supported drives:
+- Commodore 1542
+- SD2IEC
+- MSD SD-2
+
+Examples:
+drive-set 10
+drive-set 11
 ---------------------------------------
-dump-mem
+DUMPMEM COMMAND
 
 This let's you dump an area of memory
 to a file in the current directory 
@@ -860,7 +973,7 @@ argument is still the file name.
 Here's an example:
 dump-mem rom kernal kernal.rom
 ---------------------------------------
-echo
+ECHO COMMAND
 
 Displays the text as the first
 argument. You can also use quotes
@@ -868,13 +981,13 @@ around the text you want echoed.
 
 Example: echo "ChiCLI is the COOLEST!"
 ---------------------------------------
-exit
+EXIT COMMAND
 
 This exits ChiCLI.
 
 Example: exit
 ---------------------------------------
-filedate
+FILEDATE COMMAND
 
 If you have an SD2IEC, it is capable
 of displaying time stamps for a given
@@ -917,7 +1030,7 @@ SD2IEC device exclusively.
 
 Example: filedate chicli-readme
 ---------------------------------------
-format
+FORMAT COMMAND
 
 Format a disk, based on the device 
 your currently in. 
@@ -943,7 +1056,7 @@ format
 format -q mydisk
 format -q
 ---------------------------------------
-help 
+HELP COMMAND
 
 Displays a quick list of commands. 
 note: The file chicli-readme.txt 
@@ -951,7 +1064,7 @@ contains detailed help.
 
 Example: help
 ---------------------------------------
-hex2dec
+HEX2DEC COMMAND
 
 Maths: Converts from a hexidecimal 
 number to a decimal number.
@@ -959,7 +1072,7 @@ number to a decimal number.
 Example: hex2dec FFFF
 Outputs: DEC:65535
 ---------------------------------------
-initialize
+INITIALIZE COMMAND
 
 Executes the Commodore DOS drive 
 command for initialize, based on the 
@@ -967,7 +1080,7 @@ current drive.
 
 Example: initialize
 ---------------------------------------
-keycodes
+KEYCODES COMMAND
 
 Displays the key code of a key that's 
 pressed in decimal value. RUN/STOP or
@@ -975,36 +1088,70 @@ CTRL+C quits the command.
 
 keycodes
 ---------------------------------------
-list
+LIST COMMAND
 
-This displays a listing of the files 
-within the disk, image, or folder 
+This displays a listing of the files
+within the disk, image, or folder
 you are currently in.
 
+The list command defaults to showing
+the detailed, or long, view.
+
+The dir alias default to showing
+the two column, or short, view.
+
 Option: -s
-This lists the contents in a format
-that's twice as wide, showing 2 files
-for each line of the screen.
+This overrides the current default
+and displays in the short view.
+
+Option: -l
+This overrides the current default
+and displays in the long view.
+
+You can also pass a search string to
+list, in order to get a list of files
+that fit the search pattern.
+
+For example:
+list *.d64
+...will display all the files ending
+in .d64 in the currently directory.
+
+You can also mix options with the
+search pattern.
 
 Example: list
 Example: list -s
+Example: list -l
+Example: list *.d64 -s
+Example: list -s *.d64
 ---------------------------------------
-list-partitions / lp
+LP / LD COMMAND
 
-this command lists the partitions on
-the current device.
+this command lists the partitions or
+drives on the current device.
 
-example:
-lp
+This will also show the disk label, ID
+and free space in blocks. This works
+on single drive devices as well as
+multi-drive units.
+
+The SD2IEC with it's partitions is
+also supported.
+
+The 1581 with it's concept of
+partitions is currently untested.
+
+Example: ld
 ---------------------------------------
-mkdir
+MKDIR COMMAND
 
 Makes a new, empty directory, using 
 the provided name.
 
 Example: mkdir game-images
 ---------------------------------------
-mount
+MOUNT COMMAND
 
 This mounts a disk image on a SD2IEC
 device, like the SD2IEC. You can then
@@ -1014,7 +1161,7 @@ floppy disk.
 Example: 
 mount chicli-disk.d64
 ---------------------------------------
-partition
+PART / DRIVE COMMAND
 
 This quickly changes the current 
 partition based on the supplied letter.
@@ -1022,9 +1169,10 @@ The shortcut "part" makes using this
 handy to change partitions fast. Only
 works on drives that support partitions.
 
-Example: partition b
+Example: part c
+Example: drive b
 ---------------------------------------
-peek      
+PEEK COMMAND
 
 Returns the value stored in memory at
 the given address. Works just as in 
@@ -1033,10 +1181,9 @@ Commodore Basic.
 This takes the address as a 
 decimal value.
 
-Example: 
-peek 1000
+Example: peek 1000
 ---------------------------------------
-peek-bit
+PEEKBIT COMMAND
 
 Returns the value of a given bit 
 stored in memory at the given address. 
@@ -1047,7 +1194,7 @@ This grabs the third least significant
 bit from memory address 1024 in 
 decimal format.
 ---------------------------------------
-poke
+POKE COMMAND
 
 Updates the value stored in memory at
 the given address. Works just as in 
@@ -1056,10 +1203,9 @@ Commodore Basic.
 This version takes the address and 
 value as a decimal number.
 
-Example: 
-poke 1000 33
+Example: poke 1000 33
 ---------------------------------------
-poke-bit
+POKEBIT COMMAND
 
 Writes the value of a given bit 
 stored in memory at the given address. 
@@ -1070,7 +1216,7 @@ Writes 1 to the third least significant
 bit from memory address 1024 in
 decimal format
 ---------------------------------------
-profile    
+PROFILE COMMAND
 
 Changes the current text, background 
 and border colors, to one of a set of
@@ -1083,17 +1229,16 @@ profile [Profile Number]
 3 - C64    7 - White on Black
 4 - C128   8 - Grey
 
-Example: 
-profile 1
+Example: profile 1
 ---------------------------------------
-pwd
+PWD COMMAND
 
 Shows you the currently set device 
 and partition.
 
 Example: pwd
 ---------------------------------------
-reboot
+REBOOT COMMAND
 
 This restarts the Commodore by calling
 the system reset vector.
@@ -1112,7 +1257,7 @@ Commoodre Basic: sys 57194
 
 Example: reboot
 ---------------------------------------
-rename 
+RENAME COMMAND
 
 Renames a file.
 
@@ -1123,20 +1268,20 @@ to rename it.
 Example: rename oldfilename newfilename
 Example: rename weirdfile* friendlyfile
 ---------------------------------------
-restart
+RESTART COMMAND
 
 This exits ChiCLI and automatically
 loads and runs ChiCLI from disk again.
 
 Example: restart
 ---------------------------------------
-remove-dir
+REMOVEDIR COMMAND
 
-Remvoe a directory. 
+Remvoe a directory.
 
 Example: remove-dir testdir
 ---------------------------------------
-run 
+RUN COMMAND
 
 This loads and runs a command after 
 exiting the ChiCLI system. You can use
@@ -1148,7 +1293,7 @@ to run it.
 
 Example: run kong*
 ---------------------------------------
-screensaver
+SCREENSAVER COMMAND
 
 Displays a screensaver that is a moving
 Commodore inspired logo.
@@ -1159,9 +1304,9 @@ and time, if used with an SD2IEC.
 You can also enable or disable whether
 the date and/or time is displayed.
 
-By default only the time is displayed,
-and only if a SD2IEC software or RTC
-clock is detected.
+By default the time and date are 
+displayed, and only if a SD2IEC 
+software or RTC clock is detected.
 
 You can use the following agruments
 to toggle the options:
@@ -1176,7 +1321,7 @@ screensaver
 screensaver -disable-time
 screensaver -enable-date
 ---------------------------------------
-shutdown   
+SHUTDOWN COMMAND
 
 This exits the program and displays
 a message letting you know it's safe
@@ -1184,14 +1329,14 @@ to turn off your Commodore.
 
 Example: shutdown
 ---------------------------------------
-status 
+STATUS COMMAND
 
 This retrives the status of the 
 current drive.
 
 Example: status
 ---------------------------------------
-stopwatch
+STOPWATCH COMMAND
 
 The "stopwatch" command starts when 
 you run it, and when run again, stops 
@@ -1202,7 +1347,7 @@ is about 18 mins.
 
 Example: stopwatch
 ---------------------------------------
-sys
+SYS COMMAND
 
 This causes execution to jump to the 
 memory location given. It expects a
@@ -1211,7 +1356,7 @@ like the Commodore Basic command.
 
 Example: sys 64738
 ---------------------------------------
-sysinfo
+SYSINFO COMMAND
 
 Attempts to detect your hardware and
 displays information about your system.
@@ -1232,7 +1377,7 @@ to be recognised.
 
 Example: sysinfo
 ---------------------------------------
-time
+TIME COMMAND
 
 Displays the current time.
 
@@ -1242,7 +1387,7 @@ parameter "-set".
 
 Example: time
 ---------------------------------------
-type
+TYPE COMMAND
 
 This is a file viewer. It can display
 files in the formats SEQ, PRG, or any
@@ -1268,7 +1413,7 @@ type chicli
 type chicli-readme
 type chicli -hex
 ---------------------------------------
-sd2iec
+SD2IEC COMMAND
 
 This command does SD2IEC specific 
 functions. The second argument
@@ -1319,7 +1464,7 @@ up set to device 10.
 Example: 
 sd2iec -save
 ---------------------------------------
-unmount
+UNMOUNT COMMAND
 
 This unmounts a previously mounted 
 disk image. It automatically pops you 
@@ -1327,7 +1472,7 @@ back to the previous folder.
 
 Example: unmount
 ---------------------------------------
-validate
+VALIDATE COMMAND
 
 Executes the Commodore DOS drive 
 command for validate, based on the 
@@ -1335,7 +1480,49 @@ current drive.
 
 Example: validate
 ---------------------------------------
-view-mem   
+VARS COMMAND
+
+This command shows a list of the
+bytes that can be used for certain
+system functions.
+
+Command Line:
+The number of characters that can be
+entered into the command line.
+
+Args:
+The number of characters that can be
+used as an argument in any given
+command.
+
+Disk Buffer:
+This is the size, in bytes, of the
+buffer used to read and write to the
+disk when using custom routines. For
+example, when copying files from one
+device to another.
+
+Aliases:
+This is the total number of aliases
+that are available to be used.
+
+Alias:
+This is how long, in characters, any
+given alias can be.
+
+Hotkeys:
+This is the total number of hotkeys
+that are available to be used.
+Currently, the only hotkeys availble
+are the function keys.
+
+Hotkey:
+This is how long, in characters, any
+given hotkey can be.
+
+Example: vars
+---------------------------------------
+VIEWMEM COMMAND
 
 Displays memory in hexidecimal and in 
 plain text value.

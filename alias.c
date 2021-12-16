@@ -130,6 +130,7 @@ void display_alias_all( void ) {
 		printf("Slots empty.\n");
 	};//end if 
 
-	printf("Maximum alias length:%u\nTotal alias slots:%u\n",MAX_ALIAS_LENGTH,MAX_ALIASES);
+	// printf("Maximum alias length:%u\nTotal alias slots:%u\n",MAX_ALIAS_LENGTH,MAX_ALIASES);
+	printf("Total alias slots:%u\n",MAX_ALIASES);
 
 };//end func 

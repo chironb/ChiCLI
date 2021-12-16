@@ -38,55 +38,95 @@
 // ********************************************************************************
 // HARDWARE MACRO FUNCTIONS 
 // ********************************************************************************
-
 #define set_drive_detection(drive,detected) drive_detected[drive-8] = detected
 #define get_drive_detection(drive) drive_detected[drive-8]
 #define set_drive_type(drive,type) drive_detected_type[drive-8] = type
 #define get_drive_type(drive) drive_detected_type[drive-8]
 
+// Convert from device string to DOS ready string
+// Valid devices: 8,9,0,1,2,3,4,5
+// We "return" 255 if the input was out of range or invalid.
+#define convert_device_string(device_character, device_number)    \
+    switch(device_character) {                                    \
+        case '8' : device_number = 8; break;                      \
+        case '9' : device_number = 9; break;                      \
+        case '0' : ;											  \
+        case '1' : ;											  \
+        case '2' : ;											  \
+        case '3' : ;											  \
+        case '4' : ;											  \
+        case '5' : device_number = device_character - 38; break;  \
+        default  : device_number = 255; break; /*INVALID DEVICE*/ \
+    };/*end-switch*/                                              \
+//end-func
+
+// Convert from partition or drive string to DOS ready string
+// Valid partitions: a,b,c,d,e,f,g,h,i
+// We "return" 255 if the input was out of range or invalid.
+#define convert_partition_string(user_input_partition, dos_ready_character) \
+    switch(user_input_partition) {                                          \
+        case 'a' : ;                                                        \
+        case 'b' : ;                                                        \
+        case 'c' : ;                                                        \
+        case 'd' : ;                                                        \
+        case 'e' : ;                                                        \
+        case 'f' : ;                                                        \
+        case 'g' : ;                                                        \
+        case 'h' : ;                                                        \
+        case 'i' : dos_ready_character = user_input_partition - 17; break;  \
+        default  : dos_ready_character = 255; break; /*INVALID PARTITION*/  \
+    };/*end-switch*/                                                        \
+//end-func
+
+
+
 // DRIVE TYPE MACROS
 // Commodore IEEE Floppy
-#define    DRIVE_2031 0x31 // *****
-#define    DRIVE_2040 0x20 
-#define    DRIVE_2041 0x21	 
-#define    DRIVE_3040 0x30 
-#define    DRIVE_4031 0x31 
-#define    DRIVE_4040 0x44 // ?????
-#define DRIVE_SFD1001 0x01 // *****
-#define    DRIVE_8050 0x50	 
-#define    DRIVE_8060 0x60 
-#define    DRIVE_8061 0x61	 
-#define    DRIVE_8250 0x50 
-#define    DRIVE_8280 0x80 
+#define DRIVE_2031    0x31
+#define DRIVE_2040    0x20
+#define DRIVE_2041    0x21
+#define DRIVE_3040    0x30
+#define DRIVE_4031    0x31
+#define DRIVE_4040    0x44
+#define DRIVE_SFD1001 0x01
+#define DRIVE_8050    0x50
+#define DRIVE_8060    0x60
+#define DRIVE_8061    0x61
+#define DRIVE_8250    0x50
+#define DRIVE_8280    0x80
 
-// Commodore Serial Floppy 
-#define    DRIVE_1540 0x40 
-#define    DRIVE_1541 0x41 // *****
-#define    DRIVE_1542 0x42 
-#define    DRIVE_1551 0x51 // (SFS481)
-#define    DRIVE_1563 0x63 
-#define    DRIVE_1570 0x70 
-#define    DRIVE_1571 0x71 
-#define    DRIVE_1572 0x72  
-#define    DRIVE_1581 0x81 
+// Commodore Serial Floppy
+#define DRIVE_1540    0x40
+#define DRIVE_1541    0x41
+#define DRIVE_1542    0x42
+#define DRIVE_1551    0x51 // (SFS481)
+#define DRIVE_1563    0x63
+#define DRIVE_1570    0x70
+#define DRIVE_1571    0x71
+#define DRIVE_1572    0x72
+#define DRIVE_1581    0x81
    
 // Commodore Hard Drive 
-#define    drive_9060 0x96 
-#define    drive_9090 0x99 
+#define DRIVE_9060    0x96
+#define DRIVE_9090    0x99
  
 // CMD Hard Drives 
-#define DRIVE_HD_40   0xC4 
-#define DRIVE_HD_170  0xC7 
-#define DRIVE_HD_340  0xC3 
-#define DRIVE_HD_500  0xC5 
-#define DRIVE_HD_1000 0xC1 
-#define DRIVE_HD_2000 0xC2 
+#define DRIVE_HD_40   0xC4
+#define DRIVE_HD_170  0xC7
+#define DRIVE_HD_340  0xC3
+#define DRIVE_HD_500  0xC5
+#define DRIVE_HD_1000 0xC1
+#define DRIVE_HD_2000 0xC2
+
+// MSD Floppy Drives
+#define DRIVE_SD1     0xD1
+#define DRIVE_SD2     0xD2
 
 // Modern SD Card Drives
-#define  DRIVE_UIEC   0xEC // *****
-#define  DRIVE_PI1541 0x1E // !!!!!
+#define  DRIVE_UIEC   0xEC
+#define  DRIVE_PI1541 0x1E
 
-// DRIVE TYPE STRINGS
+// DRIVE TYPE STRINGS - I THINK I CAN DELETE THIS???
 #define DRIVE_2031_NAME    "C 2031" // removed Commodore from these
 #define DRIVE_SFD1001_NAME "C SFD 1001"
 #define DRIVE_1541_NAME    "C 1541"

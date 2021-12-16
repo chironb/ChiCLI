@@ -2,9 +2,10 @@
 //	
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
 //
-/* Compiling, deleting object files, and launching VICE in fast prg loading mode: 
+/* Compiling and deleting object files command, because who needs a make file!
+
 cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli.prg && rm *.o && ls -l *.prg
-wine exomizer.exe sfx sys -n chicli-1rc.prg -o chicli-1rc-exo.prg
+
 */ 
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -17,7 +18,7 @@ wine exomizer.exe sfx sys -n chicli-1rc.prg -o chicli-1rc-exo.prg
     // GNU General Public License for more details.
 
     // You should have received a copy of the GNU General Public License
-    // along with this program.  If not, see <https://www.gnu.org/licenses/>.	
+    // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // ********************************************************************************
 
@@ -25,7 +26,7 @@ wine exomizer.exe sfx sys -n chicli-1rc.prg -o chicli-1rc-exo.prg
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R2"
+#define VERSION "v1.R3"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -85,10 +86,21 @@ wine exomizer.exe sfx sys -n chicli-1rc.prg -o chicli-1rc-exo.prg
 // GLOBAL VARS
 // ********************************************************************************
 
-unsigned char screensaver_show_time = TRUE;
-unsigned char screensaver_show_date = FALSE;
+// move this to the top or something
+#define get_bit(var,y)     (var>>y) & 1       // Return Data.Y value - Ex: uint8_t some_var = get_bit(number,bit_2); // some_var = 1
+#define set_bit(var,bit)   var |= (1 << bit)  // Set Data.Y   to 1   - Ex: set_bit(number,1); // number =  0x07 => 0b00000111 // bits are right to left so the right most bit is bit 0
+#define clear_bit(var,bit) var &= ~(1 << bit) // Clear Data.Y to 0   - Ex: clear_bit(number,2); // number =0x03 => 0b0000011
 
-unsigned int user_date_input;
+
+
+
+unsigned char files_per_screen;
+unsigned char listing_string[10] = "";
+
+unsigned char screensaver_show_time = TRUE;
+unsigned char screensaver_show_date = TRUE;
+
+//unsigned int user_date_input;
 unsigned char rtc_device = 0;
 
 // 0 == not scanned , 1 == detected , 2 == NOT detected (and therefore do not attempt to read a status, which would lock up the Commodore 64)
@@ -124,8 +136,30 @@ unsigned char color_profiles[9][3] = {{06,01,01},  //  1 - C PET Style
 
 unsigned char alias_shortcut_list[MAX_ALIASES][MAX_ALIAS_LENGTH] ; // --> lots of RAM! like 2.5K !!!
 unsigned char alias_command_list[MAX_ALIASES][MAX_ALIAS_LENGTH] ;  // --> see chicli.h to change this
+unsigned char hotkeys_list[MAX_HOTKEYS][MAX_HOTKEY_LENGTH];
 
-unsigned char hotkeys_list[MAX_HOTKEYS][MAX_HOTKEY_LENGTH] ;
+// Doing it this way actually added to the overall program size, instead of reducing it!
+// // Preset Hotkeys:
+// unsigned char hotkeys_list[MAX_HOTKEYS][MAX_HOTKEY_LENGTH] = {
+// 	{"ls\0"}, /* set_hotkey(1,"ls"); */
+// 	{"\0"},
+// 	{"cls\0"}, /* set_hotkey(3,"cls"); */
+// 	{"\0"},
+// 	{"stopwatch\0"}, /* set_hotkey(5,"stopwatch"); */
+// 	{"\0"},
+// 	{"ss\0"}, /* set_hotkey(7,"ss"); */
+// 	{"\0"}
+// };//end-array
+
+
+	// set_hotkey(1,"ls"); // like 10 bytes per call
+	// // set_hotkey(2,"d08:");
+	// set_hotkey(3,"cls");
+	// // set_hotkey(4,"d09:");
+	// set_hotkey(5,"stopwatch");
+	// // set_hotkey(6,"d10:");
+	// set_hotkey(7,"ss");
+	// // set_hotkey(8,"d11:");
 
 unsigned char entered_keystrokes[MAX_ENTERED_KEYSTROKES] ;
 unsigned char position_at_prompt_x = 0;
@@ -148,6 +182,7 @@ signed int result2    = 0; // This needs to be signed, because cbm_read and  cbm
 signed int read_bytes = 0; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
 
 unsigned char i; // shared by all for loops
+unsigned char ii; // shared by all for loops
 
 // ARRAYS
 unsigned char disk_sector_buffer[MAX_DISK_SECTOR_BUFFER] = " "; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
@@ -188,7 +223,7 @@ unsigned char original_position_at_prompt_y = 0;
 
 unsigned int  error_number      ;
 unsigned char error_message[32] ;
-unsigned char error_message2[32] ;
+unsigned char error_message2[32] ; // TODO: Save RAM here? 
 unsigned int  error_track       ;
 unsigned int  error_block       ;
 
@@ -263,34 +298,265 @@ unsigned int stopwatch_start_stamp;
 // FUNCTIONS
 // ********************************************************************************
 
-// void gotox( signed int x_to_goto ) { // these are debugging
 
-// 	if (x_to_goto < 0) {
-// 		// bordercolor(  7-1 ); // blue
-// 	}else if (x_to_goto > SCREEN_RIGHT_EDGE) {
-// 		// bordercolor(  3-1 ); // red
-// 	} else {
-// 		// bordercolor(  15-1 ); // light blue 
-// 	};//end if  
+// ********************************************************************************
+// NEW DIRECT DISK ACCESS FUNCTIONS FOR THE 1541 DISK DRIVE
+// ********************************************************************************
 
-// 	gotox(x_to_goto);
+// BASIC EXAMPLE OF READING THE DISK NAME
+// 10 OPEN 2,8,2,"#"
+// 15 OPEN 15,8,15
+// 20 PRINT#15,"U1";2;0;18;0
+// 25 PRINT#15,"B-P";2;144
+// 25 FOR I = 1 TO 16
+// 30 GET#2,B$
+// 35 PRINT B$;
+// 40 NEXT I
+// 45 CLOSE 2
+// 50 CLOSE 15
 
-// };//end func
 
 
-// void gotoy( signed int y_to_goto ) {// these are debugging
+unsigned char disk_label[16];
+unsigned char disk_id[2];
 
-// 	if (y_to_goto < 0) {
-// 		//bordercolor(  8-1 ); // yellow
-// 	}else if (y_to_goto > SCREEN_BOTTOM_EDGE) {
-// 		//bordercolor(  9-1 ); // orange
-// 	} else {
-// 		//bordercolor(  15-1 ); // light blue 
-// 	};//end if  
 
-// 	gotoy(y_to_goto);
+// void read_disk_label() {
 
-// };//end func
+// 	// Instead of passing a var, we use a global var for this purpose,
+// 	// because it's faster in C programming esepcially on the 6502 processor.
+// 	// unsigned char disk_label[16];
+
+// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
+// 	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	result = cbm_open(2, dev, 2, "#"); // Open command channel.
+// 	result = cbm_write(15, "u1:2,0,18,0", sizeof("u1:2,0,18,0")); // Send the block read command to load track and sector to RAM command.
+// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	// memset( disk_sector_buffer, 0, sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
+// 	read_bytes = cbm_read(2, disk_sector_buffer, 16); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	disk_sector_buffer[16]='\0'; // Make sure the string is NULL terminated.
+// 	strcpy(disk_label, disk_sector_buffer);
+// 	// printf("disk_sector_buffer:'%s'\n",disk_sector_buffer); // Show us the disk label.
+// 	cbm_close(2); // Close the command channel.
+// 	cbm_close(15); // Close the other channel???
+
+// };//end-func
+
+// BROKEN! why???
+// void write_disk_label() {
+
+// 	// Instead of passing a var, we use a global var for this purpose,
+// 	// because it's faster in C programming esepcially on the 6502 processor.
+// 	// unsigned char disk_label[16];
+
+// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
+// 	//read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	result = cbm_open(2, 8, 2, "#"); // Open command channel.
+// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	// memset( disk_sector_buffer, ' ', sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
+// 	// strncpy(disk_sector_buffer,disk_label,16); // Create our new disk label string.
+// 	read_bytes = cbm_write(2, "TESTING-DISKNAME", 16); // Write our new disk label's 16 bytes to the commmand channel.
+// 	result = cbm_write(15, "u2:2,0,18,0", sizeof("u2:2,0,18,0")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
+// 	//read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	cbm_close(2); // Close the command channel.
+// 	cbm_close(15); // Close the other channel???
+
+// };//end-func
+
+// void read_disk_label() {
+
+// 	// Instead of passing a var, we use a global var for this purpose,
+// 	// because it's faster in C programming esepcially on the 6502 processor.
+// 	// unsigned char disk_label[16];
+
+// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
+// 	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	result = cbm_open(2, dev, 2, "#"); // Open command channel.
+// 	result = cbm_write(15, "u1:2,0,18,0", sizeof("u1:2,0,18,0")); // Send the block read command to load track and sector to RAM command.
+// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	memset( disk_sector_buffer, 0, sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
+// 	read_bytes = cbm_read(2, disk_sector_buffer, 16); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	disk_sector_buffer[16]='\0'; // Make sure the string is NULL terminated.
+// 	strcpy(disk_label, disk_sector_buffer);
+// 	// printf("disk_sector_buffer:'%s'\n",disk_sector_buffer); // Show us the disk label.
+// 	cbm_close(2); // Close the command channel.
+// 	cbm_close(15); // Close the other channel???
+
+// };//end-func
+
+
+void write_disk_label() {
+
+	result = get_drive_type(dev);
+
+	switch (result) {
+		case DRIVE_1541 :
+		case DRIVE_2031 :
+		case DRIVE_SD2  :
+			// These drives are supported! Keep executing.
+		break;
+
+		default :
+			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
+			return;
+		break;
+	};//end-switch
+
+	// if (get_drive_type(dev) == DRIVE_1541 ||
+	// 	get_drive_type(dev) == DRIVE_2031 ||
+	// 	get_drive_type(dev) == DRIVE_SD2  ){
+	// 	// Drive is supported!
+	// } else {
+	// 	printf("Drive not supported!\n");
+	// 	return;
+	// };//end-if
+
+	// Instead of passing a var, we use a global var for this purpose,
+	// because it's faster in C programming esepcially on the 6502 processor.
+	// unsigned char disk_label[16];
+
+	// This is the original initial command DOS string for drive 0.
+	strcpy(drive_command_string, "i0");
+	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
+	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
+	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
+	
+	result = cbm_open(15, dev, 15, drive_command_string); // Open with the initialize command.
+	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+	
+	result = cbm_open(2, 8, 2, "#"); // Open command channel.
+	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60 <---!!!!! This is th reason. But I don't know why. Probably null characters!
+	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
+	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+	strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
+	read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
+	drive_command_string2[1] = '2';
+	// strcpy(drive_command_string2, "u2:2,0,18,0");
+	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60
+	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
+	
+	result = cbm_open(15, dev, 15, drive_command_string); // Open with the initialize command.
+	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+	
+	cbm_close(2); // Close the command channel.
+	cbm_close(15); // Close the other channel???
+
+};//end-func
+
+
+
+// BASIC EXAMPLE OF WRITING THE DISK NAME
+// 10 OPEN 2,8,2,"#"
+// 15 OPEN 15,8,15
+// 20 PRINT#15,"B-P";2;144
+// 25 PRINT#2,"TESTING-DISKNAME";
+// 30 PRINT#15,"U2";2;0;18;0
+// 35 CLOSE 2
+// 40 CLOSE 15
+
+
+
+
+
+
+
+
+
+
+// void read_disk_id() {
+
+// 	// Instead of passing a var, we use a global var for this purpose,
+// 	// because it's faster in C programming esepcially on the 6502 processor.
+// 	// unsigned char disk_label[16];
+
+// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
+// 	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	result = cbm_open(2, dev, 2, "#"); // Open command channel.
+// 	result = cbm_write(15, "u1:2,0,18,0", sizeof("u1:2,0,18,0")); // Send the block read command to load track and sector to RAM command.
+// 	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	//memset( disk_sector_buffer, 0, sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
+// 	read_bytes = cbm_read(2, disk_sector_buffer, 2); // Read the 16 bytes that are the current disk label from the commmand channel.
+// 	disk_sector_buffer[2]='\0'; // Make sure the string is NULL terminated.
+// 	strcpy(disk_id, disk_sector_buffer);
+// 	// printf("disk_sector_buffer:'%s'\n",disk_sector_buffer); // Show us the disk label.
+// 	cbm_close(2); // Close the command channel.
+// 	cbm_close(15); // Close the other channel???
+
+// };//end-func
+
+
+void write_disk_id() {
+
+	result = get_drive_type(dev);
+
+	switch (result) {
+		case DRIVE_1541 :
+		case DRIVE_2031 :
+		case DRIVE_SD2  :
+			// These drives are supported! Keep executing.
+		break;
+
+		default :
+			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
+			return;
+		break;
+	};//end-switch
+
+	// Instead of passing a var, we use a global var for this purpose,
+	// because it's faster in C programming esepcially on the 6502 processor.
+	// unsigned char disk_label[16];
+
+	// This is the original initial command DOS string for drive 0.
+	strcpy(drive_command_string, "i0");
+	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
+	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
+	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
+	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+	result = cbm_open(2, 8, 2, "#"); // Open command channel.
+	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60 <---!!!!! This is th reason. But I don't know why. Probably null characters!
+	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
+ 	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+	strncpy(disk_sector_buffer,disk_id,2); // Create our new disk label string.
+	// disk_sector_buffer[0] = disk_id[0];
+	// disk_sector_buffer[1] = disk_id[1];
+	// disk_sector_buffer[2] = '\0';
+	read_bytes = cbm_write(2, disk_id, 2); // Write our new disk label's 16 bytes to the commmand channel.
+	// result = cbm_write(15, "u2:2,0,18,0", sizeof("u2:2,0,18,0")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+	drive_command_string2[1] = '2';
+	// strcpy(drive_command_string2, "u2:2,0,18,0");
+	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60
+	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
+	// result = cbm_open(15, dev, 15, "i0"); // Open ???
+	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
+	read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+	cbm_close(2); // Close the command channel.
+	cbm_close(15); // Close the other channel???
+
+};//end-func
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void BYTE_TO_BINARY(byte) {
     cputc('B');           
@@ -315,23 +581,33 @@ unsigned char they_are_sure(void) {
 
 	unsigned char are_they_sure_keystroke;
 
-	printf("Are you sure?(Y/N)\n");
+	printf("Are you sure?(Y/N) ");
 
-	wait_for_keypress(); 	// wait for a keypress, after flushing the buffer 
-	are_they_sure_keystroke = cgetc();
+	while(1){
 
-    switch(are_they_sure_keystroke) {
-        case 'Y' :
-        case 'y' :
-		    printf("Ok.\n");
-		    return(1);
-		break;
+		wait_for_keypress(); 	// wait for a keypress, after flushing the buffer 
+		are_they_sure_keystroke = cgetc();
 
-        default :
-		    printf("Aborting.\n");
-		    return(0);
-		break;
-	};//end_switch
+		switch(are_they_sure_keystroke) {
+		    case 'Y' :
+		    case 'y' :
+				printf("Ok.\n");
+				return(1);
+			break;
+
+		    // default :
+
+		    // There was this weird bug where I would hit Y but it would act like I didn't. 
+		    // I can't re-create it reliably, so instead it's going to look for Y or N explictly.
+		    case 'N' :
+		    case 'n' :
+				printf("Aborting.\n");
+				// printf("are_they_sure_keystroke #:%u C:'%c'\n",are_they_sure_keystroke,are_they_sure_keystroke); // Debugging this weird error I can't always re-create.
+				return(0);
+			break;
+		};//end_switch
+
+	};//end-while
 
     // reworking this saved 3 bytes
 	// if (are_they_sure_keystroke == 'Y' || are_they_sure_keystroke == 'y') {
@@ -402,318 +678,84 @@ char* replace_char(char* str, char find, char replace){
 
 void display_logo(unsigned char x, unsigned char y) {
 
-	//TODO: prevent the lgoo from trypign to drawe itself outisde teh screen 
+	// Savings: Before: 47536 After: 46722 saved: 814 bytes!!!
 
-	// full checkerboard = 230    bottom checkerboard = 232      side checkerboard = 220 
-	// ctrl+7 = 31  blue        ctrl+3 = 28 red        ctrl+3 = 5 whtie    ctrl+4 = cyan     ctrl+5 = 156 purple 
+	unsigned char current_x = 0;
+	unsigned char current_y = 0;
+	unsigned char current_color = 0;
 
-	// unsigned char line1[] = "   XXXX";
-	// unsigned char line2[] = "  XXXXX";
-	// unsigned char line3[] = " XX|   XXXXX";
-	// unsigned char line4[] = "XX|    XXXX ";
-	// unsigned char line5[] = "XX";
-	// unsigned char line6[] = "XX|";
-	// unsigned char line7[] = " XX|";
-	// unsigned char line8[] = "  XXXXX";
-	// unsigned char line9[] = "   XXXX";
+	// Newest 64 Rainbow Logo    
+	// 0123456789X12
+	// "     #| #|#  "; 0
+	// "    #| #|#|  "; 1
+	// "   #| #| |#  "; 2
+	// "  #| #|  ##  "; 3
+	// " #| #|##|#|#|"; 4
+	// "#| #|##|#|#| "; 5
+	// "|#    |# ##  "; 6
+	// "#|    #| #|  "; 7
+	// "|#    |# |#  "; 8
+	// "#|    #| ##  "; 9
+	// " ##  #|  #|  "; 10
+	// "  #|#|   |   "; 11
 
-	// unsigned char line6r[] = "XXXX";
-	// unsigned char line7r[] = "XXXXX";
-
-	// TODO: this takes up like 256 or so bytes
-	// replace_char(line1, 'X', 230);
-	// replace_char(line2, 'X', 230);
-	// replace_char(line3, 'X', 230);
-	// replace_char(line4, 'X', 230);
-	// replace_char(line5, 'X', 230);
-	// replace_char(line6, 'X', 230);
-	// replace_char(line7, 'X', 230);
-	// replace_char(line8, 'X', 230);
-	// replace_char(line9, 'X', 230);
-
-	// replace_char(line1, '|', 220);
-	// replace_char(line2, '|', 220);
-	// replace_char(line3, '|', 220);
-	// replace_char(line4, '|', 220);
-	// replace_char(line5, '|', 220);
-	// replace_char(line6, '|', 220);
-	// replace_char(line7, '|', 220);
-	// replace_char(line8, '|', 220);
-	// replace_char(line9, '|', 220);
-
-	// replace_char(line6r, 'X', 230);
-	// replace_char(line7r, 'X', 230);
-
-    // // Newer
-	// unsigned char line1[] = { 32,32,32,230,230,230,230,'\0' };
-	// unsigned char line2[] = { 32,32,230,230,230,230,230,'\0' };
-	// unsigned char line3[] = { 32,230,230,220,32,32,32,230,230,230,230,230,'\0' };
-	// unsigned char line4[] = { 230,230,220,32,32,32,32,230,230,230,230,'\0' };
-	// unsigned char line5[] = { 230,230,'\0' };
-	// unsigned char line6[] = { 230,230,220,'\0' };
-	// unsigned char line7[] = { 32,230,230,220,'\0' };
-	// unsigned char line8[] = { 32,32,230,230,230,230,230,'\0' };
-	// unsigned char line9[] = { 32,32,32,230,230,230,230,'\0' };
-
-	// unsigned char line6r[] = { 230,230,230,230,'\0' };
-	// unsigned char line7r[] = { 230,230,230,230,230,'\0' };
-
-	// Newest 64 Rainbow Logo
-	// unsigned char line1[]  = {  32, 32, 32, 32, 32,230,'/', 32,230,'/',230, 32, 32,'\0' };
-	// unsigned char line2[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line3[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line4[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line5[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line6[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line7[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line8[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line9[]  = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line10[] = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line11[] = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-	// unsigned char line12[] = { 000,000,000,000,000,000,000,000,000,000,000,000,000,'\0' };
-
-
-	// Newest 64 Rainbow Logo    0123456789X12
-	// unsigned char  line1[] = "     #| #|#  "; 0
-	// unsigned char  line2[] = "    #| #|#|  "; 1
-	// unsigned char  line3[] = "   #| #| |#  "; 2
-	// unsigned char  line4[] = "  #| #|  ##  "; 3
-	// unsigned char  line5[] = " #| #|##|#|#|"; 4
-	// unsigned char  line6[] = "#| #|##|#|#| "; 5
-	// unsigned char  line7[] = "|#    |# ##  "; 6
-	// unsigned char  line8[] = "#|    #| #|  "; 7
-	// unsigned char  line9[] = "|#    |# |#  "; 8
-	// unsigned char line10[] = "#|    #| ##  "; 9
-	// unsigned char line11[] = " ##  #|  #|  "; 10
-	// unsigned char line12[] = "  #|#|   |   "; 11
+	unsigned char binary_logo[] = {
+		/*"     ## "  "###  "*/
+		 0b00000110, 0b11100000,
+		/*"    ## #"  "###  "*/
+		 0b00001101, 0b11100000,
+		/*"   ## ##"  " ##  "*/
+		 0b00011011, 0b01100000,
+		/*"  ## ## "  " ##  "*/
+		 0b00110110, 0b01100000,
+		/*" ## ####"  "#####"*/
+		 0b01101111, 0b11111000,
+		/*"## #####"  "#### "*/
+		 0b11011111, 0b11110000,
+		/*"##    ##"  " ##  "*/
+		 0b11000011, 0b01100000,
+		/*"##    ##"  " ##  "*/
+		 0b11000011, 0b01100000,
+		/*"##    ##"  " ##  "*/
+		 0b11000011, 0b01100000,
+		/*"##    ##"  " ##  "*/
+		 0b11000011, 0b01100000,
+		/*" ##  ## "  " ##  "*/
+		 0b01100110, 0b01100000,
+		/*"  ####  "  " #   "*/
+		 0b00111100, 0b01000000
+	};//end-array
 
 	#define CHAR_SQUARE 232
-	#define CHAR_LEFT_HATCH 232
-	
 
-	// Starting position gotoxy(x+0,y+0);
+	// unsigned char color_fade[] = { RED, RED, ORANGE, ORANGE, YELLOW, YELLOW, GREEN, GREEN, BLUE, BLUE, PURPLE, PURPLE};
+	unsigned char color_fade[] = { RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE, RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE};
 
-	revers(TRUE);
+	for ( i = 0 ; i <= 23 ; i++) { // first to last position in the binary logo bitmap array
 
-	// Line 1 - "0123456789X12" - 0
-	// Line 1 - "     #| #|#  "
-	gotoxy    ( x+5 , y+0 );
-	textcolor ( RED );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+8 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_SQUARE );
+		textcolor( color_fade[current_y] );
 
-	// Line 2 - "0123456789X12" - 1
-	// Line 2 - "    #| #|#|  "
-	gotoxy    ( x+4 , y+1 );
-	textcolor ( RED );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+7 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+9 );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
+		for ( ii = 8 ; ii > 0 ; ii--) {
+			if (get_bit(binary_logo[i],ii-1) ) {
+				revers(TRUE);
+				gotoxy    ( x+current_x , y+current_y );
+				cputc( CHAR_SQUARE );
+			} else {
+				revers(FALSE);
+				cputc( ' ' );
+			};//end-if
+			current_x++;
+		};//end-for
 
-	// Line 3 - "0123456789X12" - 2
-	// Line 3 - "   #| #| |#  "
-	gotoxy    ( x+3 , y+2 );
-	textcolor ( RED );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+6 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+9 );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
+		if (get_bit(i,0)) {
+			current_y++;
+			current_x = 0;
+		};//end-if
 
-	// Line 4 - "0123456789X12" - 3
-	// Line 4 - "  #| #|  ##  "
-	gotoxy    ( x+2 , y+3 );
-	textcolor ( RED );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+5 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+9 );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_SQUARE );
-
-	// Line 5 - "0123456789X12" - 4
-	// Line 5 - " #| #|##|#|#|"
-	gotoxy    ( x+1 , y+4 );
-	textcolor ( RED );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+4 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-
-	// Line 6 - "0123456789X12" - 5
-	// Line 6 - "#| #|##|#|#| "
-	gotoxy    ( x+0 , y+5 );
-	textcolor ( RED );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+3 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-
-	// Line 7 - "0123456789X12" - 6
-	// Line 7 - "|#    |# ##  "
-	gotoxy    ( x+0 , y+6 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+6 );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	gotox     ( x+9 );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_SQUARE );
-
-	// Line 8 - "0123456789X12" - 7
-	// Line 8 - "#|    #| #|  "
-	gotoxy    ( x+0 , y+7 );
-	textcolor ( ORANGE );
-	cputc     ( CHAR_SQUARE );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+6 );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+9 );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-
-	// Line 9 - "0123456789X12" - 8
-	// Line 9 - "|#    |# |#  "
-	gotoxy    ( x+0 , y+8 );
-	textcolor ( YELLOW );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+6 );
-	textcolor ( GREEN );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	gotox     ( x+9 );
-	textcolor ( BLUE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( PURPLE );
-	cputc     ( CHAR_SQUARE );
-
-	// Line 10 - "0123456789X12" - 9
-	// Line 10 - " ##  #|  #|  "
-	gotoxy    ( x+1 , y+9 );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+5 );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+9 );
-	textcolor ( PURPLE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-
-	// Line 11 - "0123456789X12" - 10
-	// Line 11 - "  #|#|   |   "
-	gotoxy    ( x+2 , y+10 );
-	textcolor ( GREEN );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	textcolor ( BLUE );
-	cputc     ( CHAR_SQUARE );
-	cputc     ( CHAR_LEFT_HATCH );
-	gotox     ( x+9 );
-	textcolor ( PURPLE );
-	cputc     ( CHAR_LEFT_HATCH );
+	};//end-for
 
 	revers(FALSE);
 	textcolor( current_textcolor );
-
-
-
-	// if (current_bgcolor == BLUE) { // blue but like it's offset... 
-	// 	textcolor( BLACK ); // if background is blue, use black 
-	// } else {
-	// 	textcolor( BLUE ); // if background isn't blue, use blue 
-	// };//switch
-
-	// textcolor( WHITE ); 
-
-	// gotoxy(x,y+0); cputs(line1);
-	// gotoxy(x,y+1); cputs(line2);
-	// gotoxy(x,y+2); cputs(line3);
-	// gotoxy(x,y+3); cputs(line4);
-	// gotoxy(x,y+4); cputs(line5);
-	// gotoxy(x,y+5); cputs(line6);
-	// gotoxy(x,y+6); cputs(line7);
-	// gotoxy(x,y+7); cputs(line8);
-	// gotoxy(x,y+8); cputs(line9);
-	// gotoxy(x,y+9); cputs(line10);
-	// gotoxy(x,y+10); cputs(line11);
-	// gotoxy(x,y+11); cputs(line12);
-
-
-	//gotoxy(x,y+0); printf("%c",28); // 28 red
-	// current_bgcolor = read_nibble_low(0xD021);
-	// if (current_bgcolor == RED) { // red but like it's offset... 
-	// 	//printf("1C:%i\n",current_bgcolor);
-	// 	textcolor( PINK ); // if background is red, use pink 
-	// } else {
-	// 	//printf("2C:%i\n",current_bgcolor);
-	// 	textcolor( RED ); // if background isn't red, use red 
-	// };//switch
-
-	// gotoxy(x+7,y+5); cputs(line6r);
-	// gotoxy(x+7,y+6); cputs(line7r);
-
-	// printf(" current%ibgcolor:\n", current_bgcolor);
 
 };//end func
 
@@ -1013,6 +1055,8 @@ void find_rtc_device(void) {
 
 	// printf("WTF???");
 
+	// TODO: This assume the SD2IEC has at the very least the software clock. Doesn't deal with SD2IEC devices with nothing enabled at all.
+
 	rtc_device = 0;
 
 	for (i = 8 ; i <= 15 ; i++) {
@@ -1162,13 +1206,26 @@ void display_time_nice() {
 
 };//end func 
 
+// Variable to get input.
+unsigned char user_weekday_input[3];
+unsigned char user_ampm_input[2];
+unsigned char user_date_input[2];
+
+// Doing this saved 47721 - 47574 = 147 bytes!
+void date_helper() {
+	
+	scanf("%s", &user_date_input);
+	strcat(disk_sector_buffer,user_date_input);
+	
+};//end-func
+
 
 void set_date() {
 
-	// Variable to get input.
-	unsigned char user_weekday_input[3];
-	unsigned char user_ampm_input[2];
-	unsigned char user_date_input[2];
+	// // Variable to get input.
+	// unsigned char user_weekday_input[3];
+	// unsigned char user_ampm_input[2];
+	// unsigned char user_date_input[2];
 
 	find_rtc_device();
 	if ( rtc_device == 0 ) {
@@ -1188,33 +1245,39 @@ void set_date() {
 	strcat(disk_sector_buffer,". ");
 
 	printf("Mon. XX:");
-	scanf("%s", &user_date_input);
-	strcat(disk_sector_buffer,user_date_input);
+	// scanf("%s", &user_date_input);
+	// strcat(disk_sector_buffer,user_date_input);
+	date_helper();
 	strcat(disk_sector_buffer,"/");
 
 	printf("Day. XX:");
-	scanf("%s", &user_date_input);
-	strcat(disk_sector_buffer,user_date_input);
+	// scanf("%s", &user_date_input);
+	// strcat(disk_sector_buffer,user_date_input);
+	date_helper();
 	strcat(disk_sector_buffer,"/");
 
 	printf("Year XX:");
-	scanf("%s", &user_date_input);
-	strcat(disk_sector_buffer,user_date_input);
+	// scanf("%s", &user_date_input);
+	// strcat(disk_sector_buffer,user_date_input);
+	date_helper();
 	strcat(disk_sector_buffer," ");
 
 	printf("12 Hour:");
-	scanf("%s", &user_date_input);
-	strcat(disk_sector_buffer,user_date_input);
+	// scanf("%s", &user_date_input);
+	// strcat(disk_sector_buffer,user_date_input);
+	date_helper();
 	strcat(disk_sector_buffer,":");
 
 	printf("Mins XX:");
-	scanf("%s", &user_date_input);
-	strcat(disk_sector_buffer,user_date_input);
+	// scanf("%s", &user_date_input);
+	// strcat(disk_sector_buffer,user_date_input);
+	date_helper();
 	strcat(disk_sector_buffer,":");
 
 	printf("Secs XX:");
-	scanf("%s", &user_date_input);
-	strcat(disk_sector_buffer,user_date_input);
+	// scanf("%s", &user_date_input);
+	// strcat(disk_sector_buffer,user_date_input);
+	date_helper();
 	strcat(disk_sector_buffer," ");
 
 	printf("AM/PM XX:");
@@ -1388,14 +1451,16 @@ int main( int argc, char* argv[] ) {
 	// SET DEFAULT HOTKEYS 
 	// ********************************************************************************
 
-	set_hotkey(1,"ls"); // like 10 bytes per call
-	set_hotkey(2,"d08:");
+
+
+	set_hotkey(1,"dir"); // like 10 bytes per call
+	// set_hotkey(2,"d08:");
 	set_hotkey(3,"cls");
-	set_hotkey(4,"d09:");
+	// set_hotkey(4,"d09:");
 	set_hotkey(5,"stopwatch");
-	set_hotkey(6,"d10:");
+	// set_hotkey(6,"d10:");
 	set_hotkey(7,"ss");
-	set_hotkey(8,"d11:");
+	// set_hotkey(8,"d11:");
 
 
 	// ********************************************************************************
@@ -1827,7 +1892,7 @@ int main( int argc, char* argv[] ) {
 				cursor_end(); //erase the current entered text on teh screen, update teh screen with teh newly tab completed version, update teh screen cursor which can all be done with cursor_end()
 
 			// ********************************************************************************
-			// LEFT ARROW 
+			// LEFT ARROW
 			// ********************************************************************************
 			// } else if (keystroke == 6) { // CTRL + <- = 6 // we need this becuase left arrow is tab complete, but a filename might have an arrow in it, so CTRL plus LEFT ARROW will now emit an arrow character to compensate
 			// 	keystroke = 95; //replcace CTRL LEFT ARROW with LEFT ARROW
@@ -1838,7 +1903,7 @@ int main( int argc, char* argv[] ) {
 				cursor_add_character();
 
 			// ********************************************************************************
-			// TYPEABLE KEYS : 
+			// TYPEABLE KEYS :
 			// ********************************************************************************
 			//  Spacebar = 32 Shift+Spacebar = 160
 			//  ! = 33. ) = 40
@@ -1919,7 +1984,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// CLEAR COMMAND 
+		// CLEAR COMMAND
 		// ********************************************************************************
 		if        ( matching("clear",user_input_command_string) ||
 					matching("cls",user_input_command_string) ) {
@@ -1933,7 +1998,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// ECHO COMMAND 
+		// ECHO COMMAND
 		// ********************************************************************************
 		} else if ( matching("echo",user_input_command_string) ) {
             // printf("%s\n",user_input_arg1_string);
@@ -1952,7 +2017,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// ALIAS COMMAND 
+		// ALIAS COMMAND
 		// ********************************************************************************
 		} else if ( matching("alias",user_input_command_string) ) {
 
@@ -1985,7 +2050,7 @@ int main( int argc, char* argv[] ) {
 			result = 0; //reset it when we are done. 
 
 		// ********************************************************************************
-		// UNALIAS COMMAND 
+		// UNALIAS COMMAND
 		// ********************************************************************************
 		} else if ( matching("unalias",user_input_command_string) ) {
 
@@ -2003,10 +2068,10 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// HOTKEY COMMAND 
+		// HOTKEY COMMAND
 		// ********************************************************************************
-		} else if ( (user_input_command_string[0]=='h' && user_input_command_string[1]=='o' && user_input_command_string[2]=='t' && user_input_command_string[3]=='k') ||
-		            (user_input_command_string[0]=='h' && user_input_command_string[1]=='k') ){
+		} else if ( (user_input_command_string[0]=='h' && user_input_command_string[1]=='o' && user_input_command_string[2]=='t' && user_input_command_string[3]=='k') ) {
+		           // (user_input_command_string[0]=='h' && user_input_command_string[1]=='k') ){
 
 			if ( number_of_user_inputs==1) { // there should be a var number_of_arguments as well 
 				display_hotkeys();
@@ -2031,7 +2096,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// HELP COMMAND 
+		// HELP COMMAND
 		// ********************************************************************************
 
         // I've added an alias to cover this instead. It just automatically types the help file like this: type chicli-readme
@@ -2089,7 +2154,7 @@ int main( int argc, char* argv[] ) {
 
 				get_key = cgetc();
 
-				printf("CHR:%c HEX:%x DEC:%i\n", get_key, get_key, get_key);
+				printf("HEX:%x DEC:%i CHR:%c\n", get_key, get_key, get_key); // TODO: Make this not display control chars and have all the columns aligned in teh output. Thanks!
 
 			// RUN/STOP or CTRL-C
 			} while( get_key != 3);//end do 
@@ -2173,11 +2238,11 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// EXIT COMMAND 
+		// EXIT COMMAND
 		// ********************************************************************************
-		} else if ( matching("exit",user_input_command_string) ||
-					// matching("quit",user_input_command_string) ||
-					matching("endcli",user_input_command_string)) {
+		} else if ( matching("exit",user_input_command_string)   ||
+					// matching("quit",user_input_command_string)   ||
+					matching("endcli",user_input_command_string) ){
 
 			if (they_are_sure() == TRUE) {
 
@@ -2208,10 +2273,10 @@ int main( int argc, char* argv[] ) {
 	    		//_sys((&)65126UL); // maybe this isn't even nesscary? 
 		    	exit(EXIT_SUCCESS);  // whcih allows us to call exit properly, or we could say "press return to restart" and have hidden black on black text with SYS 64738 waiting for them 
 			};//end if
-				
-	 				
+
+
 		// ********************************************************************************
-		// RESTART COMMAND 
+		// RESTART COMMAND
 		// ********************************************************************************
 		   } else if ( matching("restart",user_input_command_string) ) {
 
@@ -2273,7 +2338,30 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// SHUTDOWN COMMAND 
+		// DISKCOPY COMMAND
+		// ********************************************************************************
+		} else if ( matching("diskcopy",user_input_command_string) ) {
+
+			// TODO: In this future, this should work like this:
+			// dos cp1  -->  Executes DOS command on the current device using 1, dev, 15
+			// dos 7 7 15 "do something" --> Executes DOS command as if it were done in Basic like this: OPEN 7,7,15 : PRINT#7,"DO SOMETHING" : CLOSE 7
+			// So either we have 1 argument or 4 arguments.
+
+			strcpy (drive_command_string,"d1=0");
+
+			printf("Put the source disk in drive a (0),\nand the target disk in drive b (1).\n");
+
+			if (they_are_sure() == TRUE) {
+				printf("DOS Command: %s... ", drive_command_string);
+				result = cbm_open(1, dev, 15, drive_command_string);
+				// printf( "cbm_open: %i \n", result );
+				cbm_close(1);
+				printf("Done!\n");
+			};//end if
+
+
+		// ********************************************************************************
+		// SHUTDOWN COMMAND
 		// ********************************************************************************
 		} else if ( matching("shutdown",user_input_command_string) ) {
 
@@ -2315,48 +2403,31 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DETECT_DRIVE COMMAND 
+		// DRIVEDETECT COMMAND
 		// ********************************************************************************
-		} else if ( matching("drive-detect",user_input_command_string) ) {
+		} else if ( matching("drivedetect",user_input_command_string) ) {
              detect_drive(dev, TRUE); // disabled ecverything below, so you just go to the drive you want and runt eh command. for example: d8: and enter then type drive-detect
 
-		// 	switch (number_of_user_inputs) {
-		// 		case 1 :
-	 // 					result = detect_drive(dev, TRUE);
-	 // 					// printf("result:%i\n", result);
-		// 				// printf("E#:%i TR:%i BL:%i\n", error_number, error_track , error_block );
-		// 				// printf("ED:%s\n", error_message );
-		// 	    break;
 
-		// 		case 2 :
-	 // 					result = detect_drive(user_input_arg1_number, TRUE);
-	 // 					// printf("result:%i\n", result);
-		// 				// printf("E#:%i TR:%i BL:%i\n", error_number, error_track , error_block );
-		// 				// printf("ED:%s\n", error_message );
-		// 	    break;
-
-		// 	    default :
-		// 	    	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-		// 	    //end default
-
-		// 	};//end switch
 
 
 		// ********************************************************************************
-		// STATUS COMMAND 
+		// STATUS COMMAND
 		// ********************************************************************************
 		} else if ( matching("status",user_input_command_string) ) {
 
-            switch(user_input_arg1_string[2]) {
-                case '8' : user_input_arg1_number = 8;  break;
-                case '9' : user_input_arg1_number = 9;  break;
-                case '0' : user_input_arg1_number = 10; break;
-                case '1' : user_input_arg1_number = 11; break;
-                case '2' : user_input_arg1_number = 12; break;
-                case '3' : user_input_arg1_number = 13; break;
-                case '4' : user_input_arg1_number = 14; break;
-                case '5' : user_input_arg1_number = 15; break;
-            };//end_switch
+            // switch(user_input_arg1_string[2]) {
+            //     case '8' : user_input_arg1_number = 8;  break;
+            //     case '9' : user_input_arg1_number = 9;  break;
+            //     case '0' : user_input_arg1_number = 10; break;
+            //     case '1' : user_input_arg1_number = 11; break;
+            //     case '2' : user_input_arg1_number = 12; break;
+            //     case '3' : user_input_arg1_number = 13; break;
+            //     case '4' : user_input_arg1_number = 14; break;
+            //     case '5' : user_input_arg1_number = 15; break;
+            // };//end_switch
+
+			convert_device_string(user_input_arg1_string[2], user_input_arg1_number) ;
 
 			switch (number_of_user_inputs) {
 				case 1 : result = get_status(dev, TRUE); break;
@@ -2394,7 +2465,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// INITIALIZE COMMAND 
+		// INITIALIZE COMMAND
 		// ********************************************************************************
 		} else if ( (user_input_command_string[0]=='i' && user_input_command_string[1]=='n' && user_input_command_string[2]=='i' && user_input_command_string[3]=='t') ) { // } else if ( matching("initialize",user_input_command_string) ) {
 		
@@ -2405,7 +2476,7 @@ int main( int argc, char* argv[] ) {
 			result = get_status(dev, TRUE);
 
 			if (result != 255) {
-				printf("-->i0\nInitializing...\n");
+				printf("Initializing... ");
 
 				result = cbm_open(1, dev, 15, "i0");
 				cbm_close(1);
@@ -2419,25 +2490,41 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// VALIDATE COMMAND 
+		// VALIDATE COMMAND
 		// ********************************************************************************
 		} else if ( (user_input_command_string[0]=='v' && user_input_command_string[1]=='a' && user_input_command_string[2]=='l') ) {
+		
+		
+		// } else if ( matching("validate",user_input_command_string) || \
+		// 			matching("val",user_input_command_string)      || \
+		// 			matching("collect",user_input_command_string)   ) {
+		
+			
 
 		    if (they_are_sure() == TRUE) {
-			result = get_status(dev, TRUE);
+				result = get_status(dev, TRUE);
 
-			if (result != 255) {
-				printf("-->v0\nValidating...\n");
-
-				result = cbm_open(1, dev, 15, "v0");
-				cbm_close(1);
-
-				if (result == 0) {
-					printf("Done.\n");
+				drive_command_string[0] = 'v';
+				if (get_drive_type(dev) == DRIVE_UIEC) {
+				    drive_command_string[1] = par+1;
 				} else {
-					printf("Er: %i\n", result);
+					drive_command_string[1] = par;
+				};//end-if
+				drive_command_string[2] = '\0';
+
+				if (result != 255) {
+					// printf("-->%s\nValidating...\n",drive_command_string);
+					printf("Validating... ");
+
+					result = cbm_open(1, dev, 15, drive_command_string);
+					cbm_close(1);
+
+					if (result == 0) {
+						printf("Done.\n");
+					} else {
+						printf("Er: %i\n", result);
+					};//end if 
 				};//end if 
-			};//end if 
 		    } else {
 		        printf("Cancelled.\n");
 		    };//end_if
@@ -2449,7 +2536,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// SD2IEC COMMAND 
+		// SD2IEC COMMAND
 		// ********************************************************************************
 		} else if ( matching("sd2iec",user_input_command_string) ) {
 
@@ -2526,7 +2613,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// // ********************************************************************************
-		// // SD2IEC-HIDE-EXT COMMAND 
+		// // SD2IEC-HIDE-EXT COMMAND
 		// // ********************************************************************************
 		// } else if ( matching("sd2iec-hide-ext",user_input_command_string) ) {
 
@@ -2551,7 +2638,7 @@ int main( int argc, char* argv[] ) {
 
 		// 			
 		// // ********************************************************************************
-		// // SD2IEC-SHOW-EXT COMMAND 
+		// // SD2IEC-SHOW-EXT COMMAND
 		// // ********************************************************************************
 		// } else if ( matching("sd2iec-show-ext",user_input_command_string) ) {
 
@@ -2576,7 +2663,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// // ********************************************************************************
-		// // SD2IEC-SHOW-EXT COMMAND 
+		// // SD2IEC-SHOW-EXT COMMAND
 		// // ********************************************************************************
 		// } else if ( matching("sd2iec-save",user_input_command_string) ) {
 
@@ -2601,7 +2688,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// CD COMMAND 
+		// CD COMMAND
 		// ******************************************************************************** 		
 		} else if (user_input_command_string[0]=='c' && user_input_command_string[1]=='d') { // --> THIS SAVES 8 BYTES!!! --> } else if ( matching("cd",user_input_command_string) ) { 
 
@@ -2625,76 +2712,116 @@ int main( int argc, char* argv[] ) {
 						strcat (drive_command_string,"//");
 
 					} else if ( user_input_arg1_string[0]=='d' && user_input_arg1_string[3]==':' ) {
-						switch (user_input_arg1_string[2]) {
-							case '8' : change_drive(8); break;
-							case '9' : change_drive(9); break;
-							case '0' : change_drive(10); break;
-							case '1' : change_drive(11); break;
-							case '2' : change_drive(12); break;
-							case '3' : change_drive(13); break;
-							case '4' : change_drive(14); break;
-							case '5' : change_drive(15); break;
+						// switch (user_input_arg1_string[2]) {
+						// 	case '8' : change_drive(8); break;
+						// 	case '9' : change_drive(9); break;
+						// 	case '0' : change_drive(10); break;
+						// 	case '1' : change_drive(11); break;
+						// 	case '2' : change_drive(12); break;
+						// 	case '3' : change_drive(13); break;
+						// 	case '4' : change_drive(14); break;
+						// 	case '5' : change_drive(15); break;
 
-							default : 
-								printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-							//end default
-						};//end switch
+						// 	default : 
+						// 		printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+						// 	//end default
+						// };//end switch
+
+						// convert_device_string(user_input_arg1_string[2], user_input_arg1_number);
+						// change_drive(user_input_arg1_number);
+
+						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);
+						if (user_input_arg1_number == 255) { // The above macro "function" updates user_input_arg1_number with 255 if user_input_arg1_string[2] is fucked.
+							printf("Error: Invalid device.\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+							goto END_CD;
+						};//end-if
+						change_drive(user_input_arg1_number);
+
 						goto END_CD;
-					
-					
+
 					} else if (user_input_arg1_string[0] == 'd' && user_input_arg1_string[4] == ':') { // copy * d08b:
 				        // puts("if 2 --> WTF???");
-						switch (user_input_arg1_string[2]) {
-							case '8' : change_drive(8); break;
-							case '9' : change_drive(9); break;
-							case '0' : change_drive(10); break;
-							case '1' : change_drive(11); break;
-							case '2' : change_drive(12); break;
-							case '3' : change_drive(13); break;
-							case '4' : change_drive(14); break;
-							case '5' : change_drive(15); break;
+						// switch (user_input_arg1_string[2]) {
+						// 	case '8' : change_drive(8); break;
+						// 	case '9' : change_drive(9); break;
+						// 	case '0' : change_drive(10); break;
+						// 	case '1' : change_drive(11); break;
+						// 	case '2' : change_drive(12); break;
+						// 	case '3' : change_drive(13); break;
+						// 	case '4' : change_drive(14); break;
+						// 	case '5' : change_drive(15); break;
 
-							default : 
-								printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-							//end default
-						};//end switch
-					
-					
-					
-					    switch (user_input_arg1_string[3]) {
-				            case '0' : par = '0';  break;
-				            case 'a' : par = '1';  break;
-				            case 'b' : par = '2';  break;
-				            case 'c' : par = '3';  break;
-				            case 'd' : par = '4';  break;
-				            case 'e' : par = '5';  break;
-				            case 'f' : par = '6';  break;
-				            case 'g' : par = '7';  break;
-				            case 'h' : par = '8';  break;
-				            case 'i' : par = '9';  break;
-				            // case 'j' : target_par = '10'; break;
-				            // case 'k' : target_par = '11'; break;
-				            // case 'l' : target_par = '12'; break;
-				            // case 'm' : target_par = '13'; break;
-				            // case 'n' : target_par = '14'; break;
-				            // case 'o' : target_par = '15'; break;
-				            // case 'p' : target_par = '16'; break;
-						    default  :
-						    	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-						    //end default
-						};//end switch
-					
-						part_command[0] = 'c';
-						part_command[1] = 'p';
-						part_command[2] = par;
-						part_command[3] = '\0';
+						// 	default : 
+						// 		printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+						// 	//end default
+						// };//end switch
+						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);
+						if (user_input_arg1_number == 255) { // The above macro "function" updates user_input_arg1_number with 255 if user_input_arg1_string[2] is fucked.
+							printf("Error: Invalid device.\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+							goto END_CD;
+						};//end-if
+						change_drive(user_input_arg1_number);
 
-						cbm_open(1, dev, 15, part_command);
-						// printf( "cbm_open result: %i \n", result );
-						// printf( "part_command: %s \n", part_command );
-						cbm_close(1);
+					 //    switch (user_input_arg1_string[3]) {
+				  //           case '0' : par = '0';  break;
+				  //           case 'a' : par = '1';  break;
+				  //           case 'b' : par = '2';  break;
+				  //           case 'c' : par = '3';  break;
+				  //           case 'd' : par = '4';  break;
+				  //           case 'e' : par = '5';  break;
+				  //           case 'f' : par = '6';  break;
+				  //           case 'g' : par = '7';  break;
+				  //           case 'h' : par = '8';  break;
+				  //           case 'i' : par = '9';  break;
+				  //           // case 'j' : target_par = '10'; break;
+				  //           // case 'k' : target_par = '11'; break;
+				  //           // case 'l' : target_par = '12'; break;
+				  //           // case 'm' : target_par = '13'; break;
+				  //           // case 'n' : target_par = '14'; break;
+				  //           // case 'o' : target_par = '15'; break;
+				  //           // case 'p' : target_par = '16'; break;
+						//     default  :
+						//     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+						//     //end default
+						// };//end switch
+						convert_partition_string(user_input_arg1_string[3], par);
+						if (par == 255) { // The above macro "function" updates par with 255 if user_input_arg1_string[3] is fucked.
+							printf("Error: Invalid partition.\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+							goto END_CD;
+						};//end-if
 
-						printf("Partition %c set.\n", par+16);
+						// part_command[0] = 'c';
+						// part_command[1] = 'p';
+						// part_command[2] = par;
+						// part_command[3] = '\0';
+
+						// cbm_open(1, dev, 15, part_command);
+						// // printf( "cbm_open result: %i \n", result );
+						// // printf( "part_command: %s \n", part_command );
+						// cbm_close(1);
+
+						// printf("Partition %c set.\n", par+16);
+
+
+						if (get_drive_type(dev) == DRIVE_UIEC) {
+							// printf("Detected SD2IEC!\n");
+							//string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+							part_command[0] = 'c';
+							part_command[1] = 'p';
+							part_command[2] = par+1;
+							part_command[3] = '\0';
+
+							cbm_open(1, dev, 15, part_command);
+							// printf( "cbm_open result: %i \n", result );
+							// printf( "part_command: %s \n", part_command );
+							cbm_close(1);
+
+							printf("Partition %c set.\n", par+17);
+						} else {
+							//string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+							printf("Drive %c set.\n", par+17);
+						};//end-if
+
 
 						goto END_CD;
 
@@ -2712,42 +2839,20 @@ int main( int argc, char* argv[] ) {
 
 			};//end switch	
 
-			result = cbm_open(1, dev, 15, drive_command_string);		
+			result = cbm_open(1, dev, 15, drive_command_string);
 			cbm_close(1);
 
             END_CD : ; // This skips the above closing of the command channel, for cases where it isn't needed.
 
-		// // ********************************************************************************
-		// // CD.. COMMAND 
-		// // ******************************************************************************** 		
-		// } else if ( matching("cd..",user_input_command_string) ) {
-
-		// 	strcpy (drive_command_string,"cd");
-		// 	strcat (drive_command_string,command_cdback);
-		// 	result = cbm_open(1, dev, 15, drive_command_string);		
-		// 	cbm_close(1);
-
-
-		// // ********************************************************************************
-		// // CD/ COMMAND 
-		// // ******************************************************************************** 		
-		// } else if ( matching("cd/",user_input_command_string) ) {
-
-		// 	strcpy (drive_command_string,"cd");
-		// 	strcat (drive_command_string,"//");
-		// 	result = cbm_open(1, dev, 15, drive_command_string);		
-		// 	cbm_close(1);
-
-
 
 
 		// ********************************************************************************
-		// MOUNT COMMAND 
+		// MOUNT COMMAND
 		// ********************************************************************************
 		} else if ( matching("mount",user_input_command_string) ) {
 
 			switch (number_of_user_inputs) {
-				case 2 : 				
+				case 2 :
 					strcpy (drive_command_string,"cd:");
 					strcat (drive_command_string,user_input_arg1_string);
 					strcat (drive_command_string,"");
@@ -2762,12 +2867,12 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// UNMOUNT COMMAND 
+		// UNMOUNT COMMAND
 		// ********************************************************************************
 		} else if ( matching("unmount",user_input_command_string) ) {
 
 			switch (number_of_user_inputs) {
-				case 1 : 				
+				case 1 :
 					strcpy (drive_command_string,"cd");
 					strcat (drive_command_string,command_cdback);
 					strcat (drive_command_string,"");
@@ -2782,36 +2887,45 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// CHANGE PARTITION COMMAND 
+		// CHANGE PARTITION COMMAND
 		// ********************************************************************************
-		} else if ( (user_input_command_string[0]=='p' && user_input_command_string[1]=='a' && user_input_command_string[2]=='r' && user_input_command_string[3]=='t') ) { // } else if ( matching("part",user_input_command_string) ) {
-            switch ( user_input_arg1_string[0] ) {
-                case '0' : par = '0';  break;
-                case 'a' : par = '1';  break;
-                case 'b' : par = '2';  break;
-                case 'c' : par = '3';  break;
-                case 'd' : par = '4';  break;
-                case 'e' : par = '5';  break;
-                case 'f' : par = '6';  break;
-                case 'g' : par = '7';  break;
-                case 'h' : par = '8';  break;
-                case 'i' : par = '9';  break;
-                // case 'j' : par[0]='1'; par[1]='0'; par[3]='\0'; break; // not an array or a pointer. Need to rework all this.
-                // case 'k' : par[0]='1'; par[1]='1'; par[4]='\0'; break;
-                // case 'l' : par[0]='1'; par[1]='2'; par[5]='\0'; break;
-                // case 'm' : par[0]='1'; par[1]='3'; par[6]='\0'; break;
-                // case 'n' : par[0]='1'; par[1]='4'; par[7]='\0'; break;
-                // case 'o' : par[0]='1'; par[1]='5'; par[8]='\0'; break;
-                // case 'p' : par[0]='1'; par[1]='6'; par[9]='\0'; break;
-                // case 'k' : par = '11'; break;
-                // case 'l' : par = '12'; break;
-                // case 'm' : par = '13'; break;
-                // case 'n' : par = '14'; break;
-                // case 'o' : par = '15'; break;
-                // case 'p' : par = '16'; break;
-                default  : printf("Partition %c not supported.\n", user_input_arg1_string[0]); break;
-            };//end_switch
-
+		} else if ( /* matching("partition",user_input_command_string) || */ \
+					matching("part",user_input_command_string)      || \
+					matching("prt",user_input_command_string)       || \
+					matching("drive",user_input_command_string)      ) {
+			// } else if ( (user_input_command_string[0]=='p' && user_input_command_string[1]=='a' && user_input_command_string[2]=='r' && user_input_command_string[3]=='t') ) { 
+		
+			// The difference between just looking for teh first 4 chars 'p' 'a' 'r' 't' and 
+			// the four calls of matching() for "partition" "part" "prt"
+			// was about 41 bytes.
+		
+            // switch ( user_input_arg1_string[0] ) {
+            //     case '0' : par = '0';  break;
+            //     case 'a' : par = '1';  break;
+            //     case 'b' : par = '2';  break;
+            //     case 'c' : par = '3';  break;
+            //     case 'd' : par = '4';  break;
+            //     case 'e' : par = '5';  break;
+            //     case 'f' : par = '6';  break;
+            //     case 'g' : par = '7';  break;
+            //     case 'h' : par = '8';  break;
+            //     case 'i' : par = '9';  break;
+            //     // case 'j' : par[0]='1'; par[1]='0'; par[3]='\0'; break; // not an array or a pointer. Need to rework all this.
+            //     // case 'k' : par[0]='1'; par[1]='1'; par[4]='\0'; break;
+            //     // case 'l' : par[0]='1'; par[1]='2'; par[5]='\0'; break;
+            //     // case 'm' : par[0]='1'; par[1]='3'; par[6]='\0'; break;
+            //     // case 'n' : par[0]='1'; par[1]='4'; par[7]='\0'; break;
+            //     // case 'o' : par[0]='1'; par[1]='5'; par[8]='\0'; break;
+            //     // case 'p' : par[0]='1'; par[1]='6'; par[9]='\0'; break;
+            //     // case 'k' : par = '11'; break;
+            //     // case 'l' : par = '12'; break;
+            //     // case 'm' : par = '13'; break;
+            //     // case 'n' : par = '14'; break;
+            //     // case 'o' : par = '15'; break;
+            //     // case 'p' : par = '16'; break;
+            //     default  : printf("Partition %c not supported.\n", user_input_arg1_string[0]); break;
+            // };//end_switch
+			convert_partition_string(user_input_arg1_string[0], par);
 
    //          strcpy(part_command,"cp");
    //          strncat(part_command,&par,1);
@@ -2821,26 +2935,46 @@ int main( int argc, char* argv[] ) {
 			// // printf( "part_command: %s \n", part_command );
 			// cbm_close(1);
 
-            part_command[0] = 'c';
-            part_command[1] = 'p';
-            part_command[2] = par;
-            part_command[3] = '\0';
 
-            cbm_open(1, dev, 15, part_command);
-			// printf( "cbm_open result: %i \n", result );
-			// printf( "part_command: %s \n", part_command );
-			cbm_close(1);
+			// This is only needed for the SD2IEC, and the 4040 and MSD SD-2 don't need it.
+			
+			
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+				// printf("Detected SD2IEC!\n");
+				//string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+				part_command[0] = 'c';
+		        part_command[1] = 'p';
+		        part_command[2] = par+1;
+		        part_command[3] = '\0';
 
-			printf("Partition %c set.\n", par+16);
+		        cbm_open(1, dev, 15, part_command);
+				// printf( "cbm_open result: %i \n", result );
+				// printf( "part_command: %s \n", part_command );
+				cbm_close(1);
+				
+				printf("Partition %c set!\n", par+17);
+			} else {
+				//string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+				printf("Drive %c set.\n", par+17);
+			};//end-if
+			
+
+
+
 
 		// ********************************************************************************
 		// PWD COMMAND - PRINT DEVICE/PARTITION
 		// ******************************************************************************** 		
 		} else if (user_input_command_string[0]=='p' && user_input_command_string[1]=='w' && user_input_command_string[2] == 'd') { // --> THIS SAVES 8 BYTES!!! --> } else if ( matching("cd",user_input_command_string) ) { 
 
-            printf("Current Device:%i Partition:%c\n", dev, par+16);
+            // printf("Current Device:%i Partition:%c\n", dev, par+17);
 
-
+			printf("Device:%i ", dev);
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+				printf("Partition:%c\n", par+17);
+			} else {
+				printf("Drive:%c\n", par+17);
+			};//end-if
 
 
 		// ********************************************************************************
@@ -2848,144 +2982,110 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
         } else if ( user_input_command_string[0]=='d' && user_input_command_string[3]==':' ) {
 
-            switch (user_input_command_string[2]) {
-				case '8' : change_drive(8); break;
-				case '9' : change_drive(9); break;
-				case '0' : change_drive(10); break;
-				case '1' : change_drive(11); break;
-				case '2' : change_drive(12); break;
-				case '3' : change_drive(13); break;
-				case '4' : change_drive(14); break;
-				case '5' : change_drive(15); break;
+   //          switch (user_input_command_string[2]) {
+			// 	case '8' : change_drive(8); break;
+			// 	case '9' : change_drive(9); break;
+			// 	case '0' : change_drive(10); break;
+			// 	case '1' : change_drive(11); break;
+			// 	case '2' : change_drive(12); break;
+			// 	case '3' : change_drive(13); break;
+			// 	case '4' : change_drive(14); break;
+			// 	case '5' : change_drive(15); break;
 
-			    default : 
-			    	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-			    //end default
-			};//end switch
+			//     default : 
+			//     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+			//     //end default
+			// };//end switch
+			convert_device_string(user_input_command_string[2], user_input_arg1_number);
+			change_drive(user_input_arg1_number);
+
+
 
 		// ********************************************************************************
-		// CHANGE DRIVE AND PARTITION COMMAND
+		// D08: COMMAND / D08A: COMMAND / CHANGE DRIVE AND PARTITION COMMAND
 		// ********************************************************************************
         } else if ( user_input_command_string[0]=='d' && user_input_command_string[4]==':' ) {
 
-            switch (user_input_command_string[2]) {
-				case '8' : change_drive(8); break;
-				case '9' : change_drive(9); break;
-				case '0' : change_drive(10); break;
-				case '1' : change_drive(11); break;
-				case '2' : change_drive(12); break;
-				case '3' : change_drive(13); break;
-				case '4' : change_drive(14); break;
-				case '5' : change_drive(15); break;
+   //          switch (user_input_command_string[2]) {
+			// 	case '8' : change_drive(8); break;
+			// 	case '9' : change_drive(9); break;
+			// 	case '0' : change_drive(10); break;
+			// 	case '1' : change_drive(11); break;
+			// 	case '2' : change_drive(12); break;
+			// 	case '3' : change_drive(13); break;
+			// 	case '4' : change_drive(14); break;
+			// 	case '5' : change_drive(15); break;
 
-			    default : 
-			    	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-			    //end default
-			};//end switch
+			//     default : 
+			//     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+			//     //end default
+			// };//end switch
+			convert_device_string(user_input_command_string[2], user_input_arg1_number);
+			change_drive(user_input_arg1_number);
 
-            switch (user_input_command_string[3]) {
-                case '0' : par = '0';  break;
-                case 'a' : par = '1';  break;
-                case 'b' : par = '2';  break;
-                case 'c' : par = '3';  break;
-                case 'd' : par = '4';  break;
-                case 'e' : par = '5';  break;
-                case 'f' : par = '6';  break;
-                case 'g' : par = '7';  break;
-                case 'h' : par = '8';  break;
-                case 'i' : par = '9';  break;
-                // case 'j' : par = '10'; break;
-                // case 'k' : par = '11'; break;
-                // case 'l' : par = '12'; break;
-                // case 'm' : par = '13'; break;
-                // case 'n' : par = '14'; break;
-                // case 'o' : par = '15'; break;
-                // case 'p' : par = '16'; break;
+   //          switch (user_input_command_string[3]) {
+   //              case '0' : par = '0';  break;
+   //              case 'a' : par = '1';  break;
+   //              case 'b' : par = '2';  break;
+   //              case 'c' : par = '3';  break;
+   //              case 'd' : par = '4';  break;
+   //              case 'e' : par = '5';  break;
+   //              case 'f' : par = '6';  break;
+   //              case 'g' : par = '7';  break;
+   //              case 'h' : par = '8';  break;
+   //              case 'i' : par = '9';  break;
+   //              // case 'j' : par = '10'; break;
+   //              // case 'k' : par = '11'; break;
+   //              // case 'l' : par = '12'; break;
+   //              // case 'm' : par = '13'; break;
+   //              // case 'n' : par = '14'; break;
+   //              // case 'o' : par = '15'; break;
+   //              // case 'p' : par = '16'; break;
  
-                default  : printf("Partition %c not supported.\n", user_input_command_string[3]); break;
-			    //end default
-			};//end switch
+ ////                 default  : printf("Partition %c not supported.\n", user_input_command_string[3]); break;
+			//     //end default
+			// };//end switch
+			convert_partition_string(user_input_command_string[3], par);
 
-            part_command[0] = 'c';
-            part_command[1] = 'p';
-            part_command[2] = par;
-            part_command[3] = '\0';
+   //          part_command[0] = 'c';
+   //          part_command[1] = 'p';
+   //          part_command[2] = par;
+   //          part_command[3] = '\0';
 
-            result = cbm_open(1, dev, 15, part_command);
+   //          result = cbm_open(1, dev, 15, part_command);
 			// printf( "cbm_open result: %i \n", result );
 			// printf( "part_command: %s \n", part_command );
-			cbm_close(1);
+			// cbm_close(1);
 
-			// printf("Partition %c set.\n", user_input_command_string[3]);
-			printf("Partition %c set.\n", par+16);
-
-
-		// ********************************************************************************
-		// D8: COMMAND 
-		// ********************************************************************************
-		// } else if ( matching("d08:",user_input_command_string) ) { // } else if ( matching("d8:",user_input_command_string) || matching("d08:",user_input_command_string) ) {
-
-		// 	change_drive(8);
+			// // printf("Partition %c set.\n", user_input_command_string[3]);
+			// printf("Partition %c set.\n", par+16);
 
 
-		// // ********************************************************************************
-		// // D9: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d09:",user_input_command_string) ) { // } else if ( matching("d9:",user_input_command_string) || matching("d09:",user_input_command_string) ) {
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+				// printf("Detected SD2IEC!\n");
+				//string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+				part_command[0] = 'c';
+		        part_command[1] = 'p';
+		        part_command[2] = par+1;
+		        part_command[3] = '\0';
 
-		// 	change_drive(9);
+		        cbm_open(1, dev, 15, part_command);
+				// printf( "cbm_open result: %i \n", result );
+				// printf( "part_command: %s \n", part_command );
+				cbm_close(1);
 
-
-		// // ********************************************************************************
-		// // D10: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d10:",user_input_command_string) ) {
-
-		// 	change_drive(10);
-
-
-		// // ********************************************************************************
-		// // D11: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d11:",user_input_command_string) ) {
-
-		// 	change_drive(11);
+				printf("Partition %c set!\n", par+17);
+			} else {
+				//string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+				printf("Drive %c set.\n", par+17);
+			};//end-if
 
 
-		// // ********************************************************************************
-		// // D12: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d12:",user_input_command_string) ) {
 
-		// 	change_drive(12);
-
-
-		// // ********************************************************************************
-		// // D13: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d13:",user_input_command_string) ) {
-
-		// 	change_drive(13);
-
-
-		// // ********************************************************************************
-		// // D14: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d14:",user_input_command_string) ) {
-
-		// 	change_drive(14);
-
-
-		// // ********************************************************************************
-		// // D15: COMMAND 
-		// // ********************************************************************************
-		// } else if ( matching("d15:",user_input_command_string) ) {
-
-		// 	change_drive(15);
 
 
 		// ********************************************************************************
-		// MAKE-DIR COMMAND 
+		// MAKE-DIR COMMAND
 		// ********************************************************************************
 		} else if ( matching("mkdir",user_input_command_string)    || // matching("make-dir",user_input_command_string) ||
 					(user_input_command_string[0]=='m' && user_input_command_string[1]=='d') ) {
@@ -3006,7 +3106,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// REMOVE-DIR COMMAND 
+		// REMOVE-DIR COMMAND
 		// ********************************************************************************
 		} else if ( matching("rmdir",user_input_command_string)      || //matching("remove-dir",user_input_command_string)
 					(user_input_command_string[0]=='r' && user_input_command_string[1]=='d') ) {
@@ -3027,7 +3127,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DELETE COMMAND 
+		// DELETE COMMAND
 		// ********************************************************************************
 		} else if (	/* matching("delete",user_input_command_string) || */
 		            (user_input_command_string[0]=='d' && user_input_command_string[1]=='e' && user_input_command_string[2]=='l') ||
@@ -3082,9 +3182,20 @@ int main( int argc, char* argv[] ) {
 
 					} else {
 
-						strcpy (drive_command_string,"s:");
+						strcpy (drive_command_string,"s");
+						// strcat (drive_command_string,user_input_arg1_string);
+
+						if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
+							string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+						} else {											  // Any other device
+							string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+						};//end-if
+
+						strcat (drive_command_string,":");
 						strcat (drive_command_string,user_input_arg1_string);
+
 						result = cbm_open(1, dev, 15, drive_command_string);
+						// printf("drive_command_string: %s\n", drive_command_string);
 						cbm_close(1);
 
 					};//end if 
@@ -3106,7 +3217,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// FORMAT COMMAND 
+		// FORMAT COMMAND
 		// ********************************************************************************
 		} else if ( matching("format",user_input_command_string) ) {
 
@@ -3118,7 +3229,14 @@ int main( int argc, char* argv[] ) {
 
             // unsigned char format_error = 0;
 
-			strcpy (drive_command_string,"n0:"); //prep the commadn string 
+			drive_command_string[0] = 'n';
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+		        drive_command_string[1] = par+1;
+			} else {
+				drive_command_string[1] = par;
+			};//end-if
+		    drive_command_string[2] = ':';
+		    drive_command_string[3] = '\0';
 
             if (user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='q') {
 
@@ -3180,10 +3298,10 @@ int main( int argc, char* argv[] ) {
 		    printf("Format: %s\n", drive_command_string);
 
 		    if (they_are_sure() == TRUE) {
-		        printf("Formatting...");
+		        printf("Formatting... ");
 			    result = cbm_open(1, dev, 15, drive_command_string);
 			    cbm_close(1);
-			    printf("\nDone.\n");
+			    printf("Done.\n");
 			    goto FORMAT_END; // printf("Cancelled.\n");
 		    } else {
 		        goto FORMAT_END; // printf("Cancelled.\n");
@@ -3192,33 +3310,56 @@ int main( int argc, char* argv[] ) {
             FORMAT_ERROR : printf("Er.\n");
             FORMAT_END   : ;// do nothihng // printf("Cancelled.\n");
 
+
 		// ********************************************************************************
-		// RENAME COMMAND 
+		// RENAME COMMAND
 		// ********************************************************************************
 		} else if ( /* matching("rename",user_input_command_string) || */
 		            (user_input_command_string[0]=='r' && user_input_command_string[1]=='e' && user_input_command_string[2]=='n') ||
 					(user_input_command_string[0]=='r' && user_input_command_string[1]=='n') ){
 
+			strcpy (drive_command_string,"r");
+
+			if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
+				string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+			} else {											  // Any other device
+				string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+			};//end-if
+
+			strcat (drive_command_string,":");
+			strcat (drive_command_string,user_input_arg2_string);
+			strcat (drive_command_string,"=");
+
+			if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
+				string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+			} else {											  // Any other device
+				string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+			};//end-if
+
+			strcat (drive_command_string,":");
+
+			strcat (drive_command_string,user_input_arg1_string);
+
 			switch (number_of_user_inputs) {
-				case 3 : 				
-					strcpy (drive_command_string,"r:");
-					strcat (drive_command_string,user_input_arg2_string);
-					strcat (drive_command_string,"=");
-					strcat (drive_command_string,user_input_arg1_string);
 
+				case 3 :
 					result = cbm_open(1, dev, 15, drive_command_string);
+					// printf("drive_command_string:%s\n",drive_command_string);
 					cbm_close(1);
-			    break;	
+			    break;
 
-			    default : 
+			    default :
 			    	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
 			    //end default
+
 			};//end switch
 
 
 
+
+
 		// ********************************************************************************
-		// DETECT-FILETYPE COMMAND 
+		// DETECT-FILETYPE COMMAND
 		// ********************************************************************************
 		// } else if ( matching("detect-filetype",user_input_command_string) ) {	 // Detect File Type: PRG SEQ REL USR DIR 		
 
@@ -3237,24 +3378,55 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DRIVE-SET COMMAND 
+		// DRIVESET COMMAND
 		// ********************************************************************************
-		} else if ( matching("drive-set",user_input_command_string) ) {	 
+		} else if ( matching("driveset",user_input_command_string) ) {	 
+			// drive-set 10
+			// drive-set 11
 
-			// drive-set -sd2iec 10 
-			// drive-set -1541 11 
-			
+
+			// drive-set -sd2iec 10
+			// drive-set -1541 11
+			// drive-set -sd-2 12
+
+			// printf("Device:%i ", dev);
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+			// 	printf("Partition:%c\n", par+17);
+			// } else {
+			// 	printf("Drive:%c\n", par+17);
+			// };//end-if
+
+			// switch (number_of_user_inputs) {
+			// 	case 3 : 	
+			// 		if ( matching("-1541",user_input_arg1_string) || matching("-sd2",user_input_arg1_string) || matching("-sd-2",user_input_arg1_string) ) {
+
+			// 			c1541_set(dev, user_input_arg2_string); // They both write to the same memory area to set the device number in software
+
+			// 		} else if ( matching("-sd2iec",user_input_arg1_string) ) {
+
+			// 			uiec_set(dev, user_input_arg2_string);
+
+			// 		};//end if
+			//     break;	
+
+			//     default : 
+			//     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+			//     //end default
+			// };//end switch
+
+			// TODO: Do this instead! Detect the drive and change it!
+			// unsigned char drive_detected;
+			// drive_detected = get_drive_type(dev);
+
 			switch (number_of_user_inputs) {
-				case 3 : 	
-					if ( matching("-1541",user_input_arg1_string) ) {
-
-						c1541_set(dev, user_input_arg2_string);
-
-					} else if ( matching("-sd2iec",user_input_arg1_string) ) {
-
-						uiec_set(dev, user_input_arg2_string);
-
-					};//end if
+				case 2 : 	
+					if (get_drive_type(dev) == DRIVE_UIEC) {
+						uiec_set(dev, user_input_arg1_string);
+					} else if (get_drive_type(dev) == DRIVE_1541 || get_drive_type(dev) == DRIVE_SD2 ) {
+						c1541_set(dev, user_input_arg1_string); // They both write to the same memory area to set the device number in software
+					} else {                  // These two lines...
+						printf("Er: drv!\n"); // ...added 12 bytes!
+					};//end-if
 			    break;	
 
 			    default : 
@@ -3266,28 +3438,13 @@ int main( int argc, char* argv[] ) {
 
 
 
-
-// 		} else if ( matching("1541-set",user_input_command_string) ) {	 
-
-// 				// drive-set 11    (uses current active drive you're in) 
-
-// 				c1541_set(dev, user_input_arg1_string);
-
-
-
-
-
 		// ********************************************************************************
-		// PEEK COMMAND 
+		// PEEK COMMAND
 		// ********************************************************************************
 		} else if ( matching("peek",user_input_command_string) ) {	
             // > peek 65535
             // Mem:65535 is BIN:11111111 DEC:255
 
-		    // move this to the top or something
-            #define get_bit(var,y)     (var>>y) & 1       // Return Data.Y value - Ex: uint8_t some_var = get_bit(number,bit_2); // some_var = 1
-            #define set_bit(var,bit)   var |= (1 << bit)  // Set Data.Y   to 1   - Ex: set_bit(number,1); // number =  0x07 => 0b00000111 // bits are right to left so the right most bit is bit 0
-            #define clear_bit(var,bit) var &= ~(1 << bit) // Clear Data.Y to 0   - Ex: clear_bit(number,2); // number =0x03 => 0b0000011
 
 			peeked = PEEK(user_input_arg1_number);
 
@@ -3297,7 +3454,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// PEEKING COMMAND 
+		// PEEKING COMMAND
 		// ********************************************************************************
 		} else if ( matching("peeking",user_input_command_string) ) {	
             // > peeking 65535
@@ -3318,9 +3475,9 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// PEEK-BIT COMMAND 
+		// PEEKBIT COMMAND
 		// ********************************************************************************
-		} else if ( matching("peek-bit",user_input_command_string) ) {
+		} else if ( matching("peekbit",user_input_command_string) ) {
             // > peek 65535 0
             // Mem:65535 Pos:0 is Bit:1 BIN:11111111 DEC:255
 
@@ -3335,7 +3492,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// POKE COMMAND 
+		// POKE COMMAND
 		// ********************************************************************************
 		} else if ( matching("poke",user_input_command_string) ) {	 
             // > poke 65535 0 0
@@ -3358,9 +3515,9 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// POKE-BIT COMMAND 
+		// POKEBIT COMMAND
 		// ********************************************************************************
-		} else if ( matching("poke-bit",user_input_command_string) ) {
+		} else if ( matching("pokebit",user_input_command_string) ) {
 
 			peeked = PEEK(user_input_arg1_number);
 
@@ -3447,19 +3604,9 @@ int main( int argc, char* argv[] ) {
 
 			sscanf(user_input_arg1_string, "%u", &peek_address); //TODO: THIS FUNCTION ALONE COSTS FUCKING 2K!!!!! find a better way to convert HEX
 
-            // #define putchar(c) putc((c),stdout) 
-
-
-
-            // printf("BIN: ");
-
             BYTE_TO_BINARY(peek_address);
             printf("\n");
 
-
-            // putc(byte);
-              
-            //printf("BIN: "BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(peek_address));
 
 
 
@@ -3478,13 +3625,10 @@ int main( int argc, char* argv[] ) {
                 case '-' : answer = first_number - last_number; break;
                 case '*' : answer = first_number * last_number; break;
                 case '/' : answer = first_number / last_number; break;
-                //case '%' : answer = (100 / last_number) * first_number; break; // outputs a rough percentage calculation
                 default  : puts("?"); break;
 			};//end switch
 
   			printf("  = %li\n", answer);
-//			printf("  = %i %i %li \n", user_input_arg1_number, user_input_arg3_number, answer);
-//			printf("  = %li %li %li \n", first_number, last_number, answer);
 
 
 		// ********************************************************************************
@@ -3535,9 +3679,9 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// VIEW-MEM COMMAND 
+		// VIEWMEM COMMAND
 		// ********************************************************************************
-		} else if ( matching("view-mem",user_input_command_string) ||
+		} else if ( matching("viewmem",user_input_command_string) ||
 		            (user_input_command_string[0]=='v' && user_input_command_string[1]=='m') ){
 
             unsigned int mem_counter;
@@ -3690,10 +3834,10 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DUMP-MEM COMMAND 
+		// DUMPMEM COMMAND
 		// ********************************************************************************
-		} else if ( (matching("dump-mem",user_input_command_string)) ||
-		            (user_input_command_string[0]=='v' && user_input_command_string[1]=='m') ){
+		} else if ( (matching("dumpmem",user_input_command_string)) ){
+		            // (user_input_command_string[0]=='d' && user_input_command_string[1]=='m') ){
 
 			// Simple usage:
 			// 					> dump-mem 0 100 kernal.bin
@@ -3747,14 +3891,25 @@ int main( int argc, char* argv[] ) {
                     // hex_display_position_in_file = start_address ;
 
 					// Setup TARGET FILE for WRITING 
-					strcpy (drive_command_string2, "");
+					strcpy (drive_command_string2, "0:");
 					strcat (drive_command_string2, user_input_arg3_string); // filename
 					strcat (drive_command_string2, ",w,");
 					strcat (drive_command_string2, "p"); // needs to be PRG type becuase SEQ type adds the floowing text to the beginning of the file: C64File *FILENAME*
 
-					//dev = getcurrentdevice();
 
-				    printf("Saving memory %u - %u to\nfile:%s on device:%i\n",start_address,end_address,user_input_arg3_string,dev);
+					if (get_drive_type(dev) == DRIVE_UIEC ) { // This was like 30 bytes over
+						drive_command_string2[0] = par+1;
+					} else {
+						drive_command_string2[0] = par;
+					};//end-f
+
+					// switch (get_drive_type(dev) == DRIVE_UIEC) { // And this was like 35 bytes over. WTF?!?!?
+					// 	case DRIVE_UIEC : drive_command_string2[0] = par+1; break;
+					// 	default         : drive_command_string2[0] = par;   break;
+					// };//end-switch
+
+
+				    printf("Saving %u - %u to\nfile:%s on device:%i\n",start_address,end_address,user_input_arg3_string,dev);
 
 					if (they_are_sure() == FALSE) {
 						break;
@@ -3806,74 +3961,94 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// COPY COMMAND 
+		// COPY COMMAND
 		// ********************************************************************************
 		} else if ( matching("copy",user_input_command_string)                                 ||
 				  ( (user_input_command_string[0]=='c')&&(user_input_command_string[1]=='p') ) ){
 
-            source_par = par; //source_par = par; // the source partition should be whever we are.
             use_dcopy = TRUE;
-            target_par = '0';
+
+			source_par = par; //source_par = par; // the source partition should be whever we are.
+            target_par = par;             // target_par = '0';
+
+			get_key = 0; // This is the solution for that weird bug! 
+			// Basically, a left-over character might be in this variable. 
+			// Now, when the first directory entry is returned, it's the disk name, so we don't do anything. 
+			// Turns out, this means that when the next bit of code runs to see if we've hit CTRL-C,
+			// it thinks we've scanned the keyboard at least once, ebcasue we've run at least one call 
+			// of a copy function. But on the first run, which is the disk name, we haven't!
+			// So we set this to nothing, so that it can't accidentally think we have pressed CTRL-C.
+			// So this bug doesn't run all the time, only sometimes, because sometimes there's an 
+			// old jkeybaord value in there, and only siometimes is that value an actual CTRL-C.
+			// So this is the fix for a stupid bug I can't seem to re-create consistently and
+			// has been chapping my ass forever!
+			// This fix adds only 5 bytes to the overall compiled code.
 
             if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[3] == ':') { // copy * d08:
                 // puts("if 1 --> WTF???");
-                switch (user_input_arg2_string[2]) {
-			        case '8' : user_input_arg2_number = 8;  break;
-			        case '9' : user_input_arg2_number = 9;  break;
-			        case '0' : user_input_arg2_number = 10; break;
-			        case '1' : user_input_arg2_number = 11; break;
-			        case '2' : user_input_arg2_number = 12; break;
-			        case '3' : user_input_arg2_number = 13; break;
-			        case '4' : user_input_arg2_number = 14; break;
-			        case '5' : user_input_arg2_number = 15; break;
-		            default  :
-		                /*do nothing*/
-                    break;
-		        };//end switch
+          //       switch (user_input_arg2_string[2]) {
+			       //  case '8' : user_input_arg2_number = 8;  break;
+			       //  case '9' : user_input_arg2_number = 9;  break;
+			       //  case '0' : user_input_arg2_number = 10; break;
+			       //  case '1' : user_input_arg2_number = 11; break;
+			       //  case '2' : user_input_arg2_number = 12; break;
+			       //  case '3' : user_input_arg2_number = 13; break;
+			       //  case '4' : user_input_arg2_number = 14; break;
+			       //  case '5' : user_input_arg2_number = 15; break;
+		        //     default  :
+		        //         /*do nothing*/
+          //           break;
+		        // };//end switch
+		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
+
 
             } else if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') { // copy * d08b:
                 // puts("if 2 --> WTF???");
-                switch (user_input_arg2_string[2]) {
-			        case '8' : user_input_arg2_number = 8;  break;
-			        case '9' : user_input_arg2_number = 9;  break;
-			        case '0' : user_input_arg2_number = 10; break;
-			        case '1' : user_input_arg2_number = 11; break;
-			        case '2' : user_input_arg2_number = 12; break;
-			        case '3' : user_input_arg2_number = 13; break;
-			        case '4' : user_input_arg2_number = 14; break;
-			        case '5' : user_input_arg2_number = 15; break;
-		            default :
-		            	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-		            //end default
-		        };//end switch
+          //       switch (user_input_arg2_string[2]) {
+			       //  case '8' : user_input_arg2_number = 8;  break;
+			       //  case '9' : user_input_arg2_number = 9;  break;
+			       //  case '0' : user_input_arg2_number = 10; break;
+			       //  case '1' : user_input_arg2_number = 11; break;
+			       //  case '2' : user_input_arg2_number = 12; break;
+			       //  case '3' : user_input_arg2_number = 13; break;
+			       //  case '4' : user_input_arg2_number = 14; break;
+			       //  case '5' : user_input_arg2_number = 15; break;
+		        //     default :
+		        //     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+		        //     //end default
+		        // };//end switch
+		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 
-                switch (user_input_arg2_string[3]) {
-                    case '0' : target_par = '0';  break;
-                    case 'a' : target_par = '1';  break;
-                    case 'b' : target_par = '2';  break;
-                    case 'c' : target_par = '3';  break;
-                    case 'd' : target_par = '4';  break;
-                    case 'e' : target_par = '5';  break;
-                    case 'f' : target_par = '6';  break;
-                    case 'g' : target_par = '7';  break;
-                    case 'h' : target_par = '8';  break;
-                    case 'i' : target_par = '9';  break;
-                    // case 'j' : target_par = '10'; break;
-                    // case 'k' : target_par = '11'; break;
-                    // case 'l' : target_par = '12'; break;
-                    // case 'm' : target_par = '13'; break;
-                    // case 'n' : target_par = '14'; break;
-                    // case 'o' : target_par = '15'; break;
-                    // case 'p' : target_par = '16'; break;
-		            default  :
-		            	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-		            //end default
-		        };//end switch
+          //       switch (user_input_arg2_string[3]) {
+          //           case '0' : target_par = '0';  break;
+          //           case 'a' : target_par = '1';  break;
+          //           case 'b' : target_par = '2';  break;
+          //           case 'c' : target_par = '3';  break;
+          //           case 'd' : target_par = '4';  break;
+          //           case 'e' : target_par = '5';  break;
+          //           case 'f' : target_par = '6';  break;
+          //           case 'g' : target_par = '7';  break;
+          //           case 'h' : target_par = '8';  break;
+          //           case 'i' : target_par = '9';  break;
+          //           // case 'j' : target_par = '10'; break;
+          //           // case 'k' : target_par = '11'; break;
+          //           // case 'l' : target_par = '12'; break;
+          //           // case 'm' : target_par = '13'; break;
+          //           // case 'n' : target_par = '14'; break;
+          //           // case 'o' : target_par = '15'; break;
+          //           // case 'p' : target_par = '16'; break;
+		        //     default  :
+		        //     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
+		        //     //end default
+		        // };//end switch
+		        convert_partition_string(user_input_arg2_string[3], target_par); // do it deucimo...
 
-		        if (dev != user_input_arg2_number) {
-		            // Can't do this - can't copy from another device using dcopy directly to another device's partition. The whole thing needs a bit of an overhaul for that, and I'm saving those kinds of things for version 2.0
-		            goto skip_copying;
-		        };//end_if
+				// printf("This far?\n");
+
+		        // if (dev != user_input_arg2_number) {
+		        //     // Can't do this - can't copy from another device using dcopy directly to another device's partition. The whole thing needs a bit of an overhaul for that, and I'm saving those kinds of things for version 2.0
+		        //     goto skip_copying;
+		        // };//end_if
 
             } else {
                 // puts("else --> WTF???");
@@ -3890,16 +4065,35 @@ int main( int argc, char* argv[] ) {
             };//end_if
 
             // trying to hack a solution for 1541 that doesnt' support partions 
-            if ((source_par == '0') && (target_par == '0') && (use_dcopy == FALSE)) {
-                source_par = NULL;
-                target_par = NULL;
-            };//end_if
+            // if ((source_par == '0') && (target_par == '0') && (use_dcopy == FALSE)) {
+            //     source_par = NULL;
+            //     target_par = NULL;
+            // };//end_if
 
             //printf("dev:%i arg2#:%i dcopy:%i Spar:%i Tpar:%i\n",dev,user_input_arg2_number,use_dcopy,source_par,target_par);
 
+
+			// The source device is dev
+			// The target device is user_input_arg2_number
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+				// printf("Source is SD2IEC!\n");
+				source_par = source_par+1;
+			};//end-if
+
+			if (get_drive_type(user_input_arg2_number) == DRIVE_UIEC) {
+				// printf("Target is NOT SD2IEC!\n");
+				target_par = target_par+1;
+			};//end-if
+
+
+			// // ********** DEBUGGING **********
+			// printf("dev:%u user_input_arg2_number:%u \n", dev, user_input_arg2_number);
+			// printf("source_par:%c target_par:%c \n", source_par, target_par);
+
+
 		    switch (number_of_user_inputs) {
 			    case 3 : 	
-				    if ( matching("*",user_input_arg1_string) ) { 			// copy * d8:     
+				    if ( matching("*",user_input_arg1_string) ) { 			// copy * d08:     
 
 					    dir_file_count(dir_file_total); // get the total number of files to copy and store in dir_file_total 
 					    printf("Files to copy: %i\n", dir_file_total);
@@ -3908,7 +4102,7 @@ int main( int argc, char* argv[] ) {
 
 					        for (loop_k = 0; loop_k <= dir_file_total ; loop_k++) {
 
-						        if (loop_k == 0) { //first entry is the disk anme 
+						        if (loop_k == 0) { // first entry is the disk name.
 						        	//do nothing
 						        } else { 
 						        	dir_goto_file_index(loop_k);
@@ -3966,8 +4160,8 @@ int main( int argc, char* argv[] ) {
 
 
             // ********** END OF COPY ********** //
-            skip_copying :
-                printf("Not supported.\n"); //printf("Warning! Can't copy from different\ndevices directly to another partiton.\nSwitch to the device, set the\npartition, and then copy between\ndevices.\n");
+            // skip_copying :
+            //     printf("Not supported.\n"); //printf("Warning! Can't copy from different\ndevices directly to another partiton.\nSwitch to the device, set the\npartition, and then copy between\ndevices.\n");
 
             end_copying : ;
                 // printf("Copy ended.\n");
@@ -3975,14 +4169,14 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// TYPE COMMAND 
+		// TYPE COMMAND
 		// ********************************************************************************
 		} else if ( matching("type",user_input_command_string) ||
 		            (user_input_command_string[0]=='c' && user_input_command_string[1]=='a' && user_input_command_string[2]=='t') ){ //matching("cat",user_input_command_string) ) 
 
 			switch (number_of_user_inputs) {
 
-				case 2 : 				
+				case 2 :
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
 					switch(detected_filetype){
 						case 2 : // case  2 : printf("DIR"); break;	// DIR
@@ -4034,24 +4228,92 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// LIST COMMAND 
+		// LIST COMMAND
 		// ********************************************************************************
 		} else if ( matching("list",user_input_command_string) ||
 		            (user_input_command_string[0]=='l' && user_input_command_string[1]=='s') ||
 					(user_input_command_string[0]=='d' && user_input_command_string[1]=='i' && user_input_command_string[2]=='r') ){
 
-            unsigned char files_per_screen;
-            unsigned char listing_string[10] = "$"; // The default is $ to load the current directory.
+			// printf("uis[0]:%c\n",user_input_command_string[0]);
 
-			if ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='s' ) {
-			    files_per_screen = 48; // 2 column display mode
-			} else if ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='p' ) {
-			    strcpy(listing_string,"$=p"); // This lists the partitions.
+			if        (user_input_command_string[0]=='d') {
+				files_per_screen = 48; // 2 column display mode
+			} else if (user_input_command_string[0]=='l') {
+				files_per_screen = 24; // 1 column display mode
+			};//end-if
+
+			strcpy(listing_string,"$"); // The default is $ to load the current directory.
+
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+				// printf("Detected SD2IEC!\n");
+				string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
 			} else {
-			    files_per_screen = 24; // 1 column display mode
-			};//end_if
+				string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+			};//end-if
+
+			// ls -s
+			// ls chi*
+			// ls -s chi*
+			// ls chi* -ls
+
+			switch (number_of_user_inputs) {
+				case 2 :
+					if        ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='s' ) {
+					    files_per_screen = 48; // 2 column display mode
+					} else if ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='l' ) {
+					    files_per_screen = 24; // 1 column display mode
+					} else {
+						string_add_character(listing_string,':');
+						strcat(listing_string, user_input_arg1_string);
+					};//end_if
+				break;
+
+				case 3 :
+					if        ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='s' ) {
+					    files_per_screen = 48; // 2 column display mode
+					    string_add_character(listing_string,':');
+					    strcat(listing_string, user_input_arg2_string);
+					} else if ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='l' ) {
+					    files_per_screen = 24; // 1 column display mode
+					    string_add_character(listing_string,':');
+					    strcat(listing_string, user_input_arg2_string);
+					} else if ( user_input_arg2_string[0]=='-' && user_input_arg2_string[1]=='s' ) {
+					    files_per_screen = 48; // 2 column display mode{
+					    string_add_character(listing_string,':');
+					    strcat(listing_string, user_input_arg1_string);
+					} else if ( user_input_arg2_string[0]=='-' && user_input_arg2_string[1]=='l' ) {
+					    files_per_screen = 24; // 1 column display mode{
+					    string_add_character(listing_string,':');
+					    strcat(listing_string, user_input_arg1_string);
+					};//end_if
+				break;
+			};//end-switch
+
+			// // ********** DEBUGGING **********
+			// printf("listing_string:%s\n",listing_string);
+
+
+
+
+
+			// if ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='s' ) {
+			//     files_per_screen = 48; // 2 column display mode
+			// // } else if ( user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='p' ) {
+			// //     strcpy(listing_string,"$=p"); // This lists the partitions.
+			// } else {
+			//     files_per_screen = 24; // 1 column display mode
+			// };//end_if
+
+
+
+
+
+
 
 		    printf("Device:%i ", dev,par+16);
+
+			// Can't do this here. Need to do it in a way that's supported by non-1541 drives.
+		    // read_disk_id(); // This records the Disk ID to disk_id which we will use below.
 
 		    result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
 
@@ -4062,7 +4324,7 @@ int main( int argc, char* argv[] ) {
 				if (displayed_count == files_per_screen) {
 
 					//printf(" * Hit Any Key * ");
-					printf("* HIT TO CONTINUE *");
+					printf("* CONTINUE *");
 
 					do {
 						// nothing
@@ -4092,6 +4354,10 @@ int main( int argc, char* argv[] ) {
 
 			    if (number_of_files == 0) { // the size is actually drive 0 or drive 1 from PET dual drives
 					printf("Name:%s\n", dir_ent.name);
+
+					// Can't do this, have to do it another way to support non-1541 drives!
+					// printf("Name:%s ", dir_ent.name);
+					// printf("ID:%s\n", disk_id);
 
 			    // } else if (number_of_files == 1) { // the size is actually drive 0 or drive 1 from PET dual drives
 			    // 	printf("\n");
@@ -4131,7 +4397,7 @@ int main( int argc, char* argv[] ) {
 
 			    } else { // print filenames 
 
-			    	if (user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='s') { // short 2-column form 
+			    	if (files_per_screen == 48) { // short 2-column form 
 
 				        printf(" %16s ", dir_ent.name );
 
@@ -4162,7 +4428,7 @@ int main( int argc, char* argv[] ) {
 
 					    ++displayed_count;
 
-			        } else { // long form 
+			        } else { // long form  1-column mode files_per_screen == 24
 
 				        gotox(3);
 				        printf("%s", dir_ent.name );
@@ -4286,79 +4552,81 @@ int main( int argc, char* argv[] ) {
 
 
 
+		// // ********************************************************************************
+		// // LIST PARTITIONS COMMAND or LP COMMAND
+		// // ********************************************************************************
+		// } else if ( (matching("list-partitions",user_input_command_string)) || \
+		// 			(user_input_command_string[0]=='l' && user_input_command_string[1]=='p') ) {
+
+
+  //           unsigned char listing_string[10] = "$"; // The default is $ to load the current directory.
+		// 	strcpy(listing_string,"$=p"); // This lists the partitions.
+
+		//     printf("Device:%00i ", dev,par+16);
+
+		//     result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
+
+		//     //displayed_count = 2; // this is two becuase we alrieady displaeyd two lines of text 
+
+		//     for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
+
+		//     	if (result != 0) {
+		//     		printf("Er: cbm_dir %i\n", result);
+		//     		break;
+		//     	};//end_if 
+
+		// 	    result = cbm_readdir(1, &dir_ent);
+		// 	    //printf("result:%u\n",result);
+
+		// 	    if (number_of_files == 0) { 
+
+		// 			printf("Name:%s\n", dir_ent.name);
+
+		// 		} else if (number_of_files == 1) { // Skip the first file, because it's the "system" partition or partition 0.
+
+		// 			//printf("Partitions:\n");
+
+		// 	    } else if (result == 3) { // I don't know why SD2IEC exits listing partions like this when using $=P vs. $ using 2.
+
+  //                   if (wherex() != 0) {
+  //                       printf("\n");
+  //                   };//end_if
+
+		// 	    	printf("Total:%u\n",number_of_files-2);
+
+		// 	    	break;
+
+		// 	    } else { // print filenames 
+		// 				gotox(3);
+		// 		        printf( "Partition:%c" , 'a'+number_of_files-2 );
+		// 		        gotox(16);
+		// 		        printf( "Name:%s" , dir_ent.name );
+
+		// 		        // if (dir_ent.type != 2) {
+		// 					// do nothing yet...
+		// 			    // };//end if 
+
+		// 			    printf("\n");
+		// 			    //++displayed_count;
+
+		// 		};//end_if
+
+		// 	};//end for
+
+		//     cbm_closedir(1);	
+
+
+
+
+
+
+
 		// ********************************************************************************
-		// LIST-PARTITIONS COMMAND or LP COMMAND
-		// ********************************************************************************
-		} else if ( (matching("list-partitions",user_input_command_string)) || \
-					(user_input_command_string[0]=='l' && user_input_command_string[1]=='p') ) {
-
-
-            unsigned char listing_string[10] = "$"; // The default is $ to load the current directory.
-			strcpy(listing_string,"$=p"); // This lists the partitions.
-
-		    printf("Device:%00i ", dev,par+16);
-
-		    result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
-
-		    //displayed_count = 2; // this is two becuase we alrieady displaeyd two lines of text 
-
-		    for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
-
-		    	if (result != 0) {
-		    		printf("Er: cbm_dir %i\n", result);
-		    		break;
-		    	};//end_if 
-
-			    result = cbm_readdir(1, &dir_ent);
-			    //printf("result:%u\n",result);
-
-			    if (number_of_files == 0) { 
-
-					printf("Name:%s\n", dir_ent.name);
-
-				} else if (number_of_files == 1) { // Skip the first file, because it's the "system" partition or partition 0.
-
-					//printf("Partitions:\n");
-
-			    } else if (result == 3) { // I don't know why SD2IEC exits listing partions like this when using $=P vs. $ using 2.
-
-                    if (wherex() != 0) {
-                        printf("\n");
-                    };//end_if
-
-			    	printf("Total:%u\n",number_of_files-2);
-
-			    	break;
-
-			    } else { // print filenames 
-						gotox(3);
-				        printf( "Partition:%c" , 'a'+number_of_files-2 );
-				        gotox(16);
-				        printf( "Name:%s" , dir_ent.name );
-
-				        // if (dir_ent.type != 2) {
-							// do nothing yet...
-					    // };//end if 
-
-					    printf("\n");
-					    //++displayed_count;
-
-				};//end_if
-
-			};//end for
-
-		    cbm_closedir(1);	
-
-
-
-
-
-
-
-		// ********************************************************************************
-		// FILEINFO COMMAND
+		// FILEDATE COMMAND
 		// ********************************************************************************
 		} else if ( (matching("filedate",user_input_command_string)) ) {
+
+			// TODO: I want to re-create this as part of a fileinfo command, that spits out a whole list of info about a file.
 
 			unsigned char one_char_string[2] = " ";
 			unsigned char date_index;
@@ -4373,7 +4641,8 @@ int main( int argc, char* argv[] ) {
 				goto END_FILEDATE;
 			};//end-if
 
-			strcpy(drive_command_string,"$=t0:"); // This lists the partitions.
+			// Send SD2IEC the command to create a file listing with file dates included.
+			strcpy(drive_command_string,"$=t0:"); // TODO: This only works because partition zero (0) is whatever the currently set partition is. I should probably make this take the specifically set partition instead.
 			strcat(drive_command_string,user_input_arg1_string); // This lists the partitions.
 			strcat(drive_command_string,"=l"); // This lists the partitions.
 
@@ -4423,7 +4692,7 @@ int main( int argc, char* argv[] ) {
 			printf("Timestamp: %s", file_date_time); // print the time stamp
 
 			END_FILEDATE :
-				printf("\n");
+			printf("\n");
 
 
 
@@ -4478,14 +4747,63 @@ int main( int argc, char* argv[] ) {
 
 
 
+		// USED FOR RAW READING FROM DOS COMMANDS LIKE LOAD"$=P",9
+		// THIS IS MOSTLY A DEBUGGING THING FOR NOW - NOT ENOUGH SPACE TO ADD IT!
+		// ********************************************************************************
+		// LP COMMAND OR LD COMMAND OR LIST PARTITIONS COMMAND OR LIST DRIVES COMMAND
+		// ********************************************************************************
+		} else if ( (user_input_command_string[0]=='l' && user_input_command_string[1]=='d') || \
+					(user_input_command_string[0]=='l' && user_input_command_string[1]=='p') ){
 
+			unsigned char read_drive_number;
+			unsigned int  read_bytes_free;
+			unsigned char first_partition = 0;
+			unsigned char last_partition;
+			unsigned char sd2iec_offset = 0;
 
+			if (get_drive_type(dev) == DRIVE_UIEC) {
 
+				memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+				result = cbm_open(8, dev, CBM_READ, "$=p");
+				read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+				cbm_close (8);
+
+				first_partition = 1;
+				last_partition  = disk_sector_buffer[4];
+				sd2iec_offset = 1;
+				// printf("first_partition:%u last_partition:%u\n",first_partition,last_partition);
+
+			} else if (get_drive_type(dev) == DRIVE_SD2 || get_drive_type(dev) == DRIVE_4040) {
+				last_partition = 1;
+			} else {
+				last_partition = 0;
+			};//end-if
+
+			printf("Device:");
+			detect_drive(dev, TRUE);
+
+			for ( i = first_partition ; i <= last_partition ; i++ ) {
+
+				strcpy(drive_command_string,"$0:");
+				drive_command_string[1]=i+48;
+
+				memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+				result = cbm_open(8, dev, CBM_READ, drive_command_string);
+				read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+				cbm_close (8);
+
+				read_drive_number = disk_sector_buffer[4];
+				read_bytes_free = disk_sector_buffer[34];
+				read_bytes_free = read_bytes_free + (disk_sector_buffer[35]*256);
+
+				printf(" %c:%16.16s %2.2s %2.2s Free:%u BL\n", read_drive_number+48+17-sd2iec_offset, disk_sector_buffer+8, disk_sector_buffer+26, disk_sector_buffer+29, read_bytes_free);
+
+			};//end-for
 
 
 
 		// ********************************************************************************
-		// CHIRP COMMAND 
+		// CHIRP COMMAND
 		// ********************************************************************************
 		} else if ( matching("chirp",user_input_command_string) ) {
 
@@ -4493,7 +4811,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// SYSINFO COMMAND 
+		// SYSINFO COMMAND
 		// ********************************************************************************
 		} else if ( matching("sysinfo",user_input_command_string) ) {
 
@@ -4502,9 +4820,9 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// COLOR-SET COMMAND 
+		// COLOR-SET COMMAND
 		// ********************************************************************************
-		} else if ( matching("color-set",user_input_command_string) ) {
+		} else if ( matching("colorset",user_input_command_string) ) {
 			// printf("See help.\n");
             // printf("1-Bk 2-Wt 3-Rd 4-Cy 5-Pr 6-Gn 7-Bl 8-Yl\n9-Or 10-Br 11-Pk 12-DGy 13-Gy 14-LGn\n15-LBl 16-LGy 0-Skip\n");
 
@@ -4549,7 +4867,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// PROFILE COMMAND 
+		// PROFILE COMMAND
 		// ********************************************************************************
 		} else if ( matching("profile",user_input_command_string) ) {
 
@@ -4591,7 +4909,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DISPLAY-LOGO COMMAND 
+		// DISPLAY-LOGO COMMAND
 		// ********************************************************************************
 		// } else if ( matching("display-logo",user_input_command_string) ) {
 
@@ -4601,7 +4919,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// SCREENSAVER COMMAND 
+		// SCREENSAVER COMMAND
 		// ********************************************************************************
 		} else if ( matching("screensaver",user_input_command_string) ||
 		            (user_input_command_string[0]=='s' && user_input_command_string[1]=='s') ){
@@ -4640,7 +4958,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DATETIME COMMAND 
+		// DATETIME COMMAND
 		// ********************************************************************************
 		} else if ( matching("datetime",user_input_command_string) ){
 
@@ -4680,32 +4998,43 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// TIME COMMAND 
+		// TIME COMMAND
 		// ********************************************************************************
 		} else if ( matching("time",user_input_command_string) ) {
-			    	find_rtc_device();
-					if ( rtc_device != 0 ) {
-						display_time_nice();
-						printf("\n");
-					} else {
-						printf("Err: No RTC found!\n");
-					};//end-if
+			    	// find_rtc_device();
+					// if ( rtc_device != 0 ) {
+					// 	display_time_nice();
+					// 	printf("\n");
+					// } else {
+					// 	printf("Err: No RTC found!\n");
+					// };//end-if
+
+					find_rtc_device();
+					switch (rtc_device) {
+						case 0  : printf("Err: No RTC found!\n");   break;
+						default : display_time_nice();printf("\n"); break;
+					};//end-switch
+
 
 		// ********************************************************************************
-		// DATE COMMAND 
+		// DATE COMMAND
 		// ********************************************************************************
 		} else if ( matching("date",user_input_command_string) ) {
-			    	find_rtc_device();
-					if ( rtc_device != 0 ) {
-						display_date_nice();
-						printf("\n");
-					} else {
-						printf("Err: No RTC found!\n");
-					};//end-if
-
+			  //   	find_rtc_device();
+					// if ( rtc_device != 0 ) {
+					// 	display_date_nice();
+					// 	printf("\n");
+					// } else {
+					// 	printf("Err: No RTC found!\n");
+					// };//end-if
+					find_rtc_device();
+					switch (rtc_device) {
+						case 0  : printf("Err: No RTC found!\n");   break;
+						default : display_date_nice();printf("\n"); break;
+					};//end-switch
 
 		// ********************************************************************************
-		// STOPWATCH COMMAND 
+		// STOPWATCH COMMAND
 		// ********************************************************************************
 		} else if (  matching("stopwatch",user_input_command_string)                          ||
 		             (user_input_command_string[0]=='s' && user_input_command_string[1]=='w') ){ // matching("stopwatch",user_input_command_string) ||
@@ -4761,16 +5090,137 @@ int main( int argc, char* argv[] ) {
             };//end_if
 
 
-		// ********************************************************************************
-		// EASTEREGG COMMAND
-		// ********************************************************************************
-		} else if ( matching("easteregg",user_input_command_string) ) {
-			printf("IT IS YOUR EASTER EGG.\n");
 
 
 
 		// ********************************************************************************
-		// DEBUG-ARGS COMMAND 
+		// VARS COMMAND
+		// ********************************************************************************
+		} else if ( matching("vars",user_input_command_string) ) {
+			printf("Maximum Bytes:\nCommand Line:%u\nArgs:%u\nDisk Buffer:%u\nAliases:%u\nAlias:%u\nHotkeys:%u\nHotkey:%u\n",MAX_LENGTH_COMMAND,MAX_LENGTH_ARGS,MAX_DISK_SECTOR_BUFFER,MAX_ALIASES,MAX_ALIAS_LENGTH,MAX_HOTKEYS,MAX_HOTKEY_LENGTH);
+
+
+// BROKEN!!! WHY????
+		// // ********************************************************************************
+		// // CHANGELABEL COMMAND
+		// // ********************************************************************************
+		// } else if ( matching("changelabel",user_input_command_string) ) {
+
+		// 	// Needs checking for 1541 / 4040 / SD-2 and length of entered string is not greater than 16 chars
+
+		// 	switch (number_of_user_inputs) {
+		// 		case 2 :
+		// 			if (they_are_sure() == TRUE) {
+
+		// 				// read_disk_label();
+		// 				// printf("Old Label: %s\n", disk_label);
+
+		// 				printf("disk_label1: '%s'\n", disk_label);
+
+		// 				strncpy(disk_label, user_input_arg1_string, 16); // strcpy vs strncpy(,,16) here --> 10 bytes!
+
+		// 				printf("disk_label2: '%s'\n", disk_label);
+
+		// 				// while(strlen(disk_label) < 16) {  // This added 18 bytes!
+		// 				// 	string_add_character(disk_label, '!');
+		// 				// };//end-while
+
+		// 				// printf("disk_label3: '%s'\n", disk_label);
+
+		// 				write_disk_label();
+
+		// 				// strcpy(disk_label, "");
+		// 				// read_disk_label();
+		// 				// printf("New Label: %s\n", disk_label);
+
+		// 				printf("Done!\n");
+
+		// 			};//end if
+		// 	    break;
+
+		// 	    default:
+		// 			printf("Er. args!\n");
+		// 		break;
+		// 	};//end_switch
+
+
+		// ********************************************************************************
+		// CHANGELABEL COMMAND
+		// ********************************************************************************
+		} else if ( matching("changelabel",user_input_command_string) ) {
+
+			// Needs checking for 1541 / 4040 / SD-2 and length of entered string is not greater than 16 chars
+
+			switch (number_of_user_inputs) {
+				case 2 :
+					if (they_are_sure() == TRUE) {
+
+						//read_disk_label(); // REMOVING THIS SCREWS IT UP!!! YOu need to load something before you can change it and savfe it!@!!!!
+						// printf("Old Label: %s\n", disk_label);
+
+						strcpy(disk_label, user_input_arg1_string);
+						// strcpy(disk_id, user_input_arg2_string);
+
+						while(strlen(disk_label) < 16) {  // This added 18 bytes!
+							string_add_character(disk_label, 0xA0);
+						};//end-while
+
+						write_disk_label();
+
+						//strcpy(disk_label, "");
+						// read_disk_label();
+						// printf("New Label: %s\n", disk_label);
+
+						printf("Done!\n");
+
+					};//end if
+				break;
+
+				default:
+					printf("Er. args!\n");
+				break;
+			};//end_switch
+
+
+		// ********************************************************************************
+		// CHANGEID COMMAND
+		// ********************************************************************************
+		} else if ( matching("changeid",user_input_command_string) ) {
+
+			// Needs checking for 1541 / 4040 / SD-2 and length of entered string is not greater than 16 chars
+
+			switch (number_of_user_inputs) {
+				case 2 :
+					if (they_are_sure() == TRUE) {
+
+						//read_disk_id();
+						// printf("Old ID: %s\n", disk_id);
+
+						strncpy(disk_id, user_input_arg1_string, 2);
+						write_disk_id();
+
+						// strcpy(disk_id, "");
+						// read_disk_id();
+						// printf("New ID: %s\n", disk_id);
+
+						printf("Done!\n");
+
+					};//end if
+			    break;
+
+			    default:
+					printf("Er. args!\n");
+				break;
+			};//end_switch
+
+
+
+
+
+
+
+		// ********************************************************************************
+		// DEBUG-ARGS COMMAND
 		// ********************************************************************************
 		// } else if ( matching("debug-args",user_input_command_string) ) {
 
@@ -4786,6 +5236,13 @@ int main( int argc, char* argv[] ) {
 		// 	// if (argc > 8)printf("Arg  8:%s\n"         , argv[ 8]);
 		// 	// if (argc > 9)printf("Arg  9:%s\n"         , argv[ 9]);
 		// 	// if (argc >10)printf("Arg 10:%s\n"         , argv[10]);
+
+
+		// // ********************************************************************************
+		// // EASTEREGG COMMAND - This takes up 71 bytes!
+		// // ********************************************************************************
+		// } else if ( matching("easteregg",user_input_command_string) ) {
+		// 	printf("IT IS YOUR EASTER EGG.\n");
 
 
 		// ********************************************************************************

@@ -46,10 +46,11 @@
 	(printf("F6 = %s\n", hotkeys_list[5]));						\
 	(printf("F7 = %s\n", hotkeys_list[6]));						\
 	(printf("F8 = %s\n", hotkeys_list[7]));						\
-	printf("Maximum hotkey length:%u\nTotal hotkey slots:%u\n",	\
-	        MAX_HOTKEY_LENGTH,MAX_HOTKEYS);						\
+	printf("Total hotkey slots:%u\n",MAX_HOTKEYS);			    \
 //end-macro-func
 
+// printf("Maximum hotkey length:%u\nTotal hotkey slots:%u\n",	\
+//         MAX_HOTKEY_LENGTH,MAX_HOTKEYS);						\
 
 #define load_hotkey_command(N) 													\
 	if (strlen(hotkeys_list[N-1]) > 0) {                                   		\

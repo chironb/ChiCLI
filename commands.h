@@ -261,10 +261,10 @@
 	/* --> Copy FILEORIGINAL from Partition 1 to Partition 2 Called FILECOPY */                                \
 	                                                                                                           \
                                                /*      C2/:FILECOPY=1/:FILEORIGINAL */                         \
-	/* printf("source_par:%c target_par:%c\n", source_par, target_par); */                                     \
+	/*printf("source_par:%c target_par:%c\n", source_par, target_par);    */                                   \
     strcpy (drive_command_string,"c");         /* this is the copy command */                                  \
     strncat (drive_command_string,&target_par,1);  /* this is the target partition */                          \
-    strcat (drive_command_string,"/");         /* this is the beginning of the target path */                  \
+    /* strcat (drive_command_string,"/");  */       /* this is the beginning of the target path */                  \
     strcat (drive_command_string,target_path); /* this is the target path */                                   \
     strcat (drive_command_string,":");         /* this finishes the target path */                             \
 	if (target_filename_length == 0 ) {        /* add the SOURCE filename because it's inferred */             \
@@ -276,7 +276,7 @@
 	strcat (drive_command_string,"=");                     /* this finished the target path */                 \
 	                                                                                                           \
 	strncat (drive_command_string,&source_par,1);              /* this is the source partition */              \
-	strcat (drive_command_string,"/");                     /* this is the beginning of the source path */      \
+	/* strcat (drive_command_string,"/"); */                    /* this is the beginning of the source path */      \
 	strcat (drive_command_string,source_path);             /* this is the source path */                       \
 	strcat (drive_command_string,":");                     /* this finishes the source path */                 \
 	strcat (drive_command_string,source_filename_pointer); /* add the source filename  */                      \
@@ -292,7 +292,7 @@
 	                                                                                                           \
 //end macro_func
 
-/* printf("2 tp:%s tf:%s\nsp:%s sf:%s\n", target_path, target_filename_pointer, source_path, source_filename_pointer); */ \
+// printf("tp:%s tf:%s\nsp:%s sf:%s\n", target_path, target_filename_pointer, source_path, source_filename_pointer); \
 
 
 // ********************************************************************************
@@ -323,6 +323,8 @@
 		case 3 : 				                                                                        \
 			/* Setup SOURCE FILE for READING */                                                         \
 			strcpy (drive_command_string, "");                                                          \
+			strncat(drive_command_string,&source_par,1);              /* this is the source partition */              \
+			strcat (drive_command_string, ":");                                                       \
 			strcat (drive_command_string, user_input_arg1_string); /*filename*/                         \
 			strcat (drive_command_string, ",r,");                                                       \
 			strcat (drive_command_string, detected_filetype_char); 				                        \
@@ -333,11 +335,13 @@
                                                                                                         \
 			/* Setup TARGET FILE for WRITING */                                                         \
 			strcpy (drive_command_string2, "");                                                         \
+			strncat(drive_command_string2,&target_par,1);              /* this is the target partition */              \
+			strcat (drive_command_string2, ":");                                                       \
 			strcat (drive_command_string2, user_input_arg1_string); /*filename*/                        \
 			strcat (drive_command_string2, ",w,");                                                      \
 			strcat (drive_command_string2, detected_filetype_char); 			                        \
                                                                                                         \
-			/* printf("OPEN 7,%i,%i,%s\n", user_input_arg2_number, CBM_WRITE, drive_command_string2);*/ \
+			/* printf("OPEN 7,%i,%i,%s\n", user_input_arg2_number, CBM_WRITE, drive_command_string2); */\
                                                                                                         \
 			result2 = cbm_open(7, user_input_arg2_number, CBM_WRITE, drive_command_string2);            \
                                                                                                         \
