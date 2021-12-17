@@ -66,52 +66,80 @@
 // unsigned char dir_file_total = 0;
 // unsigned char current_dir_file_index = 0;
 
-#define dir_file_count(total_files)											\
- 																			\
-	total_files = 0; 														\
- 																			\
-	result = cbm_opendir(1, dev);  	     									\
- 																			\
-	for (iii = 0; iii <= 254 ; iii++) { 									\
- 		/* printf("iii:%i\n", iii); */										\
-		if (result != 0) { 													\
-			/* printf("dir_file_count result != 0 --> %i\n",result); */	    \
-			break; 															\
-		};/*end if*/  														\
- 																			\
-	    result = cbm_readdir(1, &dir_ent); 									\
- 																			\
-	    if (iii == 0) {  													\
-			/* printf("Start.\n"); */     									\
- 																			\
-	    } else if (result == 2) {   										\
-			/* printf("End.\n"); */											\
- 																			\
-	    } else {  															\
-			total_files++; 													\
- 																			\
-		};/*end if*/  														\
- 																			\
-	};/*end for*/  															\
- 																			\
-	cbm_closedir(1);	 													\
-//end macro func 
 
-#define dir_goto_file_index(file_index) 											\
- 																					\
- 																					\
-	result = cbm_opendir(1, dev);  	     											\
- 																					\
-	for (jjj = 0; jjj <= file_index ; jjj++) {										\
- 																					\
- 																					\
-	    result = cbm_readdir(1, &dir_ent); 											\
-	    /*printf("%s\n", dir_ent.name); */											\
- 																					\
-	};/*end for*/  																	\
- 																					\
-	cbm_closedir(1);	 															\
-//end macro func 
+
+
+
+// #define dir_file_count(total_files)											\
+//  																			\
+// 	total_files = 0; 														\
+//  																			\
+// 	/* result = cbm_opendir(1, dev);  	 */    								\
+// 	                                                                        \
+// 	strcpy(listing_string,"$"); /* The default is $ to load the current directory.*/ \
+//                                                                             \
+// 	if (get_drive_type(dev) == DRIVE_UIEC) {                                \
+// 		string_add_character(listing_string,par+1); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/ \
+// 	} else {                                                                \
+// 		string_add_character(listing_string,par); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/ \
+// 	};/*end for*/  															\
+//  																			\
+//  	result = cbm_opendir(1, dev, listing_string);                           \
+//  																			\
+// 	for (iii = 0; iii <= 254 ; iii++) { 									\
+//  		/* printf("iii:%i\n", iii); */										\
+// 		if (result != 0) { 													\
+// 			/* printf("dir_file_count result != 0 --> %i\n",result); */	    \
+// 			break; 															\
+// 		};/*end if*/  														\
+//  																			\
+// 	    result = cbm_readdir(1, &dir_ent); 									\
+//  																			\
+// 	    if (iii == 0) {  													\
+// 			/* printf("Start.\n"); */     									\
+//  																			\
+// 	    } else if (result == 2) {   										\
+// 			/* printf("End.\n"); */											\
+//  																			\
+// 	    } else {  															\
+// 			total_files++; 													\
+//  																			\
+// 		};/*end if*/  														\
+//  																			\
+// 	};/*end for*/  															\
+//  																			\
+// 	cbm_closedir(1);	 													\
+// /*end macro func*/
+
+
+
+
+
+
+
+// #define dir_goto_file_index(file_index) 											\
+//  																					\
+// 	                                                                        \
+// 	strcpy(listing_string,"$"); /* The default is $ to load the current directory.*/ \
+//                                                                             \
+// 	if (get_drive_type(dev) == DRIVE_UIEC) {                                \
+// 		string_add_character(listing_string,par+1); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/ \
+// 	} else {                                                                \
+// 		string_add_character(listing_string,par); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/ \
+// 	};/*end for*/  															\
+//  																			\
+//  	result = cbm_opendir(1, dev, listing_string);                           \
+//  																					\
+// 	for (jjj = 0; jjj <= file_index ; jjj++) {										\
+//  																					\
+//  																					\
+// 	    result = cbm_readdir(1, &dir_ent); 											\
+// 	    /*printf("%s\n", dir_ent.name); */											\
+//  																					\
+// 	};/*end for*/  																	\
+//  																					\
+// 	cbm_closedir(1);	 															\
+// //end macro func 
 
 
 
@@ -131,7 +159,7 @@
 
 
 // ********************************************************************************
-// ACOPY COMMAND - Advanced Copy - Will Replace Copy 
+// ACOPY COMMAND - Drive within Drive Copying - Drive and DOS handles the copying.
 // ********************************************************************************
 #define acopy() \
 	                                                                               \
@@ -264,7 +292,7 @@
 	/*printf("source_par:%c target_par:%c\n", source_par, target_par);    */                                   \
     strcpy (drive_command_string,"c");         /* this is the copy command */                                  \
     strncat (drive_command_string,&target_par,1);  /* this is the target partition */                          \
-    /* strcat (drive_command_string,"/");  */       /* this is the beginning of the target path */                  \
+    /* strcat (drive_command_string,"/");  */       /* this is the beginning of the target path */             \
     strcat (drive_command_string,target_path); /* this is the target path */                                   \
     strcat (drive_command_string,":");         /* this finishes the target path */                             \
 	if (target_filename_length == 0 ) {        /* add the SOURCE filename because it's inferred */             \
@@ -276,7 +304,7 @@
 	strcat (drive_command_string,"=");                     /* this finished the target path */                 \
 	                                                                                                           \
 	strncat (drive_command_string,&source_par,1);              /* this is the source partition */              \
-	/* strcat (drive_command_string,"/"); */                    /* this is the beginning of the source path */      \
+	/* strcat (drive_command_string,"/"); */                    /* this is the beginning of the source path */ \
 	strcat (drive_command_string,source_path);             /* this is the source path */                       \
 	strcat (drive_command_string,":");                     /* this finishes the source path */                 \
 	strcat (drive_command_string,source_filename_pointer); /* add the source filename  */                      \
@@ -296,7 +324,7 @@
 
 
 // ********************************************************************************
-// DCOPY COMMAND 
+// DCOPY COMMAND - Device to Device Copying - Computer does the copying.
 // ********************************************************************************
 
 	// switch (detected_filetype) {                                                                        \
@@ -316,7 +344,7 @@
 		case 17 : detected_filetype_char[0]='p';detected_filetype_char[1]='\0'; break; /* PRG */                                  \
 		case 18 : detected_filetype_char[0]='u';detected_filetype_char[1]='\0'; break; /* USR */                                  \
 		case 19 : detected_filetype_char[0]='l';detected_filetype_char[1]='\0'; break; /* REL */                                  \
-		default : printf("?"); /* end default */                                                      \
+		default : printf("?"); /* end default */                                                        \
 	};/* end switch */                                                                                  \
                                                                                                         \
 	switch (number_of_user_inputs) {                                                                    \
@@ -393,8 +421,9 @@
 // COMMANDS FUNCTIONS 
 // ********************************************************************************
 
+unsigned char dir_file_count() ;
+void dir_goto_file_index(unsigned char file_index) ;
+
 void type_text( unsigned char * file_to_type ) ;
 void type_prg( unsigned char * file_to_type ) ;
 void type_hex( unsigned char * file_to_type ) ;
-
-	

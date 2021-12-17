@@ -26,7 +26,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardw
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R3"
+#define VERSION "v1.R4"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -299,10 +299,6 @@ unsigned int stopwatch_start_stamp;
 // ********************************************************************************
 
 
-// ********************************************************************************
-// NEW DIRECT DISK ACCESS FUNCTIONS FOR THE 1541 DISK DRIVE
-// ********************************************************************************
-
 // BASIC EXAMPLE OF READING THE DISK NAME
 // 10 OPEN 2,8,2,"#"
 // 15 OPEN 15,8,15
@@ -316,138 +312,6 @@ unsigned int stopwatch_start_stamp;
 // 50 CLOSE 15
 
 
-
-unsigned char disk_label[16];
-unsigned char disk_id[2];
-
-
-// void read_disk_label() {
-
-// 	// Instead of passing a var, we use a global var for this purpose,
-// 	// because it's faster in C programming esepcially on the 6502 processor.
-// 	// unsigned char disk_label[16];
-
-// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
-// 	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	result = cbm_open(2, dev, 2, "#"); // Open command channel.
-// 	result = cbm_write(15, "u1:2,0,18,0", sizeof("u1:2,0,18,0")); // Send the block read command to load track and sector to RAM command.
-// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	// memset( disk_sector_buffer, 0, sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
-// 	read_bytes = cbm_read(2, disk_sector_buffer, 16); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	disk_sector_buffer[16]='\0'; // Make sure the string is NULL terminated.
-// 	strcpy(disk_label, disk_sector_buffer);
-// 	// printf("disk_sector_buffer:'%s'\n",disk_sector_buffer); // Show us the disk label.
-// 	cbm_close(2); // Close the command channel.
-// 	cbm_close(15); // Close the other channel???
-
-// };//end-func
-
-// BROKEN! why???
-// void write_disk_label() {
-
-// 	// Instead of passing a var, we use a global var for this purpose,
-// 	// because it's faster in C programming esepcially on the 6502 processor.
-// 	// unsigned char disk_label[16];
-
-// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
-// 	//read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	result = cbm_open(2, 8, 2, "#"); // Open command channel.
-// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	// memset( disk_sector_buffer, ' ', sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
-// 	// strncpy(disk_sector_buffer,disk_label,16); // Create our new disk label string.
-// 	read_bytes = cbm_write(2, "TESTING-DISKNAME", 16); // Write our new disk label's 16 bytes to the commmand channel.
-// 	result = cbm_write(15, "u2:2,0,18,0", sizeof("u2:2,0,18,0")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
-// 	//read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	cbm_close(2); // Close the command channel.
-// 	cbm_close(15); // Close the other channel???
-
-// };//end-func
-
-// void read_disk_label() {
-
-// 	// Instead of passing a var, we use a global var for this purpose,
-// 	// because it's faster in C programming esepcially on the 6502 processor.
-// 	// unsigned char disk_label[16];
-
-// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
-// 	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	result = cbm_open(2, dev, 2, "#"); // Open command channel.
-// 	result = cbm_write(15, "u1:2,0,18,0", sizeof("u1:2,0,18,0")); // Send the block read command to load track and sector to RAM command.
-// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	memset( disk_sector_buffer, 0, sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
-// 	read_bytes = cbm_read(2, disk_sector_buffer, 16); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	disk_sector_buffer[16]='\0'; // Make sure the string is NULL terminated.
-// 	strcpy(disk_label, disk_sector_buffer);
-// 	// printf("disk_sector_buffer:'%s'\n",disk_sector_buffer); // Show us the disk label.
-// 	cbm_close(2); // Close the command channel.
-// 	cbm_close(15); // Close the other channel???
-
-// };//end-func
-
-
-void write_disk_label() {
-
-	result = get_drive_type(dev);
-
-	switch (result) {
-		case DRIVE_1541 :
-		case DRIVE_2031 :
-		case DRIVE_SD2  :
-			// These drives are supported! Keep executing.
-		break;
-
-		default :
-			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
-			return;
-		break;
-	};//end-switch
-
-	// if (get_drive_type(dev) == DRIVE_1541 ||
-	// 	get_drive_type(dev) == DRIVE_2031 ||
-	// 	get_drive_type(dev) == DRIVE_SD2  ){
-	// 	// Drive is supported!
-	// } else {
-	// 	printf("Drive not supported!\n");
-	// 	return;
-	// };//end-if
-
-	// Instead of passing a var, we use a global var for this purpose,
-	// because it's faster in C programming esepcially on the 6502 processor.
-	// unsigned char disk_label[16];
-
-	// This is the original initial command DOS string for drive 0.
-	strcpy(drive_command_string, "i0");
-	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
-	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
-	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
-	
-	result = cbm_open(15, dev, 15, drive_command_string); // Open with the initialize command.
-	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-	
-	result = cbm_open(2, 8, 2, "#"); // Open command channel.
-	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60 <---!!!!! This is th reason. But I don't know why. Probably null characters!
-	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
-	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-	strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
-	read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
-	drive_command_string2[1] = '2';
-	// strcpy(drive_command_string2, "u2:2,0,18,0");
-	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60
-	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-	
-	result = cbm_open(15, dev, 15, drive_command_string); // Open with the initialize command.
-	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-	
-	cbm_close(2); // Close the command channel.
-	cbm_close(15); // Close the other channel???
-
-};//end-func
-
-
-
 // BASIC EXAMPLE OF WRITING THE DISK NAME
 // 10 OPEN 2,8,2,"#"
 // 15 OPEN 15,8,15
@@ -458,37 +322,17 @@ void write_disk_label() {
 // 40 CLOSE 15
 
 
+// ********************************************************************************
+// NEW DIRECT DISK ACCESS FUNCTIONS FOR THE 1541 DISK DRIVE
+// ********************************************************************************
 
+unsigned char disk_label[16];
+unsigned char disk_id[2];
 
+void write_disk_label() {
 
-
-
-
-
-
-// void read_disk_id() {
-
-// 	// Instead of passing a var, we use a global var for this purpose,
-// 	// because it's faster in C programming esepcially on the 6502 processor.
-// 	// unsigned char disk_label[16];
-
-// 	result = cbm_open(15, dev, 15, "i0"); // Open ???
-// 	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	result = cbm_open(2, dev, 2, "#"); // Open command channel.
-// 	result = cbm_write(15, "u1:2,0,18,0", sizeof("u1:2,0,18,0")); // Send the block read command to load track and sector to RAM command.
-// 	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	//memset( disk_sector_buffer, 0, sizeof(disk_sector_buffer)); // Clear the string. Maybe not needed.
-// 	read_bytes = cbm_read(2, disk_sector_buffer, 2); // Read the 16 bytes that are the current disk label from the commmand channel.
-// 	disk_sector_buffer[2]='\0'; // Make sure the string is NULL terminated.
-// 	strcpy(disk_id, disk_sector_buffer);
-// 	// printf("disk_sector_buffer:'%s'\n",disk_sector_buffer); // Show us the disk label.
-// 	cbm_close(2); // Close the command channel.
-// 	cbm_close(15); // Close the other channel???
-
-// };//end-func
-
-
-void write_disk_id() {
+	// Instead of passing a var, we use a global var for this purpose,
+	// because it's faster in C programming esepcially on the 6502 processor.
 
 	result = get_drive_type(dev);
 
@@ -496,6 +340,7 @@ void write_disk_id() {
 		case DRIVE_1541 :
 		case DRIVE_2031 :
 		case DRIVE_SD2  :
+		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
 			// These drives are supported! Keep executing.
 		break;
 
@@ -505,9 +350,52 @@ void write_disk_id() {
 		break;
 	};//end-switch
 
+	// This is the original initial command DOS string for drive 0.
+	strcpy(drive_command_string, "i0");
+	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
+	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
+	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+	result = cbm_open(15, dev, 15, drive_command_string); // Open with the initialize command.
+	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
+
+	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
+	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+	strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
+	read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
+	drive_command_string2[1] = '2';
+
+	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
+	result = cbm_open( 15, dev, 15, drive_command_string); // Open with the initialize command.
+
+	cbm_close(2); // Close the command channel.
+	cbm_close(15); // Close the other channel???
+
+};//end-func
+
+
+void write_disk_id() {
+
 	// Instead of passing a var, we use a global var for this purpose,
 	// because it's faster in C programming esepcially on the 6502 processor.
-	// unsigned char disk_label[16];
+
+	result = get_drive_type(dev);
+
+	switch (result) {
+		case DRIVE_1541 :
+		case DRIVE_2031 :
+		case DRIVE_SD2  :
+		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
+			// These drives are supported! Keep executing.
+		break;
+
+		default :
+			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
+			return;
+		break;
+	};//end-switch
 
 	// This is the original initial command DOS string for drive 0.
 	strcpy(drive_command_string, "i0");
@@ -518,22 +406,17 @@ void write_disk_id() {
 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
 
 	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
-	// read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-	result = cbm_open(2, 8, 2, "#"); // Open command channel.
-	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60 <---!!!!! This is th reason. But I don't know why. Probably null characters!
+	result = cbm_open( 2, dev, 2, "#"); // Open command channel.
+
 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
  	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
 	strncpy(disk_sector_buffer,disk_id,2); // Create our new disk label string.
-	// disk_sector_buffer[0] = disk_id[0];
-	// disk_sector_buffer[1] = disk_id[1];
-	// disk_sector_buffer[2] = '\0';
+
 	read_bytes = cbm_write(2, disk_id, 2); // Write our new disk label's 16 bytes to the commmand channel.
-	// result = cbm_write(15, "u2:2,0,18,0", sizeof("u2:2,0,18,0")); // Send the buffer pointer command to move the pointer to the start of the disk label.
 	drive_command_string2[1] = '2';
-	// strcpy(drive_command_string2, "u2:2,0,18,0");
-	// printf( "sizeof('u2:2,0,18,0'):%i\nsizeof(drive_command_string2):%i\n", sizeof("u2:2,0,18,0"), sizeof(drive_command_string2) ); // OUTPUTS: sizeof('u2:2,0,18,0'):12 \n sizeof(driveDcommandDstring2):60
+
 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-	// result = cbm_open(15, dev, 15, "i0"); // Open ???
+
 	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
 	read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
 	cbm_close(2); // Close the command channel.
@@ -1838,7 +1721,20 @@ int main( int argc, char* argv[] ) {
 
                 /* NEW!!! */ // This saved 99 bytes *and* went from 70 secs to 3.89 secs to autocomplete in the same folder searching for the same file
 
-		        result = cbm_opendir(1, dev); // need to deal with errors here
+				strcpy(listing_string,"$"); /* The default is $ to load the current directory.*/ 
+
+				if (get_drive_type(dev) == DRIVE_UIEC) {
+					string_add_character(listing_string,par+1); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+				} else {
+					string_add_character(listing_string,par); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+				};/*end for*/
+
+			 	result = cbm_opendir(1, dev, listing_string);
+
+
+//		        result = cbm_opendir(1, dev); // need to deal with errors here
+
+
 		        result = cbm_readdir(1, &dir_ent); // I thinjk this will avoid it using the disk or folder name as if it were a file name and errorously auto-completing using that string.
 
 		        for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
@@ -1859,31 +1755,6 @@ int main( int argc, char* argv[] ) {
 
 
 
-
-
-                /* OLD */
-
-				// dir_file_count(dir_file_total); // get the total number of files to copy and store in dir_file_total  				//printf("\ndir_file_total:%i\n", dir_file_total);
-
-				// for (loop_k = 0; loop_k <= dir_file_total ; loop_k++) {
-
-				// 	if (loop_k == 0) { //first entry is the disk anme 
-				// 		//do nothing
-				// 	} else { 
-				// 		dir_goto_file_index(loop_k);
-				// 		//printf("dir_ent.name:%s\n",dir_ent.name);//debug
-				// 		if (strncmp(tab_complete_pointer,dir_ent.name,tab_length) == 0) { 				// 	use strncmp to compare the first X chars in the current file to the extracted text
-				// 			strncpy(new_entered_keystrokes,entered_keystrokes,tab_complete_position); 	// copy beginning of entered keystrokes
-				// 			strcat(new_entered_keystrokes,dir_ent.name); 								// aoppend the found filename to teh end
-				// 			strcpy(entered_keystrokes,new_entered_keystrokes); 							//update teh entered_keystrokes with teh tab completed version					
-				// 			// cursor_end(); // put this at the end  																
-				// 			break; 																		// break out ot eh loop to avoid loading teh resat of the files for no reason 
-				// 		} else {
-				// 			// do nothing 																// maybe play a bell/beep of some kind
-				// 		};//end_if 
-				// 	};//end if 
-
-				// };//end for 
 
 
 
@@ -3141,7 +3012,7 @@ int main( int argc, char* argv[] ) {
 				case 2 : 	
 					if ( matching("*",user_input_arg1_string) ) { 			// copy * d08:     
 
-						dir_file_count(dir_file_total); // get the total number of files to copy and store in dir_file_total 
+						dir_file_total = dir_file_count(); // get the total number of files to copy and store in dir_file_total 
 						printf("Files to del: %i\n", dir_file_total);
 
 						if (they_are_sure() == TRUE) {
@@ -3155,7 +3026,14 @@ int main( int argc, char* argv[] ) {
 									detected_filetype = dir_ent.type;
 									strcpy (user_input_arg1_string, dir_ent.name);   
 
-									strcpy (drive_command_string,"s:");
+									strcpy (drive_command_string,"s0:");
+
+									if (get_drive_type(dev) == DRIVE_UIEC ) {
+										drive_command_string[1] = par+1;
+									} else {
+										drive_command_string[1] = par;
+									};//end-f
+
 									strcat (drive_command_string,user_input_arg1_string);
 
 									printf("-> %s ",user_input_arg1_string);   
@@ -3611,28 +3489,28 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// = COMMAND / MATHS COMMAND
+		// = COMMAND / MATHS COMMAND 0--> This takes up 472 bytes!!!
 		// ********************************************************************************
 		} else if ( user_input_command_string[0] == '=' ) {
 
-            long int answer, first_number, last_number;
-
-            sscanf(user_input_arg1_string, "%li", &first_number);
-            sscanf(user_input_arg3_string, "%li", &last_number);
-
-            switch (user_input_arg2_string[0]) {
-                case '+' : answer = first_number + last_number; break;
-                case '-' : answer = first_number - last_number; break;
-                case '*' : answer = first_number * last_number; break;
-                case '/' : answer = first_number / last_number; break;
-                default  : puts("?"); break;
+			long int answer, first_number, last_number;
+			sscanf(user_input_arg1_string, "%li", &first_number);
+			sscanf(user_input_arg3_string, "%li", &last_number);
+			switch (user_input_arg2_string[0]) {
+				case '+' : answer = first_number + last_number; break;
+				case '-' : answer = first_number - last_number; break;
+				case '*' : answer = first_number * last_number; break;
+				case '/' : answer = first_number / last_number; break;
+			  default  : puts("?"); break;
 			};//end switch
+			printf("  = %li\n", answer);
 
-  			printf("  = %li\n", answer);
+			// printf("Maths have been disabled.\n");
+
 
 
 		// ********************************************************************************
-		// SYS COMMAND 
+		// SYS COMMAND
 		// ********************************************************************************
 		} else if ( matching("sys",user_input_command_string) ) {	 
 
@@ -3957,9 +3835,6 @@ int main( int argc, char* argv[] ) {
 				printf("\n");
 
 
-
-
-
 		// ********************************************************************************
 		// COPY COMMAND
 		// ********************************************************************************
@@ -3985,92 +3860,25 @@ int main( int argc, char* argv[] ) {
 			// This fix adds only 5 bytes to the overall compiled code.
 
             if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[3] == ':') { // copy * d08:
-                // puts("if 1 --> WTF???");
-          //       switch (user_input_arg2_string[2]) {
-			       //  case '8' : user_input_arg2_number = 8;  break;
-			       //  case '9' : user_input_arg2_number = 9;  break;
-			       //  case '0' : user_input_arg2_number = 10; break;
-			       //  case '1' : user_input_arg2_number = 11; break;
-			       //  case '2' : user_input_arg2_number = 12; break;
-			       //  case '3' : user_input_arg2_number = 13; break;
-			       //  case '4' : user_input_arg2_number = 14; break;
-			       //  case '5' : user_input_arg2_number = 15; break;
-		        //     default  :
-		        //         /*do nothing*/
-          //           break;
-		        // };//end switch
-		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 
+		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 
             } else if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') { // copy * d08b:
-                // puts("if 2 --> WTF???");
-          //       switch (user_input_arg2_string[2]) {
-			       //  case '8' : user_input_arg2_number = 8;  break;
-			       //  case '9' : user_input_arg2_number = 9;  break;
-			       //  case '0' : user_input_arg2_number = 10; break;
-			       //  case '1' : user_input_arg2_number = 11; break;
-			       //  case '2' : user_input_arg2_number = 12; break;
-			       //  case '3' : user_input_arg2_number = 13; break;
-			       //  case '4' : user_input_arg2_number = 14; break;
-			       //  case '5' : user_input_arg2_number = 15; break;
-		        //     default :
-		        //     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-		        //     //end default
-		        // };//end switch
-		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 
-          //       switch (user_input_arg2_string[3]) {
-          //           case '0' : target_par = '0';  break;
-          //           case 'a' : target_par = '1';  break;
-          //           case 'b' : target_par = '2';  break;
-          //           case 'c' : target_par = '3';  break;
-          //           case 'd' : target_par = '4';  break;
-          //           case 'e' : target_par = '5';  break;
-          //           case 'f' : target_par = '6';  break;
-          //           case 'g' : target_par = '7';  break;
-          //           case 'h' : target_par = '8';  break;
-          //           case 'i' : target_par = '9';  break;
-          //           // case 'j' : target_par = '10'; break;
-          //           // case 'k' : target_par = '11'; break;
-          //           // case 'l' : target_par = '12'; break;
-          //           // case 'm' : target_par = '13'; break;
-          //           // case 'n' : target_par = '14'; break;
-          //           // case 'o' : target_par = '15'; break;
-          //           // case 'p' : target_par = '16'; break;
-		        //     default  :
-		        //     	printf("Er arg\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-		        //     //end default
-		        // };//end switch
+		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 		        convert_partition_string(user_input_arg2_string[3], target_par); // do it deucimo...
 
-				// printf("This far?\n");
-
-		        // if (dev != user_input_arg2_number) {
-		        //     // Can't do this - can't copy from another device using dcopy directly to another device's partition. The whole thing needs a bit of an overhaul for that, and I'm saving those kinds of things for version 2.0
-		        //     goto skip_copying;
-		        // };//end_if
-
             } else {
-                // puts("else --> WTF???");
-                // the user hasn't entered a device and partition, so the copy is taking place on the same device,
-                // therefore, the current device (dev) and the (user_input_arg2_number) are the same
-                // thus, we don't want to use the dcopy function (it won't work)
+
                 user_input_arg2_number = dev;
                 use_dcopy = FALSE;
+
             };//end_if
 
             // user_input_arg2_number is now the target device number, so...
             if (dev == user_input_arg2_number) { // if the source device (dev) and target device (user_input_arg2_number) are the same...
                 use_dcopy = FALSE;               // ...don't use the dcopy function (it won't work)
             };//end_if
-
-            // trying to hack a solution for 1541 that doesnt' support partions 
-            // if ((source_par == '0') && (target_par == '0') && (use_dcopy == FALSE)) {
-            //     source_par = NULL;
-            //     target_par = NULL;
-            // };//end_if
-
-            //printf("dev:%i arg2#:%i dcopy:%i Spar:%i Tpar:%i\n",dev,user_input_arg2_number,use_dcopy,source_par,target_par);
 
 
 			// The source device is dev
@@ -4095,7 +3903,7 @@ int main( int argc, char* argv[] ) {
 			    case 3 : 	
 				    if ( matching("*",user_input_arg1_string) ) { 			// copy * d08:     
 
-					    dir_file_count(dir_file_total); // get the total number of files to copy and store in dir_file_total 
+					    dir_file_total = dir_file_count(); // get the total number of files to copy and store in dir_file_total 
 					    printf("Files to copy: %i\n", dir_file_total);
 
 					    if (they_are_sure() == TRUE) {
@@ -4142,7 +3950,7 @@ int main( int argc, char* argv[] ) {
 
 				    } else if ( use_dcopy == FALSE ) {
 					    // copy();
-					    acopy(); // advanced copy 
+					    acopy(); // advanced copy // TODO: IF I COMMENT THIS OUT, I SAVE 788 bytes! I think it's time to re-write this as a function and not a macro!
 
 				    } else { // error 
 					    printf("Syntax er.\n");
@@ -5100,48 +4908,7 @@ int main( int argc, char* argv[] ) {
 			printf("Maximum Bytes:\nCommand Line:%u\nArgs:%u\nDisk Buffer:%u\nAliases:%u\nAlias:%u\nHotkeys:%u\nHotkey:%u\n",MAX_LENGTH_COMMAND,MAX_LENGTH_ARGS,MAX_DISK_SECTOR_BUFFER,MAX_ALIASES,MAX_ALIAS_LENGTH,MAX_HOTKEYS,MAX_HOTKEY_LENGTH);
 
 
-// BROKEN!!! WHY????
-		// // ********************************************************************************
-		// // CHANGELABEL COMMAND
-		// // ********************************************************************************
-		// } else if ( matching("changelabel",user_input_command_string) ) {
 
-		// 	// Needs checking for 1541 / 4040 / SD-2 and length of entered string is not greater than 16 chars
-
-		// 	switch (number_of_user_inputs) {
-		// 		case 2 :
-		// 			if (they_are_sure() == TRUE) {
-
-		// 				// read_disk_label();
-		// 				// printf("Old Label: %s\n", disk_label);
-
-		// 				printf("disk_label1: '%s'\n", disk_label);
-
-		// 				strncpy(disk_label, user_input_arg1_string, 16); // strcpy vs strncpy(,,16) here --> 10 bytes!
-
-		// 				printf("disk_label2: '%s'\n", disk_label);
-
-		// 				// while(strlen(disk_label) < 16) {  // This added 18 bytes!
-		// 				// 	string_add_character(disk_label, '!');
-		// 				// };//end-while
-
-		// 				// printf("disk_label3: '%s'\n", disk_label);
-
-		// 				write_disk_label();
-
-		// 				// strcpy(disk_label, "");
-		// 				// read_disk_label();
-		// 				// printf("New Label: %s\n", disk_label);
-
-		// 				printf("Done!\n");
-
-		// 			};//end if
-		// 	    break;
-
-		// 	    default:
-		// 			printf("Er. args!\n");
-		// 		break;
-		// 	};//end_switch
 
 
 		// ********************************************************************************

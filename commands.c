@@ -120,6 +120,17 @@ unsigned char basic_tokens[76][7] = {
 	"go"
 };//end-array
 
+
+extern unsigned char listing_string[10];
+
+extern unsigned char drive_detected[8];
+extern unsigned char drive_detected_type[8]; // 0 = no drive detected, all others related to a specific drive
+
+extern void string_add_character();
+extern unsigned char par;
+extern struct cbm_dirent dir_ent;
+
+
 extern unsigned char disk_sector_buffer    [MAX_DISK_SECTOR_BUFFER] ; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
 extern unsigned char drive_command_string  [MAX_LENGTH_COMMAND]	    ;
 extern unsigned char drive_command_string2 [MAX_LENGTH_COMMAND]	    ;
@@ -143,8 +154,102 @@ extern unsigned char iii;
 extern unsigned char jjj;
 
 // ********************************************************************************
-// COMMANDS FUNCTIONS 
+// COMMANDS FUNCTIONS
 // ********************************************************************************
+
+
+
+// unsigned char dir_file_total = 0;
+// unsigned char current_dir_file_index = 0;
+
+// #define set_drive_detection(drive,detected) drive_detected[drive-8] = detected
+// #define get_drive_detection(drive) drive_detected[drive-8]
+// #define set_drive_type(drive,type) drive_detected_type[drive-8] = type
+// #define get_drive_type(drive) drive_detected_type[drive-8]
+
+// unsigned char  drive_detected[8]      = { 0,0,0,0,0,0,0,0 };
+// unsigned char  drive_detected_type[8] = { 0,0,0,0,0,0,0,0 }; // 0 = no drive detected, all others related to a specific drive
+
+
+// BEFORE: 47895
+// AFTER:  47721
+// SAVED:    174
+
+unsigned char dir_file_count(){
+
+	// unsigned char dir_file_total = 0;
+
+	unsigned char total_files = 0;
+
+	strcpy(listing_string,"$0"); /* The default is $ to load the current directory.*/
+
+	if (get_drive_type(dev) == DRIVE_UIEC) {
+		listing_string[1] = par+1; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+	} else {
+		listing_string[1] = par; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+	};/*end for*/
+
+ 	result = cbm_opendir(1, dev, listing_string);
+
+	for (iii = 0; iii <= 254 ; iii++) {
+ 		/* printf("iii:%i\n", iii); */
+		if (result != 0) {
+			/* printf("dir_file_count result != 0 --> %i\n",result); */
+			break;
+		};/*end if*/
+
+	    result = cbm_readdir(1, &dir_ent);
+
+	    if (iii == 0) {
+			/* printf("Start.\n"); */
+
+	    } else if (result == 2) {
+			/* printf("End.\n"); */
+
+	    } else {
+			total_files++;
+
+		};/*end if*/
+
+	};/*end for*/
+
+	cbm_closedir(1);
+
+	return(total_files);
+
+};//end-func
+
+
+void dir_goto_file_index(unsigned char file_index) 	{
+
+	// printf("file_index:%u\n",file_index);
+
+	strcpy(listing_string,"$0"); /* The default is $ to load the current directory.*/
+
+	if (get_drive_type(dev) == DRIVE_UIEC) {
+		listing_string[1] = par+1; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+	} else {
+		listing_string[1] = par; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+	};/*end for*/
+
+ 	result = cbm_opendir(1, dev, listing_string);
+
+	for (jjj = 0; jjj <= file_index ; jjj++) {
+
+	    result = cbm_readdir(1, &dir_ent);
+	    // printf("%s\n", dir_ent.name);
+
+	};/*end for*/
+
+	cbm_closedir(1);
+
+};//end macro func 
+
+
+
+
+
+
 
 void type_text( unsigned char * file_to_type ) {
 
