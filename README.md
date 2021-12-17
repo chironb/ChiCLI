@@ -57,7 +57,7 @@ Testing successfully with the following hardware:
 
 Latest News and Changelog:
 
-v1.R4 - Release Candidate 3 - Dec 17 2021
+v1.R4 - Release Candidate 4 - Dec 17 2021
 - Issue:     I think my SD card was dying which sent me down a few rabbit holes... however, this lead to some fixes...
 - Issue:     Needed to make multiple small updates to ensure copy and delete work properly between various target partitions and drives, within and across devices.
 
