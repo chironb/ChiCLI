@@ -1,12 +1,12 @@
 // ********************************************************************************
-//	
+//
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
 //
 /* Compiling and deleting object files command, because who needs a make file!
 
 cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli.prg && rm *.o && ls -l *.prg
 
-*/ 
+*/
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
     // the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardw
     // GNU General Public License for more details.
 
     // You should have received a copy of the GNU General Public License
-    // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    // along with this program.  If not, see <https://www.gnu.org/licenses/>
 
 // ********************************************************************************
 
@@ -26,7 +26,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardw
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R4"
+#define VERSION "v1.R5"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -5005,11 +5005,11 @@ int main( int argc, char* argv[] ) {
 		// 	// if (argc >10)printf("Arg 10:%s\n"         , argv[10]);
 
 
-		// // ********************************************************************************
-		// // EASTEREGG COMMAND - This takes up 71 bytes!
-		// // ********************************************************************************
-		// } else if ( matching("easteregg",user_input_command_string) ) {
-		// 	printf("IT IS YOUR EASTER EGG.\n");
+		// ********************************************************************************
+		// EASTEREGG COMMAND - This takes up 71 bytes!
+		// ********************************************************************************
+		} else if ( matching("easteregg",user_input_command_string) ) {
+			printf("IT IS YOUR EASTER EGG.\n");
 
 
 		// ********************************************************************************

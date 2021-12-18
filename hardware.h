@@ -123,7 +123,7 @@
 #define DRIVE_SD2     0xD2
 
 // Modern SD Card Drives
-#define  DRIVE_UIEC   0xEC
+#define  DRIVE_UIEC   0xEC // TODO:Make one for SD2IEC or find/replace all references.
 #define  DRIVE_PI1541 0x1E
 
 // DRIVE TYPE STRINGS - I THINK I CAN DELETE THIS???

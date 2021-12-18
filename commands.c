@@ -130,14 +130,21 @@ extern void string_add_character();
 extern unsigned char par;
 extern struct cbm_dirent dir_ent;
 
+extern unsigned char number_of_user_inputs;
+extern unsigned char source_par;
+extern unsigned char user_input_arg1_string[MAX_LENGTH_ARGS];
+extern unsigned char user_input_arg2_string[MAX_LENGTH_ARGS];
+extern unsigned int user_input_arg2_number;
+extern unsigned char target_par;
 
 extern unsigned char disk_sector_buffer    [MAX_DISK_SECTOR_BUFFER] ; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
 extern unsigned char drive_command_string  [MAX_LENGTH_COMMAND]	    ;
 extern unsigned char drive_command_string2 [MAX_LENGTH_COMMAND]	    ;
 extern unsigned char get_key ;
-extern unsigned char result ;
 extern unsigned char dev ;
-extern unsigned char read_bytes ;
+extern signed int result    ; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
+extern signed int result2   ; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
+extern signed int read_bytes; 
 extern unsigned char i; // shared by all for loops
 extern unsigned char spot_in_prg ;
 extern unsigned char previous_byte ;
@@ -244,6 +251,255 @@ void dir_goto_file_index(unsigned char file_index) 	{
 	cbm_closedir(1);
 
 };//end macro func 
+
+
+
+
+// Doing this saved: 48005 - 47530 = 475 bytes!
+void dcopy() {
+	                                                                                                    
+	switch (detected_filetype) {                                                                        
+		case  2 : /* bad */      break;	/* DIR */                                                       
+		case 16 : detected_filetype_char[0]='s';detected_filetype_char[1]='\0'; break; /* SEQ */       
+		case 17 : detected_filetype_char[0]='p';detected_filetype_char[1]='\0'; break; /* PRG */                                  
+		case 18 : detected_filetype_char[0]='u';detected_filetype_char[1]='\0'; break; /* USR */                                  
+		case 19 : detected_filetype_char[0]='l';detected_filetype_char[1]='\0'; break; /* REL */                                  
+		default : printf("?"); /* end default */                                                        
+	};/* end switch */                                                                                  
+                                                                                                        
+	switch (number_of_user_inputs) {                                                                    
+		case 3 : 				                                                                       
+			/* Setup SOURCE FILE for READING */                                                         
+			strcpy (drive_command_string, "");                                                          
+			strncat(drive_command_string,&source_par,1);              /* this is the source partition */              
+			strcat (drive_command_string, ":");                                                       
+			strcat (drive_command_string, user_input_arg1_string); /*filename*/                         
+			strcat (drive_command_string, ",r,");                                                       
+			strcat (drive_command_string, detected_filetype_char); 				                        
+                                                                                                        
+			/* printf("OPEN 6,%i,%i,%s\n", dev, CBM_READ, drive_command_string); */		                
+                                                                                                        
+			result = cbm_open(6, dev, CBM_READ, drive_command_string);                                  
+                                                                                                        
+			/* Setup TARGET FILE for WRITING */                                                         
+			strcpy (drive_command_string2, "");                                                         
+			strncat(drive_command_string2,&target_par,1);              /* this is the target partition */              
+			strcat (drive_command_string2, ":");                                                       
+			strcat (drive_command_string2, user_input_arg1_string); /*filename*/                        
+			strcat (drive_command_string2, ",w,");                                                      
+			strcat (drive_command_string2, detected_filetype_char); 			                        
+                                                                                                        
+			/* printf("OPEN 7,%i,%i,%s\n", user_input_arg2_number, CBM_WRITE, drive_command_string2); */
+                                                                                                        
+			result2 = cbm_open(7, user_input_arg2_number, CBM_WRITE, drive_command_string2);            
+                                                                                                        
+			printf("-> %s [",user_input_arg1_string);                                                   
+                                                                                                        
+			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));                                    
+                                                                                                        
+			if (result == 0 && result2 == 0) {                                                          
+				do {                                                                                    
+					read_bytes = cbm_read(6, disk_sector_buffer, sizeof(disk_sector_buffer));           
+					result = cbm_write(7, disk_sector_buffer, read_bytes); 								
+					if ( (read_bytes == -1) || (result == -1) ) {										
+						printf("dcopy() er!");															
+						break;																			
+					};/*end_if*/																		
+                                                                                                        
+					printf(".");																		
+                                                                                                        
+                    get_key = 0;                                                                                    
+					if (kbhit() != 0) { /* If key has been pressed */  									
+					    get_key = cgetc();									    						
+				    };/*end_if*/ 																		
+                                                                                                        
+					if (get_key == 3) { /* RUN/STOP or CTRL-C */    									
+					    break;									    									
+				    };/*end_if*/ 																		
+                                                                                                        
+					memset(disk_sector_buffer,0,sizeof(disk_sector_buffer)); 							
+				} while( read_bytes == sizeof(disk_sector_buffer) );/* end do */						
+			};/* end if */ 																				
+																										
+			cbm_close (6);																				
+			cbm_close (7);																				
+																										
+			printf("]\n");																		        
+	    break;																							
+	    																								
+	    default : 																						
+	    	printf("Er args:%i\n", number_of_user_inputs);						                        
+	    /* end default */																				
+	};/* end switch */																					
+};//end-func
+
+
+
+
+// Doing this saved: 47570 - 46784 = 786 bytes!
+
+// ********************************************************************************
+// ACOPY COMMAND - Drive within Drive Copying - Drive and DOS handles the copying.
+// ********************************************************************************
+void acopy() {
+	                                                                               \
+	unsigned char user_input_arg1_string_length; \
+	unsigned char user_input_arg2_string_length; \
+	unsigned char right_slash_index; \
+	unsigned char right_slash_position; \
+	                                                                               \
+	unsigned char  source_path[MAX_COMMODORE_DOS_FILENAME]; \
+	unsigned char  source_path_length; \
+	unsigned char *source_filename_pointer; \
+	unsigned char  source_filename_length; \
+	                                                                               \
+	unsigned char  target_path[MAX_COMMODORE_DOS_FILENAME]; \
+	unsigned char  target_path_length;			 \
+	unsigned char *target_filename_pointer; \
+	unsigned char  target_filename_length;	 \
+	                                                                               \
+	unsigned char  copy_error_status; \
+	                                                                               \
+	memset( source_path, 0, sizeof(source_path) ); \
+	memset( target_path, 0, sizeof(target_path) ); \
+	                                                                               \
+	user_input_arg1_string_length = 0; \
+	user_input_arg2_string_length = 0; \
+	                                                                               \
+	right_slash_index = 0; \
+	                                                                               \
+	user_input_arg1_string_length = strlen(user_input_arg1_string); \
+	user_input_arg2_string_length = strlen(user_input_arg2_string); \
+	                                                                               \
+	source_filename_pointer = user_input_arg1_string; /* update pointer --> user_input_arg1_string_length string */ \
+	/* NEW!!! */\
+    /* if ( matching("d9b:",user_input_arg2_string) ) { */ \
+    if ( (user_input_arg2_string[0] == 'd' && user_input_arg2_string[3] == ':') || (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') ) { \
+	    target_filename_pointer = user_input_arg1_string; /* update pointer --> user_input_arg1_string_length string */ \
+	    /* puts("???"); */ \
+	} else { \
+	    target_filename_pointer = user_input_arg2_string; \
+	};/*end_if*/\
+	                                                                               \
+	source_filename_length = 0; \
+	target_filename_length = 0; \
+	                                                                               \
+	copy_error_status = FALSE; \
+	                                                                               \
+	/* -------------------- SOURCE -------------------- */ \
+	                                                                               \
+	right_slash_index = 0; \
+	                                                                               \
+	for (i = (user_input_arg1_string_length) ; i > 0 ; i--) { \
+		if (user_input_arg1_string[i-1] == '/') { \
+			break; \
+		} else { \
+			right_slash_index++; /* how many positons left does the rightmost slash / occur */ \
+		};/*end_if*/ \
+	};/*end_if*/  \
+	                                                                               \
+	right_slash_position = (user_input_arg1_string_length - 1) - right_slash_index;	/* last positoin minus 3 of chars from end where we found the right-most slash */		\
+	\
+	if (right_slash_index == user_input_arg1_string_length) {/* if we searched the whole string and found no / slashes */ \
+		/* leave source filename_pointer as-is, leave source path as-is */ \
+	\
+	} else if (right_slash_position == 0) { /* if right_slash_position == 0 then there's only a slash at the very beginning */ \
+		source_filename_pointer = source_filename_pointer + 1; \
+	\
+	} else if (right_slash_index == 0) { /* if there's a slash at the very end */ \
+		copy_error_status = TRUE; /* ERROR! in this case, there can't be only a path as the source, cause that's not a file */ \
+	\
+	} else { \
+		source_filename_pointer = source_filename_pointer + (right_slash_position+1); \
+	\
+	};/*end_if*/ \
+	\
+	source_filename_length = strlen(source_filename_pointer); \
+	\
+	source_path_length = user_input_arg1_string_length - source_filename_length; \
+	source_filename_length = strlen(source_filename_pointer); \
+	strncpy(source_path , user_input_arg1_string , source_path_length ); /* copy the arg2 into the path leaving out the last filename characters */ \
+	\
+	/* -------------------- TARGET -------------------- */ \
+	\
+	right_slash_index = 0; \
+	\
+	for (i = (user_input_arg2_string_length) ; i > 0 ; i--) { \
+		if (user_input_arg2_string[i-1] == '/') { \
+			break; \
+		} else { \
+			right_slash_index++; /* how many positons left does the rightmost slash / occur */ \
+		};/*end_if*/ \
+	};/*end_for*/ \
+	\
+	right_slash_position = (user_input_arg2_string_length - 1) - right_slash_index; \
+	\
+	if (right_slash_index == user_input_arg2_string_length) { /* if we searched the whole string and found no slashes then... */ \
+		/* use this string as the filename , the path is left empty */ \
+	\
+	} else if (right_slash_position == 0) { /* if there's only a slash at the very beginning */ \
+		target_filename_pointer = target_filename_pointer + 1; \
+	\
+	} else if (right_slash_index == 0) { /* if there's a slash at the very end */ \
+		target_filename_pointer = source_filename_pointer; /* then they haven't given us a filename, and the source filename is implied */ \
+		strcpy(target_path,user_input_arg2_string); \
+	                                                                               \
+	} else { \
+		target_filename_pointer = target_filename_pointer + (right_slash_position+1); \
+	                                                                               \
+	};/*end_if*/ \
+	                                                                               \
+	\
+	target_filename_length = strlen(target_filename_pointer); \
+	                                                                               \
+	target_path_length = user_input_arg2_string_length - target_filename_length; \
+	target_filename_length = strlen(target_filename_pointer); \
+	strncpy(target_path , user_input_arg2_string , target_path_length ); /* copy the arg2 into the path leaving out the last filename characters */ \
+	/* NEW!!! */ \
+    /* if ( matching("d9b:",user_input_arg2_string) ) { */ \
+    if ( (user_input_arg2_string[0] == 'd' && user_input_arg2_string[3] == ':') || (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') ) { \
+	    strcpy(target_path , "" ); /* clear it */ \
+	    /* puts("???"); */ \
+	};/*end_if*/\
+	\
+	\
+	/* -------------------- BUILD STRING -------------------- */                                               \
+    /* start copy command, not gonna deal with partitions for now */                                           \
+	/* strcpy (drive_command_string,"c0"); */                                                                  \
+	/* --> Copy FILEORIGINAL from Partition 1 to Partition 2 Called FILECOPY */                                \
+	                                                                                                           \
+                                               /*      C2/:FILECOPY=1/:FILEORIGINAL */                         \
+	/*printf("source_par:%c target_par:%c\n", source_par, target_par);    */                                   \
+    strcpy (drive_command_string,"c");         /* this is the copy command */                                  \
+    strncat (drive_command_string,&target_par,1);  /* this is the target partition */                          \
+    /* strcat (drive_command_string,"/");  */       /* this is the beginning of the target path */             \
+    strcat (drive_command_string,target_path); /* this is the target path */                                   \
+    strcat (drive_command_string,":");         /* this finishes the target path */                             \
+	if (target_filename_length == 0 ) {        /* add the SOURCE filename because it's inferred */             \
+		strcat (drive_command_string,source_filename_pointer);                                                 \
+	} else {                                   /* otherwise, add the target filename */                        \
+		strcat (drive_command_string,target_filename_pointer);                                                 \
+	};/*end_if*/                                                                                               \
+	                                                                                                           \
+	strcat (drive_command_string,"=");                     /* this finished the target path */                 \
+	                                                                                                           \
+	strncat (drive_command_string,&source_par,1);              /* this is the source partition */              \
+	/* strcat (drive_command_string,"/"); */                    /* this is the beginning of the source path */ \
+	strcat (drive_command_string,source_path);             /* this is the source path */                       \
+	strcat (drive_command_string,":");                     /* this finishes the source path */                 \
+	strcat (drive_command_string,source_filename_pointer); /* add the source filename  */                      \
+	                                                                                                           \
+	printf("-->%s\n", drive_command_string);                                                                   \
+	                                                                                                           \
+	if (copy_error_status == TRUE) {                                                                           \
+		printf("ERR: File not found!\n");                                                                      \
+	} else {                                                                                                   \
+		result = cbm_open(1, dev, 15, drive_command_string);                                                   \
+		cbm_close(1);                                                                                          \
+	};/*end_if*/                                                                                               \
+	                                                                                                           \
+};//end-func
+
 
 
 
