@@ -4,7 +4,7 @@
 //
 /* Compiling and deleting object files command, because who needs a make file!
 
-cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardware.c  commands.c -o chicli.prg && rm *.o && ls -l *.prg
+cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hotkeys.c hardware.c  commands.c -o chicli.prg && rm *.o && ls -l *.prg
 
 */
     // This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardw
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R5"
+#define VERSION "v1.R6"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -54,7 +54,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hardw
 #ifndef HOTKEYS_H
 #define HOTKEYS_H
 #include "hotkeys.h"
-#endif 
+#endif
 
 #ifndef COMMANDS_H
 #define COMMANDS_H

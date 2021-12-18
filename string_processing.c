@@ -13,7 +13,6 @@
 #include <string.h>
 #include <conio.h>
 #include <ctype.h>
-#include <ctype.h>
 
 #ifndef CHICLI_H
 #define CHICLI_H
