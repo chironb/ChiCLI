@@ -57,10 +57,10 @@ Testing successfully with the following hardware:
 
 Latest News and Changelog:
 
-v1.R6 - Release Candidate 6 - Dec ?? 2021
+v1.R6 - Release Candidate 6 - Dec 18 2021
 - Updated:   Converted both copy macros to proper functions and saved 1261 bytes total!!! This means I can enable more and larger aliases and hotkeys and still have some extra room for refinements before a final version 1.0 release!
 
-v1.R5 - Release Candidate 5 - Dec ?? 2021
+v1.R5 - Release Candidate 5 - Dec 18 2021
 - Updated:   Converted both copy macros to proper functions and saved 1261 bytes total!!! This means I can enable more and larger aliases and hotkeys and still have some extra room for refinements before a final version 1.0 release!
 
 v1.R4 - Release Candidate 4 - Dec 17 2021
