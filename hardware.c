@@ -990,16 +990,25 @@ void change_drive(unsigned char device_number) {
 
 unsigned char detect_filetype(unsigned char * filename, unsigned char print_typefile) {
 
-	// result = cbm_opendir(1, dev); // need to deal with errors here
 
-	strcpy(listing_string,"$"); // Load directory "$", load drive 0 dir "$0", drive 1 "$1".
+	// strcpy(listing_string,"$"); // Load directory "$", load drive 0 dir "$0", drive 1 "$1".
 
+	// if (get_drive_type(dev) == DRIVE_UIEC) {
+	// 	// printf("Detected SD2IEC!\n");
+	// 	string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+	// } else {
+	// 	string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+	// };//end-if
+
+	listing_string[0] = '$'; // This is the short version of the DOS command
 	if (get_drive_type(dev) == DRIVE_UIEC) {
-		// printf("Detected SD2IEC!\n");
-		string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+	    listing_string[1] = par+1;
 	} else {
-		string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+		listing_string[1] = par;
 	};//end-if
+	listing_string[3] = '\0';
+
+	// printf("listing_string: %s\n",listing_string);
 
 	result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
 
@@ -1024,6 +1033,7 @@ unsigned char detect_filetype(unsigned char * filename, unsigned char print_type
 						case 17 : printf("PRG"); break; // PRG
 						case 18 : printf("USR"); break; // USR
 						case 19 : printf("REL"); break;	// REL
+						// TODO: Detect "CBM" type here for 1581 support!!!
 						default : printf("???"); //end default
 					};//end switch
 

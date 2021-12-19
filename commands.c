@@ -472,7 +472,13 @@ void acopy() {
 	/*printf("source_par:%c target_par:%c\n", source_par, target_par);    */                                   \
     strcpy (drive_command_string,"c");         /* this is the copy command */                                  \
     strncat (drive_command_string,&target_par,1);  /* this is the target partition */                          \
-    /* strcat (drive_command_string,"/");  */       /* this is the beginning of the target path */             \
+
+	if (get_drive_type(dev) == DRIVE_UIEC) {
+	    strcat (drive_command_string,"/");         /* !!!!! this is the beginning of the target path */        \
+	} else {
+		// do nothing
+	};//end-if
+
     strcat (drive_command_string,target_path); /* this is the target path */                                   \
     strcat (drive_command_string,":");         /* this finishes the target path */                             \
 	if (target_filename_length == 0 ) {        /* add the SOURCE filename because it's inferred */             \
@@ -484,7 +490,13 @@ void acopy() {
 	strcat (drive_command_string,"=");                     /* this finished the target path */                 \
 	                                                                                                           \
 	strncat (drive_command_string,&source_par,1);              /* this is the source partition */              \
-	/* strcat (drive_command_string,"/"); */                    /* this is the beginning of the source path */ \
+
+	if (get_drive_type(dev) == DRIVE_UIEC) {
+	    strcat (drive_command_string,"/");         /* !!!!! this is the beginning of the target path */        \
+	} else {
+		// do nothing
+	};//end-if
+
 	strcat (drive_command_string,source_path);             /* this is the source path */                       \
 	strcat (drive_command_string,":");                     /* this finishes the source path */                 \
 	strcat (drive_command_string,source_filename_pointer); /* add the source filename  */                      \
@@ -514,21 +526,36 @@ void type_text( unsigned char * file_to_type ) {
 
 	// if (detected_filetype == 
 
-			printf("Detected file: %s ", file_to_type );
-			detected_filetype = detect_filetype(file_to_type, TRUE);
+	printf("Detected file: %s ", file_to_type );
+	detected_filetype = detect_filetype(file_to_type, TRUE);
 
-			switch (detected_filetype) {
-				case  2 : /* bad */      break;	// DIR
-				case 16 : strcpy(detected_filetype_char,"s"); break; // SEQ
-				case 17 : strcpy(detected_filetype_char,"p"); break; // PRG
-				case 18 : strcpy(detected_filetype_char,"u"); break; // USR
-				case 19 : strcpy(detected_filetype_char,"l"); break; // REL // seems liek you need to pass L instaed of R 
-				default : printf("???"); //end default
-			};//end switch
+	switch (detected_filetype) {
+		case  2 : /* bad */      break;	// DIR
+		case 16 : strcpy(detected_filetype_char,"s"); break; // SEQ
+		case 17 : strcpy(detected_filetype_char,"p"); break; // PRG
+		case 18 : strcpy(detected_filetype_char,"u"); break; // USR
+		case 19 : strcpy(detected_filetype_char,"l"); break; // REL // seems liek you need to pass L instaed of R 
+		default : printf("???"); //end default
+	};//end switch
 
-			strcpy (drive_command_string, file_to_type);
-			strcat (drive_command_string, ",r,");
-			strcat (drive_command_string, detected_filetype_char);
+	// strcpy (drive_command_string, file_to_type);
+	// strcat (drive_command_string, ",r,");
+	// strcat (drive_command_string, detected_filetype_char);
+
+	/* Setup SOURCE FILE for READING */                                                         
+	strcpy (drive_command_string, "");                                                          
+	if (get_drive_type(dev) == DRIVE_UIEC) {
+	    drive_command_string[0] = par+1;
+	} else {
+		drive_command_string[0] = par;
+	};//end-if
+	drive_command_string[1] = ':';
+	drive_command_string[2] = '\0';
+	strcat (drive_command_string, file_to_type); /*filename*/                         
+	strcat (drive_command_string, ",r,");                                                       
+	strcat (drive_command_string, detected_filetype_char); 				                        
+
+	// printf("drive_command_string: %s\n", drive_command_string);
 
 	result = cbm_open(8, dev, CBM_READ, drive_command_string);
 
@@ -585,15 +612,26 @@ void type_text( unsigned char * file_to_type ) {
 
 void type_prg( unsigned char * file_to_type ) {
 
-			// I was helped in this section by studying this code:
-			// https://github.com/doj/dracopy/blob/master/src/cat.c
-			// As well as this website:
-			// https://wpguru.co.uk/2014/06/reading-and-writing-sequential-data-on-the-commodore-1541/
-			// for Commodore 64 Basic 2.0 info, I used this:
-			// https://www.c64-wiki.com/wiki/BASIC_token
+	// I was helped in this section by studying this code:
+	// https://github.com/doj/dracopy/blob/master/src/cat.c
+	// As well as this website:
+	// https://wpguru.co.uk/2014/06/reading-and-writing-sequential-data-on-the-commodore-1541/
+	// for Commodore 64 Basic 2.0 info, I used this:
+	// https://www.c64-wiki.com/wiki/BASIC_token
 
-			strcpy (drive_command_string, file_to_type);
+			/* Setup SOURCE FILE for READING */                                                         
+			strcpy (drive_command_string, "");                                                          
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+			    drive_command_string[0] = par+1;
+			} else {
+				drive_command_string[0] = par;
+			};//end-if
+			drive_command_string[1] = ':';
+			drive_command_string[2] = '\0';
+			strcat (drive_command_string, file_to_type);
 			strcat (drive_command_string, ",r,p");
+
+			// printf("drive_command_string: %s\n", drive_command_string);
 
 			// Blank out the disk_sector_buffer, so there isn't any garbage characters in it.
 			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
@@ -822,9 +860,22 @@ void type_hex( unsigned char * file_to_type ) {
 			// 	default : printf("???"); //end default
 			// };//end switch
 
-			strcpy (drive_command_string, file_to_type);
-			strcat (drive_command_string, ",r,");
-			strcat (drive_command_string, detected_filetype_char);
+			/* Setup SOURCE FILE for READING */                                                         
+			strcpy (drive_command_string, "");                                                          
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+			    drive_command_string[0] = par+1;
+			} else {
+				drive_command_string[0] = par;
+			};//end-if
+			drive_command_string[1] = ':';
+			drive_command_string[2] = '\0';
+			strcat (drive_command_string, file_to_type); /*filename*/                         
+			strcat (drive_command_string, ",r,");                                                       
+			strcat (drive_command_string, detected_filetype_char); 				                        
+
+			// strcpy (drive_command_string, file_to_type);
+			// strcat (drive_command_string, ",r,");
+			// strcat (drive_command_string, detected_filetype_char);
 
 			// printf("drive_command_string: %s\n", drive_command_string);
 

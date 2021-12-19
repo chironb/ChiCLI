@@ -4,7 +4,7 @@ A CLI for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_R3_screenshot.png?raw=true)
 
-ChiCLI v1.R5 (c) 2021 Chiron Bramberger
+ChiCLI v1.R7 (c) 2021 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, similar to and inspired by: AmigaDOS, Commodore DOS, MS-DOS, and Linux.
 
@@ -56,6 +56,9 @@ Testing successfully with the following hardware:
 - Commodore Flyer Internet Modem --> http://www.retroswitch.com/products/flyer/ (Not Sponsored)
 
 Latest News and Changelog:
+
+v1.R7 - Release Candidate 7 - Dec 19 2021
+- Updated:   A bunch of little fixes. The commands run, dumpmem, initialize, and type to properly handles multiple drive devices.
 
 v1.R6 - Release Candidate 6 - Dec 18 2021
 - Updated:   Converted hotkeys macros to proper functions and saved 88 bytes. I maxed out the system variables, which you can view using the vars command.

@@ -26,7 +26,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hotke
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R6"
+#define VERSION "v1.R7"
 #define PROGRAM_NAME "chicli"
 
 // ********************************************************************************
@@ -107,7 +107,7 @@ unsigned char rtc_device = 0;
 unsigned char  drive_detected[8]      = { 0,0,0,0,0,0,0,0 };
 unsigned char  drive_detected_type[8] = { 0,0,0,0,0,0,0,0 }; // 0 = no drive detected, all others related to a specific drive
 
-
+												   //  text, background, border
 unsigned char color_profiles[9][3] = {{06,01,01},  //  1 - C PET Style
 								      {07,02,04},  //  2 - C VIC-20 Style
 								      {15,07,15},  //  3 - C 64 Style
@@ -118,19 +118,19 @@ unsigned char color_profiles[9][3] = {{06,01,01},  //  1 - C PET Style
 								      {02,12,13},  //  8 - Greyscale
 								      {02,15,07}}; //  9 - Default
 
-// unsigned char color_profiles[14][3] = {{06,01,01}, //  1 - C PET Style
-// 								       {07,02,04}, //  2 - C VIC-20 Style
-// 								       {15,07,15}, //  3 - C 64 Style
-// 								       {07,02,04}, //  4 - C SX-64 Style
-// 								       {14,12,14}, //  5 - C 128 VIC-II Style
-// 								       {04,01,01}, //  6 - C 128 VDC Style
-// 								       {02,07,07}, //  7 - AmigaDOS v1.3 Style
-// 								       {02,07,15}, //  8 - White on Blue on L.Blue
-// 								       {01,02,02}, //  9 - Black on White
-// 								       {02,01,01}, // 10 - White on Black
-// 								       {02,12,13}, // 11 - Greyscale One
-// 								       {01,02,16}, // 12 - Greyscale Two
-// 								       {02,15,07}};// 13 - Default
+// unsigned char color_profiles[14][3]={{06,01,01}, //  1 - C PET Style
+// 								        {07,02,04}, //  2 - C VIC-20 Style
+// 								        {15,07,15}, //  3 - C 64 Style
+// 								        {07,02,04}, //  4 - C SX-64 Style
+// 								        {14,12,14}, //  5 - C 128 VIC-II Style
+// 								        {04,01,01}, //  6 - C 128 VDC Style
+// 								        {02,07,07}, //  7 - AmigaDOS v1.3 Style
+// 								        {02,07,15}, //  8 - White on Blue on L.Blue
+// 								        {01,02,02}, //  9 - Black on White
+// 								        {02,01,01}, // 10 - White on Black
+// 								        {02,12,13}, // 11 - Greyscale One
+// 								        {01,02,16}, // 12 - Greyscale Two
+// 								        {02,15,07}};// 13 - Default
 
 // unsigned char drive_detected_type[8];
 
@@ -358,7 +358,7 @@ void write_disk_label() {
 	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
 
-	result = cbm_open(15, dev, 15, drive_command_string); // Open with the initialize command.
+	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
 	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
 
 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
@@ -368,10 +368,13 @@ void write_disk_label() {
 	drive_command_string2[1] = '2';
 
 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-	result = cbm_open( 15, dev, 15, drive_command_string); // Open with the initialize command.
+	result = cbm_open( 15, dev, 15, drive_command_string); // Open with the init command.
 
 	cbm_close(2); // Close the command channel.
 	cbm_close(15); // Close the other channel???
+
+	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
+	cbm_close(15); // Close the channel
 
 };//end-func
 
@@ -421,6 +424,9 @@ void write_disk_id() {
 	read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
 	cbm_close(2); // Close the command channel.
 	cbm_close(15); // Close the other channel???
+
+	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
+	cbm_close(15); // Close the channel
 
 };//end-func
 
@@ -2034,22 +2040,24 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// ./ COMMAND
 		// ********************************************************************************
-		} else if ( user_input_command_string[0] == '.' && user_input_command_string[1] == '/' ) {		
+		} else if ( user_input_command_string[0] == '.' && user_input_command_string[1] == '/' ) {
+
+			// TODO: I think I can pass the entire path as part of the first string I pass to exec() so that it works in different folders!
 
 			// rpobvably need to do a chagne directory to root before running this
 
 			// switch (number_of_user_inputs) {
-				
-			// 	case 2 : 				
-					// if (they_are_sure() == TRUE) {			
+
+			// 	case 2 :
+					// if (they_are_sure() == TRUE) {
 						strcpy(extracted_program_name,user_input_command_string+2); // THIS GIVES ME EVERYTHING EXCEPT THE FIRST TWO CHARACTERS 
-						// printf("Running: %s\n", extracted_program_name);				
-			    		exec(extracted_program_name, user_input_arg1_string); 
+						// printf("Running: %s\n", extracted_program_name);
+			    		exec(extracted_program_name, user_input_arg1_string);
 		    			return EXIT_SUCCESS;
-		    		// };//end if 
-			    // break;				
-	 			
-	 			// // TODO: rewrite this to inlude all args with quotes on the command line 	
+		    		// };//end if
+			    // break;
+
+	 			// // TODO: rewrite this to inlude all args with quotes on the command line 
 			  //   default : 
 			  //   	printf("Echo args error. # of args:%i\n", number_of_user_inputs);
 			  //   //end default
@@ -2085,10 +2093,20 @@ int main( int argc, char* argv[] ) {
 		    clrscr();// clear screen
 		    cputs("new");// print new
 		    gotoxy(0,3);// move down 3 lines 
-		    cputs("load\"");// print load"---name_of_program---",9
+		    cputs("load\"");// print load"0:---name_of_program---",9
+
+			// Place the partition number in the run command on the screen.
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+			   cputc(par+1);
+			} else {
+				cputc(par);
+			};//end-if
+			drive_command_string[2] = '\0';
+		    cputc(':');
+
 		    cputs(user_input_arg1_string);//
-		    cputs("\",");		    
-		    printf("%i,1", dev); // TODO: This is where we need to add LOAD"*",8,1
+		    cputs("\",");
+		    printf("%i,1", dev);
 		    gotoxy(0,8);// move down 5 lines
 		    if ( matching("-t",user_input_arg2_string) ) { // TMP Turbo Macro Pro shortcut
 		    	cputs("sys8*4096");// print run:rem 
@@ -2200,6 +2218,8 @@ int main( int argc, char* argv[] ) {
 			// dos cp1  -->  Executes DOS command on the current device using 1, dev, 15
 			// dos 7 7 15 "do something" --> Executes DOS command as if it were done in Basic like this: OPEN 7,7,15 : PRINT#7,"DO SOMETHING" : CLOSE 7
 			// So either we have 1 argument or 4 arguments.
+
+			// TODO: Need to handle par stuff here!
 
 			if (they_are_sure() == TRUE) {
 				result = cbm_open(1, dev, 15, user_input_arg1_string);
@@ -2349,7 +2369,15 @@ int main( int argc, char* argv[] ) {
 			if (result != 255) {
 				printf("Initializing... ");
 
-				result = cbm_open(1, dev, 15, "i0");
+		    drive_command_string[0] = 'i';
+			if (get_drive_type(dev) == DRIVE_UIEC) {
+			    drive_command_string[1] = par+1;
+			} else {
+				drive_command_string[1] = par;
+			};//end-if
+			drive_command_string[2] = '\0';
+
+				result = cbm_open(1, dev, 15, drive_command_string);
 				cbm_close(1);
 
 				if (result == 0) {
@@ -2724,7 +2752,7 @@ int main( int argc, char* argv[] ) {
 
 			switch (number_of_user_inputs) {
 				case 2 :
-					strcpy (drive_command_string,"cd:");
+					strcpy (drive_command_string,"cd:"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
 					strcat (drive_command_string,user_input_arg1_string);
 					strcat (drive_command_string,"");
 					result = cbm_open(1, dev, 15, drive_command_string);
@@ -2744,7 +2772,7 @@ int main( int argc, char* argv[] ) {
 
 			switch (number_of_user_inputs) {
 				case 1 :
-					strcpy (drive_command_string,"cd");
+					strcpy (drive_command_string,"cd"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
 					strcat (drive_command_string,command_cdback);
 					strcat (drive_command_string,"");
 					result = cbm_open(1, dev, 15, drive_command_string);
@@ -3041,35 +3069,43 @@ int main( int argc, char* argv[] ) {
 									cbm_close(1);
 									printf("[Deleted]\n");
 
-                    				get_key = 0;                                                                                    
-									if (kbhit() != 0) { /* If key has been pressed */  									
+                    				get_key = 0;
+									if (kbhit() != 0) { /* If key has been pressed */
 										get_key = cgetc();
-									};/*end_if*/ 																		
+									};/*end_if*/
 
-									if (get_key == 3) { /* RUN/STOP or CTRL-C */    									
+									if (get_key == 3) { /* RUN/STOP or CTRL-C */
 										printf("Deleting aborted!\n");
 										get_key = 0;
 										break;
-									};/*end_if*/ 																		
+									};/*end_if*/
 
-								};//end if 
+								};//end if
 
-							};//end for 
+							};//end for
 
-						};//end if 
+						};//end if
 
 					} else {
 
-						strcpy (drive_command_string,"s");
-						// strcat (drive_command_string,user_input_arg1_string);
+						// strcpy (drive_command_string,"s");
+						// // strcat (drive_command_string,user_input_arg1_string);
 
-						if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
-							string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-						} else {											  // Any other device
-							string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-						};//end-if
+						// if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
+						// 	string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+						// } else {											  // Any other device
+						// 	string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
+						// };//end-if
 
-						strcat (drive_command_string,":");
+						// strcat (drive_command_string,":");
+
+						strcpy (drive_command_string,"s0:");
+						if (get_drive_type(dev) == DRIVE_UIEC ) {
+							drive_command_string[1] = par+1;
+						} else {
+							drive_command_string[1] = par;
+						};//end-f
+
 						strcat (drive_command_string,user_input_arg1_string);
 
 						result = cbm_open(1, dev, 15, drive_command_string);
@@ -3107,14 +3143,31 @@ int main( int argc, char* argv[] ) {
 
             // unsigned char format_error = 0;
 
+			// drive_command_string[0] = 'n';
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+		 //        drive_command_string[1] = par+1;
+			// } else {
+			// 	drive_command_string[1] = par;
+			// };//end-if
+		 //    drive_command_string[2] = ':';
+		 //    drive_command_string[3] = '\0';
+
+		 //    drive_command_string[0] = 'n'; // THIS IS EXACTLY THE SAME SIZE AS THE IF VERSION OF THIS!
+   //      	switch (get_drive_type(dev)) {
+			//     case DRIVE_UIEC : drive_command_string[1] = par+1; break;
+			// 	default         : drive_command_string[1] = par  ; break;
+		 //    };//end switch
+			// drive_command_string[2] = '\0';
+
+		    // THIS IS THE SMALLEST VERSION OF THIS CODE IN COMPILED CODE SIZE... SO FAR
 			drive_command_string[0] = 'n';
 			if (get_drive_type(dev) == DRIVE_UIEC) {
-		        drive_command_string[1] = par+1;
+			    drive_command_string[1] = par+1;
 			} else {
 				drive_command_string[1] = par;
 			};//end-if
-		    drive_command_string[2] = ':';
-		    drive_command_string[3] = '\0';
+			drive_command_string[2] = ':';
+			drive_command_string[3] = '\0';
 
             if (user_input_arg1_string[0]=='-' && user_input_arg1_string[1]=='q') {
 
@@ -3237,7 +3290,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// DETECT-FILETYPE COMMAND
+		// DETECTFILE COMMAND
 		// ********************************************************************************
 		// } else if ( matching("detect-filetype",user_input_command_string) ) {	 // Detect File Type: PRG SEQ REL USR DIR 		
 
@@ -3982,6 +4035,20 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("type",user_input_command_string) ||
 		            (user_input_command_string[0]=='c' && user_input_command_string[1]=='a' && user_input_command_string[2]=='t') ){ //matching("cat",user_input_command_string) ) 
 
+			// // Build the partition aware version of the filename using drive_command_string.
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+			//     drive_command_string[0] = par+1;
+			// } else {
+			// 	drive_command_string[0] = par;
+			// };//end-if
+			// drive_command_string[1] = ':';
+			// drive_command_string[2] = '\0';
+
+			// strcat(drive_command_string, user_input_arg1_string); // Add the file name to the end, which is passed using user_input_arg1_string.
+			// strcpy(user_input_arg1_string, drive_command_string); // Since the rest of the code assumes user_input_arg1_string is the filename, we replace it with our drive_command_string.
+
+			// printf("user_input_arg1_string: %s\n",user_input_arg1_string);
+
 			switch (number_of_user_inputs) {
 
 				case 2 :
@@ -4450,7 +4517,17 @@ int main( int argc, char* argv[] ) {
 			};//end-if
 
 			// Send SD2IEC the command to create a file listing with file dates included.
-			strcpy(drive_command_string,"$=t0:"); // TODO: This only works because partition zero (0) is whatever the currently set partition is. I should probably make this take the specifically set partition instead.
+			// strcpy(drive_command_string,"$0=t0:"); // DONE: This only works because partition zero (0) is whatever the currently set partition is. I should probably make this take the specifically set partition instead.
+			// // THIS IS THE SMALLEST VERSION OF THIS CODE IN COMPILED CODE SIZE... SO FAR
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+			//     drive_command_string[1] = par+1;
+			// } else {
+			// 	drive_command_string[1] = par;
+			// };//end-if
+			// printf("drive_command_string: %s\n", drive_command_string);
+
+			strcpy(drive_command_string,"$=t0:"); // NOT WORTH CHANGING --> This only works because partition zero (0) is whatever the currently set partition is. I should probably make this take the specifically set partition instead.
+
 			strcat(drive_command_string,user_input_arg1_string); // This lists the partitions.
 			strcat(drive_command_string,"=l"); // This lists the partitions.
 
@@ -5044,7 +5121,7 @@ int main( int argc, char* argv[] ) {
 			// (but dot is actually the petscii of CMD+C which is the upper left square)
 			// it means it's null or fucked 
 			// or poiting to where it shjouldn't which is a cc65 thing.
-			// This was also affecting the RUN COMMAND when you had no argument,
+			// This was also affecting RUN when you had no argument,
 			// it contains the same string /6.0
 			// but after teh REM part, which means the same bug or whatever is
 			// screwing up the argument processing as well.
