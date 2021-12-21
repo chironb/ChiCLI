@@ -332,7 +332,7 @@ profile [Profile Number]
 8 - Grey
 
 ---------------------------------------
-color-set [Text] [Background] [Border]
+colorset [Text] [Background] [Border]
 ---------------------------------------
 1 - Black        9 - Orange
 2 - White       10 - Brown

@@ -60,7 +60,7 @@ PROFILE [pROFILE nUMBER]
 8 - gREY
 
 ---------------------------------------
-COLOR-SET [tEXT] [bACKGROUND] [bORDER]
+COLORSET [tEXT] [bACKGROUND] [bORDER]
 ---------------------------------------
 1 - bLACK        9 - oRANGE
 2 - wHITE       10 - bROWN
