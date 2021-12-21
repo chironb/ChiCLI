@@ -6,6 +6,8 @@ A CLI for Commodore Computers!
 
 ChiCLI v1.R7 (c) 2021 Chiron Bramberger
 
+(chiron@bramberger.com)
+
 A Commodore 64 command line interface terminal, similar to and inspired by: AmigaDOS, Commodore DOS, MS-DOS, and Linux.
 
 Pronunciation of ChiCLI: ky see-elle-eye
