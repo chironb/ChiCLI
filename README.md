@@ -61,10 +61,7 @@ v1.R9 - Release Candidate 9 - Dec 30 2021
 - Added:     Added a help system and file. Now you can look up a command this: "help copy" or "? copy" and get some text helping with the various options.
 
 v1.R8 - Release Candidate 8 - Dec 30 2021
-Added Essential support for 1581 drives!
-IMPORTANT NOTE!
-The 1581 is... nutty. It support "partitions" but these don't work like folders or like partitions.
-Here's what's supported:
+- Added Essential support for 1581 drives! IMPORTANT NOTE! The 1581 is... nutty. It support "partitions" but these don't work like folders or like partitions. Here's what's supported:
 - A single layer of partitions that exist in the root folder.
 - Listing partitions.
 - Moving into a partition.
