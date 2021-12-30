@@ -44,13 +44,13 @@ void set_hotkey( unsigned char hotkey_number , unsigned char *actual_command) {
 
 
 void clear_hotkey(unsigned char N) {
-	memset(hotkeys_list[N-1],'\0',sizeof(hotkeys_list[N-1]));
+	memset(hotkeys_list[N-1],0,sizeof(hotkeys_list[N-1]));
 };//end-func
 
 
 void clear_all_hotkeys() {
 	for (i = 0 ; i <= 7 ; i++) {
-		memset(hotkeys_list[i], i, sizeof(hotkeys_list[i]));
+		memset(hotkeys_list[i], 0, sizeof(hotkeys_list[i]));
 	};//end-for
 	printf("All hotkeys cleared.\n");
 };//end-func

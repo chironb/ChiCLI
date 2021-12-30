@@ -30,7 +30,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hotke
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R8"
+#define VERSION "v1.R9"
 #define PROGRAM_NAME "chicli"
 
 
@@ -688,16 +688,15 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+4);
 	switch(kernal_detected) {
-		case  1 : cputs("R1 901227-01"); break;
-		case  2 : cputs("R2 901227-02"); break;
-		case  3 : cputs("R3 901227-03"); break;
-		case  4 : cputs("R3 251104-04"); break;
-		case  5 : cputs("R3 251104-01"); break;
-		case  6 : cputs("R3 901246-01"); break; // Fair to say this is most similar to a stock R3 901227-03 kernal. From here: "Note that some patches of 901227-03 are included." http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/revisions.txt
-		case 10 : cputs("R3 JiffyDOS "); break;
-		case 11 : cputs("SX-64 JiffyDOS"); break;
-		default : cputs("?"); //end default
-		// default : printf("?: %i",kernal_detected); break;
+		case  1 : cputs("R1 901227-01");   break; // R1 C64 First Kernal
+		case  2 : cputs("R2 901227-02");   break; // R2 C64 Early Kernal
+		case  3 : cputs("R3 901227-03");   break; // R3 C64 Kernal
+		case  4 : cputs("R3 251104-04");   break; // R4 SX-64 Common Latest Kernal
+		case  5 : cputs("R3 251104-01");   break; // R1 SX-64 Rare First Kernal
+		case  6 : cputs("R3 901246-01");   break; // 4064 Educator 64 --> ? Fair to say this is most similar to a stock R3 901227-03 kernal. From here: "Note that some patches of 901227-03 are included." http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/revisions.txt
+		case 10 : cputs("R3 JiffyDOS ");   break; // R3 C64 JiffyDOS
+		case 11 : cputs("SX-64 JiffyDOS"); break; // R3 SX-64 JiffyDOS
+		default : cputs("?");              break; // Default Unknown Kernal
 	};//end switch
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+5);
@@ -1014,7 +1013,7 @@ int main( int argc, char* argv[] ) {
 
 	reboot_register.pc = 0xFCE2; // this is the value that get sys'ed to reboot
 
-	set_alias( "help" , "type chicli-readme" ); // like 20 bytes per call
+	// set_alias( "help" , "type chicli-readme" ); // like 20 bytes per call
 
 	// ********************************************************************************
 	// SET DEFAULT HOTKEYS
@@ -1508,7 +1507,7 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// ABOUT COMMAND / HELP COMMAND / VERSION COMMAND
+		// ABOUT COMMAND / VERSION COMMAND
 		// ********************************************************************************
 		} else if ( matching("about",user_input_command_string) || \
 		            ((user_input_command_string[0]=='v' && user_input_command_string[1]=='e' && user_input_command_string[2]=='r')) ) {
@@ -1578,20 +1577,58 @@ int main( int argc, char* argv[] ) {
 			};//end-if
 			drive_command_string[2] = '\0';
 		    cputc(':');
-
-		    cputs(user_input_arg1_string);//
+		    cputs(user_input_arg1_string);
 		    cputs("\",");
-		    printf("%i,1", dev);
-		    gotoxy(0,8);// move down 5 lines
+			printf("%i,", dev); // 8,
+
+			// if ( matching("-0",user_input_arg2_string) ) {
+			// 	cputc('0'); // LOAD "RUNME" ,8,0
+			// } else {
+			// 	cputc('1'); // LOAD "RUNME" ,8,1
+			// };//end-if
+
 		    if ( matching("-t",user_input_arg2_string) ) { // TMP Turbo Macro Pro shortcut
+		    	cputc('1'); // LOAD "RUNME" ,8,1
+		    	gotoxy(0,8);// move down 5 lines
 		    	cputs("sys8*4096");// print run:rem
-		    } else {
+		    } else if ( matching("-0",user_input_arg2_string) ) {
+		    	cputc('0'); // LOAD "RUNME" ,8,0
+		    	gotoxy(0,8);// move down 5 lines
 		    	cputs("run");// print run:rem
-		    	if ( number_of_user_inputs != 2 ) {
-		    		cputs(":rem ");// print run:rem
-		    		cputs(user_input_arg2_string);// print ---arguments---
-		    	};//end-if
-		    };//end-if 
+		    	switch (number_of_user_inputs) {
+					case 4 :
+						cputs(":rem ");// print run:rem
+						cputs(user_input_arg3_string);// print ---argument 1---
+					break;
+		    	};//end-switch
+		    } else if ( matching("-1",user_input_arg2_string) ) {
+		    	cputc('1'); // LOAD "RUNME" ,8,1
+		    	gotoxy(0,8);// move down 5 lines
+		    	cputs("run");// print run:rem
+		    	switch (number_of_user_inputs) {
+					case 4 :
+						cputs(":rem ");// print run:rem
+						cputs(user_input_arg3_string);// print ---argument 1---
+					break;
+		    	};//end-switch
+		    } else {
+		    	cputc('1'); // LOAD "RUNME" ,8,1
+		    	gotoxy(0,8);// move down 5 lines
+		    	cputs("run");// print run:rem
+				switch (number_of_user_inputs) {
+					case 3 :
+						cputs(":rem ");// print run:rem
+						cputs(user_input_arg2_string);// print ---argument 1---
+					break;
+					case 4 :
+						cputs(":rem ");// print run:rem
+						cputs(user_input_arg2_string);// print ---argument 1---
+						cputc(' ');
+						cputs(user_input_arg3_string);// print ---argument 2---
+					break;
+		    	};//end-switch
+		    };//end-if
+
 		    gotoxy(0,10);// move down 2 lines 
   			POKE(0x0277, 19); // HOME - Push the following keystrokes into the keyboard buffer: HOME RETURN RETURN RETURN 
 		    POKE(0x0278, 13); // RETURN
@@ -1682,7 +1719,7 @@ int main( int argc, char* argv[] ) {
 			printf("Put the source disk in drive a (0),\nand the target disk in drive b (1).\n");
 
 			if (they_are_sure() == TRUE) {
-				printf("DOS Command: %s... ", drive_command_string);
+				printf("DOS: %s... ", drive_command_string);
 				result = cbm_open(1, dev, 15, drive_command_string);
 				cbm_close(1);
 				printf("Done!\n");
@@ -3270,10 +3307,10 @@ int main( int argc, char* argv[] ) {
 			unsigned char file_date_time[32];
 
 			if (number_of_user_inputs != 2) {
-				printf("Err: No file given.");
+				printf("Er: No file.");
 				goto END_FILEDATE;
 			} else if ( get_drive_type(dev) != DRIVE_UIEC) {
-				printf("Err: Device not SD2IEC.");
+				printf("Er: Not SD2IEC.");
 				goto END_FILEDATE;
 			};//end-if
 
@@ -3574,31 +3611,135 @@ int main( int argc, char* argv[] ) {
 			};//end_switch
 
 
+		// ********************************************************************************
+		// HELP COMMAND
+		// ********************************************************************************
+		} else if ( (user_input_command_string[0]=='?') ||
+ 				    (user_input_command_string[0]=='h' && user_input_command_string[1]=='e' && user_input_command_string[2]=='l') ) {
+
+			unsigned char help_entry_detected;
+			unsigned char help_entry_found;
+            // unsigned char command_to_find[6] = "about"; // For testing
+			unsigned char current_command_position; // The current char we are checking
+			unsigned char converted_character; // We need to convert thigns betwen ascii and petscii
+
+			// Compensate for petscii bullshit cc65 automatica FML fuck. 95+32
+			#define marker_character 95
+
+			help_entry_detected = 0;
+			help_entry_found = 0;
+			current_command_position = 0;
+
+			if ( user_input_arg1_string[0]=='=' ) { // =
+				strcpy(user_input_arg1_string,"equals");
+			} else if ( user_input_arg1_string[0]=='.' ) { // ./
+				strcpy(user_input_arg1_string,"dot");
+			} else if ( user_input_arg1_string[1]=='#' ) { // d##:
+				strcpy(user_input_arg1_string,"dcd");
+			} else if ( user_input_arg1_string[3]=='2' ) { // d##:
+				user_input_arg1_string[3]='t';
+			} else if ( user_input_arg1_string[2]=='2' ) { // d##:
+				user_input_arg1_string[2]='t';
+			};//end-if
+
+			switch (number_of_user_inputs) {
+				case 1 :
+					strcpy(user_input_arg1_string,"help"); 		//printf("Usage: help <command>\nList commands: help commands\nRUNSTOP / CTRL+C to cancel.\n"); //break; 
+					// Fall through
+
+				case 2 : // This should be case 2 when we are actually using good shit below.
+
+					printf("Searching help...\n\n");
+
+					// - Have a single file called chicli-help.seq
+  					memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+					strcpy (drive_command_string,"0:chicli-help,r,s");
+  					drive_command_string[0] = convert_partition_for_drive();
+					result = cbm_open(8, dev, CBM_READ, drive_command_string);
+
+					// - Each entry starts with _commandname
+					do {
+						read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+
+						// loop over buffer and barf out bytes to the screen 
+						for (i = 0 ; i < read_bytes ; i++) {
+
+							converted_character = disk_sector_buffer[i];
+
+							// - Searching for marker and we are displaying because we matched an entry
+							if ( (converted_character != marker_character) && (help_entry_found==TRUE) ) {
+								printf("%c", converted_character); // Output the character because we've matched the command.
+
+							// - Quiting because we've found and matched an entry and we found a marker
+							} else if ( (converted_character == marker_character) && (help_entry_found==TRUE) ) {
+								goto END_HELP;
+
+							// - Searching for marker and haven't found an entry
+							} else if ( (converted_character != marker_character) && (help_entry_detected==FALSE) ) {
+								// Do nothing and keep searching.
+
+							// - We found an entry
+							} else if ( (converted_character == marker_character) && (help_entry_detected==FALSE) ) {
+								help_entry_detected = TRUE; // We found an entry marker. Don't display anything yet.
+
+							// - Searching to match because we found an entry
+							} else if ( (converted_character != marker_character) && (help_entry_detected==TRUE) ) {
+								// printf("cc[%u]:%c ctf[%u]:%c\n",i,converted_character,current_command_position,user_input_arg1_string[current_command_position]);
+								// printf("cc[%u]:%u ctf[%u]:%u\n",i,converted_character,current_command_position,user_input_arg1_string[current_command_position]);
+
+								// If we've matched all the characters, the index will have been incremented past the last position, and therefore we know we have found the string.
+								if ( current_command_position == strlen(user_input_arg1_string) ) {
+									help_entry_found         = TRUE;	// We've found it, so make help_entry_found = TRUE.
+									help_entry_detected      = FALSE;	// Also make help_entry_detected = FALSE, because we don't want to keeping trying to compare the current char to the commnad we're trying to find.
+									current_command_position = 0;		// Reset this for the next time we search.
+
+								// If the current buffer character matches the index in the command we are trying to find...
+								} else if ( converted_character == user_input_arg1_string[current_command_position] + 32 ) {
+									current_command_position++;		// We matched a character, so increment and keep searching.
+
+								// If it doesn't match, stop trying to match...
+								} else if ( converted_character != user_input_arg1_string[current_command_position] + 32 ) {
+									help_entry_detected = FALSE;	// The characters don't match, so stop searching, and go back to looking for the next marker.
+									current_command_position = 0;		// Reset this for the next time we search.
+
+								};//end-if
+
+							// - If we found another entry marker before we've matched the command.
+							} else if ( (converted_character == marker_character) && (help_entry_detected==TRUE) ) {
+								help_entry_detected = FALSE; // We found an entry marker but didn't match the command. Go back to searching for another marker.
+
+							};//end-if
+
+						};//end-for
+
+		                get_key = 0;
+						if (kbhit() != 0) { /* If key has been pressed */
+							get_key = cgetc();
+						};/*end_if*/
+
+						if (get_key == 3) { /* RUN/STOP or CTRL-C */
+							goto END_HELP;
+						};/*end_if*/
+
+					} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+
+			    break;
+
+			    default:
+					printf("Er. args!\n");
+				break;
+			};//end_switch
+
+			END_HELP :
+			cbm_close(8);
+
+
 		// // ********************************************************************************
 		// // EASTEREGG COMMAND - This takes up 71 bytes!
 		// // ********************************************************************************
 		// } else if ( matching("easteregg",user_input_command_string) ) {
 
 		// 	printf("IT IS YOUR EASTER EGG.\n");
-
-
-		// ********************************************************************************
-		// DEBUG-ARGS COMMAND
-		// ********************************************************************************
-		// } else if ( matching("debug-args",user_input_command_string) ) {
-
-		// 	printf             ("# of args:%i\n", argc-1);
-		//  	//printf             ("PRG Name:%s\n"      , argv[0]);
-		//  	if (argc > 1)printf("Arg1:%s\n"         , argv[ 1]);
-		//  	if (argc > 2)printf("Arg2:%s\n"         , argv[ 2]);
-		//  	if (argc > 3)printf("Arg3:%s\n"         , argv[ 3]);
-		//  	if (argc > 4)printf("Arg4:%s\n"         , argv[ 4]);
-		//  	if (argc > 5)printf("Arg5:%s\n"         , argv[ 5]);
-		// 	// if (argc > 6)printf("Arg  6:%s\n"         , argv[ 6]);
-		// 	// if (argc > 7)printf("Arg  7:%s\n"         , argv[ 7]);
-		// 	// if (argc > 8)printf("Arg  8:%s\n"         , argv[ 8]);
-		// 	// if (argc > 9)printf("Arg  9:%s\n"         , argv[ 9]);
-		// 	// if (argc >10)printf("Arg 10:%s\n"         , argv[10]);
 
 
 		// ********************************************************************************

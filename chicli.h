@@ -40,15 +40,15 @@
 // ************
 /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
 #define MAX_COMMODORE_DOS_FILENAME 16 // Commodore DOS maximum length of filenames is 16 characters
-#define MAX_ENTERED_KEYSTROKES 60     // Commodore 40 column machines let you input a max line length of 80 characters
-#define MAX_LENGTH_COMMAND 60 	      // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
+#define MAX_ENTERED_KEYSTROKES 50     // Commodore 40 column machines let you input a max line length of 80 characters
+#define MAX_LENGTH_COMMAND 50 	      // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
 #define MAX_LENGTH_ARGS 40 		      // Commodore DOS maximum length of command string is 40 characters
 /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
 #define MAX_DISK_SECTOR_BUFFER 255    // This is the size of the buffer used when transfering data over the UIEC bus.
-#define MAX_ALIASES 6   		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
-#define MAX_ALIAS_LENGTH 30  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
+#define MAX_ALIASES 8   		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
+#define MAX_ALIAS_LENGTH 25  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
 #define MAX_HOTKEYS 8  			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
-#define MAX_HOTKEY_LENGTH 30	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
+#define MAX_HOTKEY_LENGTH 25	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
 /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
 // 47
 // // ****************************
@@ -163,7 +163,7 @@ unsigned char convert_char(unsigned char char_to_convert) ;
 	display_title_text();		      \
 	sys_info(has_ddd);			      \
 	pet_chirp();				      \
-	puts("\nReady!");                 \
+	puts("\n\nReady!");                 \
 //end macro func 
 
 // TODO: Add an extra space before the Ready!

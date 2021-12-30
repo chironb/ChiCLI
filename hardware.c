@@ -94,18 +94,38 @@ extern unsigned char par;
 // unsigned char cbm_error10_text[] = "R/S hit"; // "R/S press";
 // unsigned char cbm_error11_text[] = "Er I/O";
 
-unsigned char  cbm_error0_text[] = "Ok";
-unsigned char  cbm_error1_text[] = "Files++!";
-unsigned char  cbm_error2_text[] = "Open?";
-unsigned char  cbm_error3_text[] = "!Open?";
-unsigned char  cbm_error4_text[] = "File?";
-unsigned char  cbm_error5_text[] = "Dev?";
-unsigned char  cbm_error6_text[] = "!InFile";
-unsigned char  cbm_error7_text[] = "!OutFile";
-unsigned char  cbm_error8_text[] = "Fname?";
-unsigned char  cbm_error9_text[] = "Bad Dev#";
-unsigned char cbm_error10_text[] = "R/S!";
-unsigned char cbm_error11_text[] = "ErI/O!";
+// unsigned char  cbm_error0_text[] = "Ok";
+// unsigned char  cbm_error1_text[] = "Files++!";
+// unsigned char  cbm_error2_text[] = "Open?";
+// unsigned char  cbm_error3_text[] = "!Open?";
+// unsigned char  cbm_error4_text[] = "File?";
+// unsigned char  cbm_error5_text[] = "Dev?";
+// unsigned char  cbm_error6_text[] = "!InFile";
+// unsigned char  cbm_error7_text[] = "!OutFile";
+// unsigned char  cbm_error8_text[] = "Fname?";
+// unsigned char  cbm_error9_text[] = "Bad Dev#";
+// unsigned char cbm_error10_text[] = "R/S!";
+// unsigned char cbm_error11_text[] = "ErI/O!";
+
+// BEFORE: 48015 bytes
+// AFTER:  47935 bytes
+// SAVED:     80 bytes!
+// unsigned char cbm_error_text[12][9] = {
+// 	"Ok"    ,
+// 	"Files++!"    ,
+// 	"Open?"    ,
+// 	"!Open?"    ,
+// 	"File?"    ,
+// 	"Dev?"    ,
+// 	"!InFile"    ,
+// 	"!OutFile"    ,
+// 	"Fname?"   ,
+// 	"Bad Dev#"   ,
+// 	"R/S!"    ,
+// 	"ErI/O!"
+// };//end-array
+
+
 
 //TODO: I think this needs to be applied to the drives 12 through 15, and also, should be done in a way better way
 
@@ -137,11 +157,20 @@ void wait_one_second(void) {
 
 };//end function
 
+void peep( unsigned char high, unsigned char low ) {
+
+		POKE(0xd401,high); // high
+		POKE(0xd400,low); // low
+		POKE(0xd404,0x21);   // start note
+		wait(450);    // duration
+		POKE(0xd404,16);   // end note
+
+};//end-func
 
 void pet_chirp(void){
 
-	unsigned int duration = 450;
-	unsigned char waveform = 0x21; // 0x11=trianlge 0x21=sawtooth 0x41=pulse 0x81=noise
+	// unsigned int duration = 450;
+	// unsigned char waveform = 0x21; // 0x11=trianlge 0x21=sawtooth 0x41=pulse 0x81=noise
 	unsigned char i = 0;
 
     POKE(0xd418,15); //filter and volume 
@@ -152,53 +181,63 @@ void pet_chirp(void){
 
     for (i = 1 ; i <= 4 ; ++i) {
 
+		// BEFORE: 47899
+		// AFTER:  47798
+		// SAVED:    101
+
+		// // B-6	1975.5	$82B9
+		// POKE(0xd401,0x82); // high
+		// POKE(0xd400,0xB9); // low
+		// POKE(0xd404,waveform);   // start note
+		// wait(duration);    // duration
+		// POKE(0xd404,16);   // end note
+		peep(0x82, 0xB9);
+
+		// // B-5	987.8	$415C
+		// POKE(0xd401,0x41); // high
+		// POKE(0xd400,0x5C); // low
+		// POKE(0xd404,waveform);   // start note
+		// wait(duration);    // duration
+		// POKE(0xd404,16);   // end note
+		peep(0x41, 0x5C);
+
+		// // B-4	493.9	$20AE
+		// POKE(0xd401,0x20); // high
+		// POKE(0xd400,0xAE); // low
+		// POKE(0xd404,waveform);   // start note
+		// wait(duration);    // duration 
+		// POKE(0xd404,16);   // end note 
+		peep(0x20, 0xAE);
+
+	 //    // B-3	246.9	$1057
+		// POKE(0xd401,0x10); // high
+		// POKE(0xd400,0x57); // low
+		// POKE(0xd404,waveform);   // start note
+		// wait(duration);    // duration
+		// POKE(0xd404,16);   // end note
+		peep(0x10, 0x57);
+
+		// // B-4	493.9	$20AE
+		// POKE(0xd401,0x20); // high
+		// POKE(0xd400,0xAE); // low
+		// POKE(0xd404,waveform);   // start note
+		// wait(duration);    // duration
+		// POKE(0xd404,16);   // end note
+		peep(0x20, 0xAE);
+
+		// // B-5	987.8	$415C
+		// POKE(0xd401,0x41); // high
+		// POKE(0xd400,0x5C); // low
+		// POKE(0xd404,waveform);   // start note
+		// wait(duration);    // duration
+		// POKE(0xd404,16);   // end note
+		peep(0x41, 0x5C);
+
 		// B-6	1975.5	$82B9
 		POKE(0xd401,0x82); // high
 		POKE(0xd400,0xB9); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration
-		POKE(0xd404,16);   // end note
-
-		// B-5	987.8	$415C
-		POKE(0xd401,0x41); // high
-		POKE(0xd400,0x5C); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration
-		POKE(0xd404,16);   // end note
-
-		// B-4	493.9	$20AE
-		POKE(0xd401,0x20); // high
-		POKE(0xd400,0xAE); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration 
-		POKE(0xd404,16);   // end note 
-
-	    // B-3	246.9	$1057
-		POKE(0xd401,0x10); // high
-		POKE(0xd400,0x57); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration
-		POKE(0xd404,16);   // end note
-
-		// B-4	493.9	$20AE
-		POKE(0xd401,0x20); // high
-		POKE(0xd400,0xAE); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration
-		POKE(0xd404,16);   // end note
-
-		// B-5	987.8	$415C
-		POKE(0xd401,0x41); // high
-		POKE(0xd400,0x5C); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration
-		POKE(0xd404,16);   // end note
-
-		// B-6	1975.5	$82B9
-		POKE(0xd401,0x82); // high
-		POKE(0xd400,0xB9); // low
-		POKE(0xd404,waveform);   // start note
-		wait(duration);    // duration
+		POKE(0xd404,0x21);   // start note
+		wait(450);    // duration
 		//POKE(0xd404,16);   // end note  // comment this out to leave sustain
 
 	};//end for
@@ -421,41 +460,85 @@ unsigned char detect_kernal(void) {
     //     This 8-kilobyte ROM is the Commodore SX-64 KERNAL, which is based on
     //     901227-03
 
+
+
+	// ***** OLD *****
+	// unsigned char kernal_value = 0;
+	// kernal_value = PEEK(0xFF80); // 65408
+
+	// 		// TODO: I have discovered a *NEW* byte to look at in any kernal and figure out what it is. I need to re-write this to use this, becuase it'll save a bunch of code!
+	// 		switch (kernal_value) {
+
+	// 			case 0xAA : return(1); break;		// 901227-01 (C64   KERNAL R1, $FF80=$AA 65408=170)
+
+	// 			case 0x00 : return(2); break;		// 901227-02 (C64   KERNAL R2, $FF80=$00 65408=  0)
+
+	// 			case 0x03 :							// 901227-03 (C64   KERNAL R3, $FF80=$03 65408=  3)
+	// 				// If KERNAL R3 and KERNAL start-up screen text is "MO" then it's a regular C64
+	// 				if (        PEEK(58497L)==77 && PEEK(58498L)==79 ) {
+	// 					return(3);
+	// 				} else if ( PEEK(58497L)==68 && PEEK(58498L)==79 && PEEK(58677L)==6 ) { // $E535: (default cursor colour) 901227-03: $0E (light blue) 251104-04: $06 (dark blue)
+	// 					return(11);
+	// 				// Else if JIFFYDOS!
+	// 				} else if ( PEEK(58497L)==68 && PEEK(58498L)==79 ) {
+	// 					return(10);
+	// 				// Else if JiffyDOS for SX-64!
+	// 				} else if ( PEEK(58497L)==83 && PEEK(58498L)==88 ) { // 251104-01 !!! Early SX-64 Kernal ROM!
+	// 					return(5);
+	// 				// Something weird, we shouldn't ever get this output.
+	// 				} else {
+	// 					return(255); 
+	// 				};//end-if
+	// 			break;
+
+	// 			case 0x43 : return(4); break;		// 251104-04 (SX-64 KERNAL R3, $FF80=$43 65408= 67)
+
+	// 			case 0x64 : return(6); break;		// 251104-04 (4064  KERNAL ??, $FF80=$64 65408=100)
+
+	// 		    default   : return(0); break;  	    // Error, don't know why we are getting this output 
+
+	// 		};//end switch 
+
+
+
+	// ***** NEW ***** SAVED: 41 bytes!
+	// I have discovered a *NEW* byte to look at in any kernal and figure out what it is. I need to re-write this to use this, becuase it'll save a bunch of code!
+
+	// 	REVIEW - E4AC (58540) - Each Kernal:
+	// - 901227-01 --> 0x2B
+	// - 901227-02 --> 0x5C
+	// - 901227-03 --> 0x81
+	// - 251104-01 --> 0x00
+	// - 251104-04 --> 0xB3
+	// - 901246-01 --> 0x63
+
+	// C64 R3 58497 _77_ && 58498 79 && 58677 14
+	// SX  R3 58497 _83_ && 58498 88 && 58677 6
+	// J64 R3 58497 _68_ && 58498 79 && 58677 14
+	// JSX R3 58497 _68_ && 58498 79 && 58677 6
+
 	unsigned char kernal_value = 0;
-	kernal_value = PEEK(0xFF80); // 65408
+	kernal_value = PEEK(0xE4AC);
 
-			// TODO: I have discovered a *NEW* byte to look at in any kernal and figure out what it is. I need to re-write this to use this, becuase it'll save a bunch of code!
-			switch (kernal_value) {
-
-				case 0xAA : return(1); break;		// 901227-01 (C64   KERNAL R1, $FF80=$AA 65408=170)
-
-				case 0x00 : return(2); break;		// 901227-02 (C64   KERNAL R2, $FF80=$00 65408=  0)
-
-				case 0x03 :							// 901227-03 (C64   KERNAL R3, $FF80=$03 65408=  3)
-					// If KERNAL R3 and KERNAL start-up screen text is "MO" then it's a regular C64
-					if (        PEEK(58497L)==77 && PEEK(58498L)==79 ) {
-						return(3);
-					} else if ( PEEK(58497L)==68 && PEEK(58498L)==79 && PEEK(58677L)==6 ) { // $E535: (default cursor colour) 901227-03: $0E (light blue) 251104-04: $06 (dark blue)
-						return(11);
-					// Else if JIFFYDOS!
-					} else if ( PEEK(58497L)==68 && PEEK(58498L)==79 ) {
-						return(10);
-					// Else if JiffyDOS for SX-64!
-					} else if ( PEEK(58497L)==83 && PEEK(58498L)==88 ) { // 251104-01 !!! Early SX-64 Kernal ROM!
-						return(5);
-					// Something weird, we shouldn't ever get this output.
-					} else {
-						return(255); 
-					};//end-if
+	switch (kernal_value) {
+		case 0x2B : return(1); break;					// 901227-01 - R1 C64 First Kernal
+		case 0x5C : return(2); break;					// 901227-02 - R2 C64 Early Kernal
+		case 0x81 :
+			switch ( PEEK(58497L) ) {
+				case 68 :
+					switch (PEEK(58677L)) {
+						case 14 : return(10); break;	// R3 C64 JiffyDOS
+						case  6 : return(11); break;	// R3 SX-64 JiffyDOS
+					};//end-switch
 				break;
-
-				case 0x43 : return(4); break;		// 251104-04 (SX-64 KERNAL R3, $FF80=$43 65408= 67)
-
-				case 0x64 : return(6); break;		// 251104-04 (4064  KERNAL ??, $FF80=$64 65408=100)
-
-			    default   : return(0); break;  	    // Error, don't know why we are getting this output 
-
-			};//end switch 
+			};//end-switch
+			return(3); 									// 901227-03 - R3 C64 Kernal
+		break;
+		case 0xB3 : return(4); break;					// 251104-04 - R4 SX-64 Common Latest Kernal
+		case 0x00 :	return(5); break;					// 251104-01 - R1 SX-64 Rare First Kernal
+		case 0x63 : return(6); break;					// 901246-01 - 4064 Educator 64 --> ? Fair to say this is most similar to a stock R3 901227-03 kernal. From here: "Note that some patches of 901227-03 are included." http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/revisions.txt
+	    default   : return(0); break;  					// Default Unknown Kernal
+	};//end switch 
 
 }; // end func
 
@@ -514,11 +597,11 @@ unsigned char detect_model(void) {
 	 kernal_detected = detect_kernal()   ;
 	    detected_cpu = detect_cpu()      ;
 
-	if        (kernal_detected == 4 || kernal_detected == 5 || kernal_detected == 11 ) { return(8); // Model: Commodore SX-64 251104-01 or 251104-04 Kernal ROM
-	} else if (kernal_detected == 6)                                                   { return(9); // Model: Educator 64
-	} else if (detected_cpu    == 9  && sid_detected == 1 && detected_1571   == 1)     { return(0); // Model: Commodore 128D       CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Anything other than 1571 
-	} else if (detected_cpu    == 9  && sid_detected == 1)                             { return(1); // Model: Commodore 128        CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Must have 1571 
-    } else if (detected_cpu    == 9  && sid_detected == 1)                             { return(2); // Model: Commodore 128DCR     CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 8580 Drive: Must have 1571 
+	if        (kernal_detected  == 4 || kernal_detected == 5 || kernal_detected == 11) { return(8); // Model: Commodore SX-64 251104-01 or 251104-04 Kernal ROM
+	} else if (kernal_detected  == 6)                                                  { return(9); // Model: Educator 64
+	} else if (detected_cpu     == 9 && sid_detected == 1 && detected_1571   == 1)     { return(0); // Model: Commodore 128D       CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Anything other than 1571 
+	} else if (detected_cpu     == 9 && sid_detected == 1 )                            { return(1); // Model: Commodore 128        CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 6581 Drive: Must have 1571 
+    } else if (detected_cpu     == 9 && sid_detected == 1 )                            { return(2); // Model: Commodore 128DCR     CPU: 8502 GPU: 8564 NTSC or 8566/69 PAL SID: 8580 Drive: Must have 1571 
 	} else if (ntscpal_detected == 0 && sid_detected == 1 && kernal_detected == 1)     { return(3); // Model: Commodore 64 (Early) \n"); if NTSC + 6581 + KERNAL R1 901227-01 --> C64 (Early) --> VIC-II 6567	
 	} else if (ntscpal_detected == 0 && sid_detected == 1 )                            { return(4); // Model: Commodore 64         \n"         if NTSC + 6581 + KERNAL R2 901227-02 --> C64 		   --> VIC-II 6567
 	} else if (ntscpal_detected == 0 && sid_detected == 2 )                            { return(5); // Model: Commodore 64C        \n"        if NTSC + 8580 + Any		 	       --> C64C 	   --> VIC-II 8562
@@ -540,26 +623,39 @@ void process_status(char * input_string) {
 	error_block   = atoi(strtok(NULL, ",")        );	// Extract the fourth token.
 };//end func
 
+// BEFORE: 48015 bytes
+// AFTER:  47935 bytes
+// SAVED:     80 bytes!
+// void display_cbm_error( unsigned char cbm_error_code ) {
+// 	printf("CBM #%i: \n", cbm_error_code);
 
-void display_cbm_error( unsigned char cbm_error_code ) {
-	printf("CBM #%i: ", cbm_error_code);
-	switch (cbm_error_code) {
-		case  0 : cputs( cbm_error0_text); break;
-		case  1 : cputs( cbm_error1_text); break;
-		case  2 : cputs( cbm_error2_text); break;
-		case  3 : cputs( cbm_error3_text); break;
-		case  4 : cputs( cbm_error4_text); break;
-		case  5 : cputs( cbm_error5_text); break;
-		case  6 : cputs( cbm_error6_text); break;
-		case  7 : cputs( cbm_error7_text); break;
-		case  8 : cputs( cbm_error8_text); break;
-		case  9 : cputs( cbm_error9_text); break;
-		case 10 : cputs(cbm_error10_text); break;
-		case 11 : cputs(cbm_error11_text); break;
-		default : cputs("Err?");       	   //end-default
-	};//end switch
-	cputc('\n');
-};//end-func
+
+// BEFORE: 47955 bytes
+// AFTER:  47801 bytes
+// SAVED:    154 bytes!
+
+
+	// switch (cbm_error_code) {
+	// 	case  0 : cputs( cbm_error0_text); break;
+	// 	case  1 : cputs( cbm_error1_text); break;
+	// 	case  2 : cputs( cbm_error2_text); break;
+	// 	case  3 : cputs( cbm_error3_text); break;
+	// 	case  4 : cputs( cbm_error4_text); break;
+	// 	case  5 : cputs( cbm_error5_text); break;
+	// 	case  6 : cputs( cbm_error6_text); break;
+	// 	case  7 : cputs( cbm_error7_text); break;
+	// 	case  8 : cputs( cbm_error8_text); break;
+	// 	case  9 : cputs( cbm_error9_text); break;
+	// 	case 10 : cputs(cbm_error10_text); break;
+	// 	case 11 : cputs(cbm_error11_text); break;
+	// 	default : cputs("Err?");       	   //end-default
+	// };//end switch
+
+	// unsigned char cbm_error_text[12][9] = {
+	// cputs(cbm_error_text[cbm_error_code]);
+	// cputc('\n');
+
+// };//end-func
 
 
 unsigned char detect_drive(unsigned char device_number, unsigned char display_status) {
@@ -718,7 +814,12 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 		if ( result == 2 && error_number == 73 ) {
 			printf("%i %s\n", device_number, error_message ); //  everything is okay, and we go the drive identity 
 		} else {
-			display_cbm_error(cbm_result); // yes, so do it 
+			// display_cbm_error(cbm_result); // yes, so do it
+			// Removing the function altogetehr: 
+			// BEFORE: 47955 bytes
+			// AFTER:  47788 bytes
+			// SAVED:    177 bytes!
+			printf("CBM #%i: \n", cbm_result);
 			printf("Drv D%i Er:\n", device_number);
 			printf("E#:%i TR:%i BL:%i\n", error_number, error_track , error_block );
 			printf("ED:%s\n", error_message );
@@ -936,16 +1037,21 @@ void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) 
 
 	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends. 	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
 
-    switch( atoi(new_drive_number) ) {
-        case  8 : command_set[3] = (0x08) ; break; // Are you fucking kidding me? I wrote this? WTF? I must have been too tired to think.
-        case  9 : command_set[3] = (0x09) ; break;
-        case 10 : command_set[3] = (0x0A) ; break;
-        case 11 : command_set[3] = (0x0B) ; break;
-        case 12 : command_set[3] = (0x0C) ; break;
-        case 13 : command_set[3] = (0x0D) ; break;
-        case 14 : command_set[3] = (0x0E) ; break;
-        case 15 : command_set[3] = (0x0F) ; break;
-    };//end_switch
+	// BEFORE: 47935
+	// AFTER:  47899
+	// SAVED:     36
+    // switch( atoi(new_drive_number) ) {
+    //     case  8 : command_set[3] = (0x08) ; break; // Are you fucking kidding me? I wrote this? WTF? I must have been too tired to think.
+    //     case  9 : command_set[3] = (0x09) ; break;
+    //     case 10 : command_set[3] = (0x0A) ; break;
+    //     case 11 : command_set[3] = (0x0B) ; break;
+    //     case 12 : command_set[3] = (0x0C) ; break;
+    //     case 13 : command_set[3] = (0x0D) ; break;
+    //     case 14 : command_set[3] = (0x0E) ; break;
+    //     case 15 : command_set[3] = (0x0F) ; break;
+    // };//end_switch
+
+	command_set[3] = atoi(new_drive_number); // Please tell me there isn't some stupid reason this *DOESN'T* work!
 
 	result = cbm_open(15, old_drive_number, 15, "");
     cbm_write(15, command_set, sizeof(command_set) );
