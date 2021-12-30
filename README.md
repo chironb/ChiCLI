@@ -77,6 +77,7 @@ The Commodore 1581 shenanigans implementation of partition functionality is obje
 
 v1.R7 - Release Candidate 7 - Dec 19 2021
 - Updated:   A bunch of little fixes. The commands run, dumpmem, initialize, and type to properly handles multiple drive devices.
+- Updated:   Seriously cleaned up a lot of code.
 
 v1.R6 - Release Candidate 6 - Dec 18 2021
 - Updated:   Converted hotkeys macros to proper functions and saved 88 bytes. I maxed out the system variables, which you can view using the vars command.
