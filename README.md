@@ -59,6 +59,7 @@ Latest News and Changelog:
 
 v1.R9 - Release Candidate 9 - Dec 30 2021
 - Added:     Added a help system and file. Now you can look up a command this: "help copy" or "? copy" and get some text helping with the various options.
+- Fixed:     The hotkeys updates had a bug when cleared. This is fixed now.
 
 v1.R8 - Release Candidate 8 - Dec 30 2021
 - Updated:   Seriously cleaned up a lot of code.
