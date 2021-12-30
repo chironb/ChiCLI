@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2020 by: Chiron Bramberger
+// (c) 2021 by: Chiron Bramberger
 //
 // ********************************************************************************
 
@@ -36,7 +36,7 @@ extern unsigned char alias_command_list[MAX_ALIASES][MAX_ALIAS_LENGTH] ;
 
 unsigned char do_alias( unsigned char *input_string ) {
 
-	unsigned char i = 0;	
+	unsigned char i = 0;
 
 	if (input_string[0] == 'a' && 
 		input_string[1] == 'l' && 
@@ -105,9 +105,9 @@ unsigned char set_alias( unsigned char *input_string , unsigned char *actual_com
 			strncpy(alias_shortcut_list[i],input_string, MAX_ALIAS_LENGTH-1);
 			strncpy(alias_command_list[i], actual_command, MAX_ALIAS_LENGTH-1);
 			return(1); 												// success! found it!
-		};//end if 
+		};//end if
 
-	}//end for 
+	}//end for
 
 	return(0); 														// fail! couldn't find it!
 
@@ -130,7 +130,6 @@ void display_alias_all( void ) {
 		printf("Slots empty.\n");
 	};//end if 
 
-	// printf("Maximum alias length:%u\nTotal alias slots:%u\n",MAX_ALIAS_LENGTH,MAX_ALIASES);
 	printf("Total alias slots:%u\n",MAX_ALIASES);
 
 };//end func 

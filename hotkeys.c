@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2020 by: Chiron Bramberger
+// (c) 2021 by: Chiron Bramberger
 //
 // ********************************************************************************
 
@@ -35,7 +35,7 @@ extern unsigned char entered_keystrokes[MAX_ENTERED_KEYSTROKES] ;
 extern unsigned char position_at_prompt_y;
 
 // ********************************************************************************
-// HOTKEYS MACRO FUNCTIONS 
+// HOTKEYS MACRO FUNCTIONS
 // ********************************************************************************
 
 void set_hotkey( unsigned char hotkey_number , unsigned char *actual_command) {
@@ -65,22 +65,20 @@ void display_hotkeys() {
 
 
 void load_hotkey_command(unsigned char N) {
-	if (strlen(hotkeys_list[N-1]) > 0) {                                   		
-		strncpy(entered_keystrokes,hotkeys_list[N-1],MAX_HOTKEY_LENGTH-1); 	    
-	   	hotkeys_list[N-1][MAX_HOTKEY_LENGTH-1] = '\0'; /* WTF does this do? */  
-		replace_characters(entered_keystrokes, '\"', ' ');                		
-		replace_characters(entered_keystrokes, ';', '\"');                		
-		gotox(0);                                                               
-		while( wherex() != SCREEN_RIGHT_EDGE-1 ) cputc(' '); 
-		gotox(0); \
-		printf("> %s\n",entered_keystrokes);                                    
-	} else { 										                      		
-		gotox(0);                                    	    
-		gotoy(position_at_prompt_y);                                    	    
-		while( wherex() != SCREEN_RIGHT_EDGE-1 ) cputc(' '); 
-		gotox(0);                                    	    
-		printf("> \nF%i is unset.\nUse 'hotkey' to set it.\n",N);              
-	}/*end if*/																	
+	if (strlen(hotkeys_list[N-1]) > 0) {
+		strncpy(entered_keystrokes,hotkeys_list[N-1],MAX_HOTKEY_LENGTH-1);
+	   	hotkeys_list[N-1][MAX_HOTKEY_LENGTH-1] = '\0'; /* WTF does this do? */
+		replace_characters(entered_keystrokes, '\"', ' ');
+		replace_characters(entered_keystrokes, ';', '\"');
+		gotox(0);
+		while( wherex() != SCREEN_RIGHT_EDGE-1 ) cputc(' ');
+		gotox(0);
+		printf("> %s\n",entered_keystrokes);
+	} else {
+		gotox(0);
+		gotoy(position_at_prompt_y);
+		while( wherex() != SCREEN_RIGHT_EDGE-1 ) cputc(' ');
+		gotox(0);
+		printf("> \nF%i is unset.\nUse 'hotkey' to set it.\n",N);
+	}/*end if*/
 };//end-func
-
-

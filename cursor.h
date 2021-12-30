@@ -1,16 +1,18 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2020 by: Chiron Bramberger
+// (c) 2021 by: Chiron Bramberger
 //
 // ********************************************************************************
+
 
 // ********************************************************************************
 // cursor.h
 // ********************************************************************************
 
+
 // ********************************************************************************
-// CURSOR MACRO FUNCTIONS 
+// CURSOR MACRO FUNCTIONS
 // ********************************************************************************
 
 #define cursor_home() 																		\
@@ -20,24 +22,24 @@
 		cputc(entered_keystrokes[position_in_string]); /* restore char where cursor was */	\
 	};/*end if*/																			\
 																							\
-	gotox(position_at_prompt_x);														\
-	gotoy(position_at_prompt_y);														\
+	gotox(position_at_prompt_x);															\
+	gotoy(position_at_prompt_y);															\
 																							\
 	position_in_string = 0;																	\
 																							\
 	previous_x = wherex();	/* remember where we are...    */								\
 	previous_y = wherey(); 	/* ...so we can come back here */								\
 	cputc(CURSOR_CHARACTER);																\
-	gotoy(previous_y);  /* go back to...  */											\
-	gotox(previous_x);  /* ...where we were, but move forward 1	*/						\
+	gotoy(previous_y);  /* go back to...  */												\
+	gotox(previous_x);  /* ...where we were, but move forward 1	*/							\
 //end macro func
 
 
 #define cursor_end() 																		\
 	if ( position_in_string != strlen(entered_keystrokes) ) {								\
 																							\
-		gotox(position_at_prompt_x);													\
-		gotoy(position_at_prompt_y);													\
+		gotox(position_at_prompt_x);														\
+		gotoy(position_at_prompt_y);														\
 																							\
 		result = display_substring(entered_keystrokes, 0);	/* moving forward so +1 */		\
 		if (result == 1) { 									/* has scrolled */				\
@@ -47,7 +49,7 @@
 		position_in_string = strlen(entered_keystrokes);									\
 																							\
 		cputc(CURSOR_CHARACTER);															\
-		gotox(wherex()-1);																\
+		gotox(wherex()-1);																	\
 																							\
 	};/*end if*/																			\
 //end macro func
@@ -58,8 +60,8 @@
 	previous_x = position_at_prompt_x;									\
 	previous_y = position_at_prompt_y;									\
 																		\
-	gotox(previous_x);												\
-	gotoy(previous_y);												\
+	gotox(previous_x);													\
+	gotoy(previous_y);													\
 																		\
 	original_position_at_prompt_y = previous_y;							\
 																		\
@@ -68,8 +70,8 @@
 		previous_y = previous_y-result;									\
 	};/*end if*/ 														\
 																		\
-	gotox(previous_x);												\
-	gotoy(previous_y);												\
+	gotox(previous_x);													\
+	gotoy(previous_y);													\
 																		\
 	strcpy(entered_keystrokes, previous_entered_keystrokes);			\
 																		\
@@ -83,13 +85,14 @@
 	previous_y = wherey();												\
 																		\
 	cputc(CURSOR_CHARACTER);											\
-	gotox(previous_x);												\
-	gotoy(previous_y);												\
+	gotox(previous_x);													\
+	gotoy(previous_y);													\
 																		\
 	position_in_string = strlen(entered_keystrokes); 					\
 																		\
-	if ( original_position_at_prompt_y == SCREEN_BOTTOM_EDGE  &&  wherey() == SCREEN_BOTTOM_EDGE-1 ) {	\
-		position_at_prompt_y--;											\
+	if ( original_position_at_prompt_y == SCREEN_BOTTOM_EDGE  &&  		\
+	     wherey() == SCREEN_BOTTOM_EDGE-1 ) { 							\
+			position_at_prompt_y--;										\
 	};/*end if*/ 														\
 //end macro func
 
@@ -99,8 +102,8 @@
 	previous_x = position_at_prompt_x;													\
 	previous_y = position_at_prompt_y;													\
 																						\
-	gotox(previous_x);																\
-	gotoy(previous_y);																\
+	gotox(previous_x);																	\
+	gotoy(previous_y);																	\
 																						\
 	result = display_blank_substring(entered_keystrokes, 0);							\
 	cputc(' ');																			\
@@ -109,12 +112,12 @@
 		previous_y = previous_y-result;													\
 	};/*end if*/																		\
 																						\
-	gotox(previous_x);																\
-	gotoy(previous_y);																\
+	gotox(previous_x);																	\
+	gotoy(previous_y);																	\
 																						\
 	cputc(CURSOR_CHARACTER);															\
-	gotox(previous_x);																\
-	gotoy(previous_y);																\
+	gotox(previous_x);																	\
+	gotoy(previous_y);																	\
 																						\
 	/* this is right - cursor should be at NEXT char after the end of the string */		\
 	position_in_string = 0;  															\
@@ -139,9 +142,9 @@
 																								\
 	} else if (wherex() == 0) {		/*since there's a prompt, it must me on a second line*/ 	\
 																								\
-		gotoy(wherey()-1); 		/*go up one row*/ 											\
+		gotoy(wherey()-1); 		/*go up one row*/ 												\
 		previous_y = wherey();	/* .remember where we are... so we can come back here	*/  	\
-		gotox(SCREEN_RIGHT_EDGE);         		/*go to the end of the line */				\
+		gotox(SCREEN_RIGHT_EDGE);         		/*go to the end of the line */					\
 		cputc(CURSOR_CHARACTER);	       			/*draw teh cursor*/							\
 		result = result = display_substring(entered_keystrokes, position_in_string);			\
 																								\
@@ -150,30 +153,30 @@
 		};/*end if*/																			\
 																								\
 		cputc(' ');	       			/*erase old character*/										\
-		gotoy(previous_y);   	/*go back to the line we were on*/							\
-		gotox(SCREEN_RIGHT_EDGE); 				/*go back to where we were, minus one*/		\
+		gotoy(previous_y);   	/*go back to the line we were on*/								\
+		gotox(SCREEN_RIGHT_EDGE); 				/*go back to where we were, minus one*/			\
 		position_in_string--;  																	\
 																								\
 	} else if (wherex() == SCREEN_RIGHT_EDGE) {													\
 																								\
 		previous_y = wherey();		/* .remember where we are... so we can come back here*/		\
-		gotox(SCREEN_RIGHT_EDGE-1);         		/*go to the end of the line */			\
+		gotox(SCREEN_RIGHT_EDGE-1);         		/*go to the end of the line */				\
 		cputc(CURSOR_CHARACTER);	       			/*draw teh cursor*/							\
 		result = display_substring(entered_keystrokes, position_in_string); 					\
 		if (result == 1) { /* has scrolled*/													\
 			previous_y = previous_y-1;															\
 		};/*end if*/																			\
 		cputc(' ');	       			/*erase old character*/										\
-		gotoy(previous_y);   	/*go back to the line we were on*/							\
-		gotox(SCREEN_RIGHT_EDGE-1);	/*go back to where we were, minus one*/					\
+		gotoy(previous_y);   	/*go back to the line we were on*/								\
+		gotox(SCREEN_RIGHT_EDGE-1);	/*go back to where we were, minus one*/						\
 		position_in_string--;  																	\
 																								\
 	} else if (position_in_string != 0) {														\
 																								\
-		gotox(wherex()-1); 		/*backup */													\
+		gotox(wherex()-1); 		/*backup */														\
 		cputc(CURSOR_CHARACTER);	       			/*draw cursor*/								\
 		cputc(' ');	       			/*erase old cursor*/										\
-		gotox(wherex()-1); 		/*go back again	    */										\
+		gotox(wherex()-1); 		/*go back again	    */											\
 		previous_x = wherex();		/* remember where we are...*/								\
 		previous_y = wherey();		/* ...so we can come back here	    	*/					\
 		result = display_substring(entered_keystrokes, position_in_string);/*display rest*/		\
@@ -181,8 +184,8 @@
 			previous_y = previous_y-1;															\
 		};/*end if*/																			\
 		cputc(' ');	       			/*erase old character*/										\
-		gotox(previous_x-1); 	/*go back to where we were, minus one*/						\
-		gotoy(previous_y);   	/*go back to the line we were on  */						\
+		gotox(previous_x-1); 	/*go back to where we were, minus one*/							\
+		gotoy(previous_y);   	/*go back to the line we were on  */							\
 		position_in_string--;																	\
 																								\
 	};/*end if*/																				\
@@ -199,11 +202,11 @@
 			previous_y = previous_y-1;																	\
 		};/*end if*/			 																		\
 		cputc(' ');																						\
-    	gotox(previous_x);																			\
-    	gotoy(previous_y);																			\
+    	gotox(previous_x);																				\
+    	gotoy(previous_y);																				\
     	cputc(CURSOR_CHARACTER);																		\
-		gotox(previous_x);																			\
-		gotoy(previous_y);																			\
+		gotox(previous_x);																				\
+		gotoy(previous_y);																				\
 	};/*end if*/																						\
 //end macro func
 
@@ -222,8 +225,8 @@
 	     	gotox(SCREEN_LEFT_EDGE);																\
 	     	cputc(' ');																				\
 																									\
-			gotoy(previous_y);		/* go back to... 	*/										\
-			gotox(previous_x);		/* ...where we were	*/										\
+			gotoy(previous_y);		/* go back to... 	*/											\
+			gotox(previous_x);		/* ...where we were	*/											\
 																									\
 			/* write out the rest of the string after (+1) where we are (where the cursor is) */	\
 			/* if the output has scrolled, then our old position has moved up...			  */	\
@@ -237,21 +240,21 @@
 																									\
 			position_in_string--;		/* update where we are in the string*/						\
 																									\
-			gotoy(previous_y-1);	/* go back to...  */										\
-			gotox(SCREEN_RIGHT_EDGE);  			/* ...where we were, but move forward 1*/		\
+			gotoy(previous_y-1);	/* go back to...  */											\
+			gotox(SCREEN_RIGHT_EDGE);  			/* ...where we were, but move forward 1*/			\
 			cputc(CURSOR_CHARACTER); 		  		/* draw the cursor	*/							\
-			gotoy(previous_y-1);    /* go back to...  */										\
-			gotox(SCREEN_RIGHT_EDGE);  			/* ...where we were*/							\
+			gotoy(previous_y-1);    /* go back to...  */											\
+			gotox(SCREEN_RIGHT_EDGE);  			/* ...where we were*/								\
 																									\
 		} else if (wherex() == SCREEN_RIGHT_EDGE) {													\
 																									\
 			previous_x = wherex(); 		/* remember where we are...							 */		\
 	     	previous_y = wherey(); 		/* ...so we can come back here */							\
-			gotox(wherex()-1);																	\
+			gotox(wherex()-1);																		\
 			cputc(' '); 				/* this is for when we are at the end of the string  */		\
 			cputc(' '); 				/* this is for when we are at the end of the string */		\
-			gotoy(previous_y);    	/* go back to...   */										\
-			gotox(previous_x-1);  	/* ...where we were */										\
+			gotoy(previous_y);    	/* go back to...   */											\
+			gotox(previous_x-1);  	/* ...where we were */											\
 																									\
 			position_in_string--; 		/* update where we are in the string */						\
 																									\
@@ -263,20 +266,20 @@
 				previous_y = previous_y-result; 													\
 			};/*end if*/																			\
 																									\
-			gotoy(previous_y);    	/* go back to...   */										\
-			gotox(previous_x);  	/* ...where we were, but move forward 1 */					\
+			gotoy(previous_y);    	/* go back to...   */											\
+			gotox(previous_x);  	/* ...where we were, but move forward 1 */						\
 			cputc(CURSOR_CHARACTER); 	/* draw the cursor	*/										\
-			gotoy(previous_y);    	/* go back to...   */										\
-			gotox(previous_x);  	/* ...where we were */										\
+			gotoy(previous_y);    	/* go back to...   */											\
+			gotox(previous_x);  	/* ...where we were */											\
 																									\
 		} else {																					\
 																									\
 			previous_x = wherex(); 		/* remember where we are... */								\
 	     	previous_y = wherey(); 		/* ...so we can come back here */							\
-			gotox(wherex()-1);																	\
+			gotox(wherex()-1);																		\
 			cputc(' '); 				/* this is for when we are at the end of the string  */		\
 			cputc(' '); 				/* this is for when we are at the end of the string */		\
-			gotox(wherex()-2);																	\
+			gotox(wherex()-2);																		\
 																									\
 			position_in_string--; 		/* update where we are in the string */						\
 																									\
@@ -288,11 +291,11 @@
 				previous_y = previous_y-result; 													\
 			};/*end if*/																			\
 																									\
-			gotoy(previous_y);    	/* go back to...   */										\
-			gotox(previous_x);  	/* ...where we were, but move forward 1 */					\
+			gotoy(previous_y);    	/* go back to...   */											\
+			gotox(previous_x);  	/* ...where we were, but move forward 1 */						\
 			cputc(CURSOR_CHARACTER); 	/*  		// draw the cursor					 */			\
-			gotoy(previous_y);    	/* go back to...   */										\
-			gotox(previous_x);  	/* ...where we were */										\
+			gotoy(previous_y);    	/* go back to...   */											\
+			gotox(previous_x);  	/* ...where we were */											\
 																									\
 		};/*end if*/																				\
 																									\
@@ -317,11 +320,11 @@
 				previous_y = previous_y-result; 									\
 			};/*end if*/ 															\
 																					\
-			gotoy(previous_y+1);	/* go back to...  					    */  \
-			gotox(SCREEN_LEFT_EDGE);/* ...where we were, but move forward 1 */  \
+			gotoy(previous_y+1);	/* go back to...  					    */  	\
+			gotox(SCREEN_LEFT_EDGE);/* ...where we were, but move forward 1 */  	\
 			cputc(CURSOR_CHARACTER); 	/* draw the cursor					    */  \
-			gotoy(previous_y+1);    /* go back to...        				*/  \
-			gotox(SCREEN_LEFT_EDGE);/* ...where we were   					*/  \
+			gotoy(previous_y+1);    /* go back to...        				*/  	\
+			gotox(SCREEN_LEFT_EDGE);/* ...where we were   					*/  	\
 			position_in_string++;		/* update where we are in the string    */  \
 																					\
 		} else  {																	\
@@ -334,18 +337,16 @@
 				previous_y = previous_y-result; 									\
 			};/*end if*/ 															\
 																					\
-			gotoy(previous_y);    	/* go back to...   						*/	\
-			gotox(previous_x+1);  	/* ...where we were, but move forward 1 */	\
+			gotoy(previous_y);    	/* go back to...   						*/		\
+			gotox(previous_x+1);  	/* ...where we were, but move forward 1 */		\
 			cputc(CURSOR_CHARACTER); 	/* draw the cursor					 	*/	\
-			gotoy(previous_y);    	/* go back to...   						*/	\
-			gotox(previous_x+1);  	/* ...where we were 					*/	\
+			gotoy(previous_y);    	/* go back to...   						*/		\
+			gotox(previous_x+1);  	/* ...where we were 					*/		\
 			position_in_string++; 		/* update where we are in the string 	*/	\
 		};/*end if*/ 																\
 																					\
 	};/*end if*/ 																	\
 //end macro func
-
-
 
 
 #define cursor_add_character() 														\
@@ -358,22 +359,22 @@
 				previous_x = SCREEN_RIGHT_EDGE;										\
 				previous_y = wherey();												\
 				cputc(CURSOR_CHARACTER);											\
-			  	gotox(previous_x);												\
-			  	gotoy(previous_y);												\
+			  	gotox(previous_x);													\
+			  	gotoy(previous_y);													\
 			} else if (wherex() == SCREEN_RIGHT_EDGE) {								\
-				if ( wherex() == SCREEN_RIGHT_EDGE && wherey() == SCREEN_BOTTOM_EDGE) {				\
+				if (wherex()==SCREEN_RIGHT_EDGE && wherey()==SCREEN_BOTTOM_EDGE){	\
 					printf("\n");													\
-					gotoy(SCREEN_BOTTOM_EDGE-1);													\
-					gotox(SCREEN_RIGHT_EDGE);									\
+					gotoy(SCREEN_BOTTOM_EDGE-1);									\
+					gotox(SCREEN_RIGHT_EDGE);										\
 					position_at_prompt_y--;	/* since we scrolled */					\
 				};/*end if*/ 														\
 				cputc(keystroke);													\
 				cputc(CURSOR_CHARACTER);											\
-				gotox(SCREEN_LEFT_EDGE);			    						\
+				gotox(SCREEN_LEFT_EDGE);			    							\
 			} else {																\
 				cputc(keystroke);													\
 				cputc(CURSOR_CHARACTER);											\
-				gotox(wherex()-1);												\
+				gotox(wherex()-1);													\
 			};/*end if*/															\
 			position_in_string++;													\
 		};/*end if*/																\
@@ -389,30 +390,30 @@
 			if (result == 1) { /* has scrolled */									\
 				previous_y = previous_y-result;										\
 			};/*end if*/															\
-			gotox(previous_x);													\
-			gotoy(previous_y);													\
+			gotox(previous_x);														\
+			gotoy(previous_y);														\
 			cputc(CURSOR_CHARACTER);												\
-			gotox(previous_x);													\
-			gotoy(previous_y);													\
+			gotox(previous_x);														\
+			gotoy(previous_y);														\
 		} else if (wherex() == SCREEN_RIGHT_EDGE) {									\
-			if ( wherex() == SCREEN_RIGHT_EDGE && wherey() == SCREEN_BOTTOM_EDGE) {					\
+			if ( wherex() == SCREEN_RIGHT_EDGE && wherey() == SCREEN_BOTTOM_EDGE) {	\
 				printf("\n");														\
-				gotoy(SCREEN_BOTTOM_EDGE-1);														\
-				gotox(SCREEN_RIGHT_EDGE);										\
+				gotoy(SCREEN_BOTTOM_EDGE-1);										\
+				gotox(SCREEN_RIGHT_EDGE);											\
 				position_at_prompt_y--;	/* since we scrolled */						\
 			};/*end if*/															\
 			cputc(keystroke);														\
-			gotox(SCREEN_LEFT_EDGE);											\
+			gotox(SCREEN_LEFT_EDGE);												\
 	    	previous_y = wherey();													\
 			result = display_substring(entered_keystrokes, position_in_string); 	\
 			if (result == 1) { /* since we scrolled */								\
 				previous_y = previous_y-result;										\
 			};/*end if*/ 															\
-			gotox(SCREEN_LEFT_EDGE);											\
-			gotoy(previous_y);													\
+			gotox(SCREEN_LEFT_EDGE);												\
+			gotoy(previous_y);														\
 			cputc(CURSOR_CHARACTER); 												\
-			gotox(SCREEN_LEFT_EDGE);											\
-			gotoy(previous_y);													\
+			gotox(SCREEN_LEFT_EDGE);												\
+			gotoy(previous_y);														\
 		} else {																	\
 			cputc(keystroke);		    											\
 	    	previous_x = wherex();													\
@@ -421,16 +422,14 @@
 			if (result == 1) { /* since we scrolled */								\
 				previous_y = previous_y-result;										\
 			};/*end if*/			    											\
-	    	gotox(previous_x);													\
-	    	gotoy(previous_y);													\
+	    	gotox(previous_x);														\
+	    	gotoy(previous_y);														\
 	    	cputc(CURSOR_CHARACTER);												\
-			gotox(previous_x);													\
-			gotoy(previous_y);													\
+			gotox(previous_x);														\
+			gotoy(previous_y);														\
 		};/*end if*/																\
 																					\
 		string_insert_character(entered_keystrokes, keystroke, position_in_string);	\
 		position_in_string++;														\
 	};/*end if*/																	\
 //end macro func
-
-

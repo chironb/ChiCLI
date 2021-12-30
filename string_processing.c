@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2020 by: Chiron Bramberger
+// (c) 2021 by: Chiron Bramberger
 //
 // ********************************************************************************
 
@@ -69,21 +69,19 @@ unsigned char string_insert_character ( unsigned char * input_string , unsigned 
 		default :
 			for (i = 0; i < MAX_ENTERED_KEYSTROKES ; i++) {
 				if (i == position_to_insert ) { //?
-
 					string_add_character(output_string, character_to_insert);
 					string_add_character(output_string, input_string[i]);
-					
 				} else {
 					string_add_character(output_string, input_string[i]);
-				};//end if 
-			};//end for 
+				};//end if
+			};//end for
 		//end default
 
-	};//end switch 
+	};//end switch
 
-	strcpy(input_string, output_string); // overwrite input string with the newly inserted string 
+	strcpy(input_string, output_string); // overwrite input string with the newly inserted string
 
-	return(1); 
+	return(1);
 
 };//end func
 
@@ -263,19 +261,19 @@ void remove_extra_spaces(unsigned char * input_string ) {
 		if ( input_string[i] == ' ' &&  found_a_space == 0 ) {
 			output_string[ii] = ' ';
 			ii++;
-			found_a_space = 1;	
+			found_a_space = 1;
 
 		} else if ( input_string[i] == ' ' &&  found_a_space == 1 ){
-			found_a_space = 1;	
+			found_a_space = 1;
 
 		} else {
 			output_string[ii] = input_string[i];
 			ii++;
-			found_a_space = 0;			
+			found_a_space = 0;
 
-		};//end if  		
+		};//end if
 
-	};//end for 
+	};//end for
 
 	strcpy(input_string, output_string); // overwrite input string with the newly inserted string 
 
@@ -288,22 +286,6 @@ unsigned char is_string_only_numbers(unsigned char * input_string ) {
 
 	for (i = 0 ; i < strlen(input_string) ; i++) {
 
-		// if (input_string[i] == '0' || 
-		// 	input_string[i] == '1' || 
-		// 	input_string[i] == '2' || 
-		// 	input_string[i] == '3' || 
-		// 	input_string[i] == '4' || 
-		// 	input_string[i] == '5' || 
-		// 	input_string[i] == '6' || 
-		// 	input_string[i] == '7' || 
-		// 	input_string[i] == '8' || 
-		// 	input_string[i] == '9'    ) { 	//found a non-zero character	
-		// 		// do nothing 	
-		// } else {	
-		// 		return(0);
-		// };//end if  		
-
-		// This saved 117 bytes compared to the above if statement
 		// TODO: Also... this is cheap and stupid. There's for sure a better way.
 		switch(input_string[i]) {
 			case '0' : ;
@@ -324,17 +306,3 @@ unsigned char is_string_only_numbers(unsigned char * input_string ) {
 	return(1); 								// is_string_only_zeros == TRUE (1) means the stirng is only zeros, otherwise FALSE (0) means there's more than zeros
 
 };//end func
-
-
-
-// replaced by strupper()
-// void string_toupper( unsigned char * input_string) {
-
-// 	unsigned char i;
-
-// 	for (i = 0 ; i < strlen(input_string) ; i++) {
-// 		input_string[i] = toupper(input_string[i]);
-// 	};//end for 
-
-// };//end if 
-

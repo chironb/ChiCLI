@@ -4,9 +4,7 @@ A CLI for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_R3_screenshot.png?raw=true)
 
-ChiCLI v1.R7 (c) 2021 Chiron Bramberger
-
-Contact: chiron@bramberger.com
+ChiCLI v1.R8 (c) 2021 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, similar to and inspired by: AmigaDOS, Commodore DOS, MS-DOS, and Linux.
 
@@ -34,8 +32,7 @@ ChiCLI - Features List:
 
 Made in Canada. :-)
 
-You can download a disk image with this program and it's supporting Commodore readable text files here: 
-https://github.com/chironb/ChiCLI/raw/main/chicli-disk.d64
+You can download a disk image with this program and it's supporting Commodore readable text files under the release section of this GitH
 
 This is release-candidate quality software. Regardless, it comes with no warranty or guarantees of any kind.
 
@@ -56,8 +53,27 @@ Testing successfully with the following hardware:
 - Commodore 64 and Commodore 1541 with JiffyDOS installed
 - Commodore 64 with Epyx Fast Load and Super Snapshot 4
 - Commodore Flyer Internet Modem --> http://www.retroswitch.com/products/flyer/ (Not Sponsored)
+- Commodore 1581 emulated. Tested under VICE only.
 
 Latest News and Changelog:
+
+v1.R8 - Release Candidate 8 - Dec ?? 2021
+- Added:     Essential support for 1581 drives. 
+IMPORTANT NOTE!
+The 1581 is... nutty. It support "partitions" but these don't work like folders or like partitions.
+Here's what's supported:
+- A single layer of partitions that exist in the root folder.
+- Listing partitions.
+- Moving into a partition.
+- Moving to the root partition using this command: part root
+- Delete, rename, dumpmem, type, and the rest of the file commands work.
+- The only command that doesn't work as expected is copy, where you're trying to copying directly to a partition.
+- Example: This doesn't work: copy * d09b: --> You're trying to copy everything in the current device to the 1581 as device 9, on the second partition.
+- Example: This *does* work: copy * d09: --> You're copying everything in the current device to the 1581 as device 9, on whatever the last set partition was.
+- When using an SD2IEC with a D81 file that's mounted, you can't move into partitions. This is because the SD2IEC doesn't support this. Also, regarding useability, there's no sensible way to make this work. I'd have to make the system understand the idea of real partitions within "virtual" partitions.
+- I don't own a real 1581 to test on (I need a working PCB).
+- The way this thing does partitions is bonkers. I really can't believe how insane it is. It's totally in outer space. There's no execuse for this. The 1581 was released in 1987. The concept of partitions, folders, directories, all long existed at this time. The Amiga existed at this time. The 1581 drive should have either limited partitions to the root of the drive without nesting partitions, or supported partitions properly, or treated them like folders, or not done it at all. Look... this drive is an amazing thing to have for a Commodore 64, it really is, and I credit Commodore for it. However... 
+The Commodore 1581 shenanigans implementation of partition functionality is objectively terrible!
 
 v1.R7 - Release Candidate 7 - Dec 19 2021
 - Updated:   A bunch of little fixes. The commands run, dumpmem, initialize, and type to properly handles multiple drive devices.
