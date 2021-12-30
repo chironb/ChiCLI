@@ -61,6 +61,7 @@ v1.R9 - Release Candidate 9 - Dec 30 2021
 - Added:     Added a help system and file. Now you can look up a command this: "help copy" or "? copy" and get some text helping with the various options.
 
 v1.R8 - Release Candidate 8 - Dec 30 2021
+- Updated:   Seriously cleaned up a lot of code.
 - Added Essential support for 1581 drives! IMPORTANT NOTE! The 1581 is... nutty. It support "partitions" but these don't work like folders or like partitions. Here's what's supported:
 - A single layer of partitions that exist in the root folder.
 - Listing partitions.
@@ -77,7 +78,6 @@ The Commodore 1581 shenanigans implementation of partition functionality is obje
 
 v1.R7 - Release Candidate 7 - Dec 19 2021
 - Updated:   A bunch of little fixes. The commands run, dumpmem, initialize, and type to properly handles multiple drive devices.
-- Updated:   Seriously cleaned up a lot of code.
 
 v1.R6 - Release Candidate 6 - Dec 18 2021
 - Updated:   Converted hotkeys macros to proper functions and saved 88 bytes. I maxed out the system variables, which you can view using the vars command.
