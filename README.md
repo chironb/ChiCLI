@@ -6,23 +6,23 @@ A CLI for Commodore Computers!
 
 ChiCLI v1.00 (c) 2020 - 2022 Chiron Bramberger
 
-A Commodore 64 command line interface terminal, similar to and inspired by: AmigaDOS, Commodore DOS, MS-DOS, and Linux.
+A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
 Pronunciation of ChiCLI: ky see-elle-eye
 
 Quotes
 
-"Your program completes me. I think i may even make my c64 boot directly to it. I like it that much. I have never seen anything this slick!! Major kudos and praise to this dev! It is a must have for every C64 enthusiast and raises the bar substantially! I have never seen or used such a perfect terminal on a C64 in all my decades using the platform. It is extremely powerful and easy to use. It modernizes the system and makes it perform equal to or better then a PC MS-DOS distro command line. Full featured copies quickly from folder to folder unlike CBM manager. It breaks new barriers on this platform! I highly recommend it to everyone. It does advanced stuff like mounting D64 containers on SD2IEC. Directory manipulation you name it! Partition manipulation. This terminal is epic!!! Major cheers to the dev! I'm going to make it my core drive boot!"  
-~ LordDarkenbeast, Reddit User
+*"Your program completes me. I think i may even make my c64 boot directly to it. I like it that much. I have never seen anything this slick!! Major kudos and praise to this dev! It is a must have for every C64 enthusiast and raises the bar substantially! I have never seen or used such a perfect terminal on a C64 in all my decades using the platform. It is extremely powerful and easy to use. It modernizes the system and makes it perform equal to or better then a PC MS-DOS distro command line. Full featured copies quickly from folder to folder unlike CBM manager. It breaks new barriers on this platform! I highly recommend it to everyone. It does advanced stuff like mounting D64 containers on SD2IEC. Directory manipulation you name it! Partition manipulation. This terminal is epic!!! Major cheers to the dev! I'm going to make it my core drive boot!"*  
+*~ LordDarkenbeast, Reddit User*
 
-"Right on! I think that this is exactly the type of thing the Commodore 64 needs right now."  
-~ Privileged_Interface, Reddit User
+*"Right on! I think that this is exactly the type of thing the Commodore 64 needs right now."*  
+*~ Privileged_Interface, Reddit User*
 
-"I smiled when I did ls."  
-~ opi, Reddit User
+*"I smiled when I did ls."*  
+*~ opi, Reddit User*
 
-"Awesome work!"  
-~ Oldbitcollector
+*"Awesome work!"*  
+*~ Oldbitcollector*
 
 ChiCLI - Features List:
 
