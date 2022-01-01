@@ -15,13 +15,13 @@ Quote:
 - LordDarkenbeast, Reddit User
 
 "Right on! I think that this is exactly the type of thing the Commodore 64 needs right now."
-- Privileged_Interface, Reddit User
+Privileged_Interface, Reddit User
 
 "I smiled when I did ls."
-- opi, Reddit User
+opi, Reddit User
 
 "Awesome work!"
-- Oldbitcollector
+Oldbitcollector
 
 ChiCLI - Features List:
 
