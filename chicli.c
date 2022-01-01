@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2021 by: Chiron Bramberger
+// (c) 2020 - 2022 by: Chiron Bramberger
 //
 // ********************************************************************************
 
@@ -30,7 +30,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hotke
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.R9"
+#define VERSION "v1.00"
 #define PROGRAM_NAME "chicli"
 
 
@@ -861,7 +861,7 @@ void set_date() {
 	// Varible reused to build string for setting the date.
 	strcpy(disk_sector_buffer,"t-wa");
 
-	printf("Weekday XXXX:");
+	printf("Day XXXX:");
 	scanf("%s", &user_weekday_input);
 	user_weekday_input[0] = tolower(user_weekday_input[0]);
 	user_weekday_input[1] = tolower(user_weekday_input[1]);
@@ -869,31 +869,31 @@ void set_date() {
 	strcat(disk_sector_buffer,user_weekday_input);
 	strcat(disk_sector_buffer,". ");
 
-	printf("Mon. XX:");
+	printf("M ##:");
 	date_helper();
 	strcat(disk_sector_buffer,"/");
 
-	printf("Day. XX:");
+	printf("D:");
 	date_helper();
 	strcat(disk_sector_buffer,"/");
 
-	printf("Year XX:");
+	printf("Y ##:");
 	date_helper();
 	strcat(disk_sector_buffer," ");
 
-	printf("12 Hour:");
+	printf("12H:");
 	date_helper();
 	strcat(disk_sector_buffer,":");
 
-	printf("Mins XX:");
+	printf("Min:");
 	date_helper();
 	strcat(disk_sector_buffer,":");
 
-	printf("Secs XX:");
+	printf("Sec:");
 	date_helper();
 	strcat(disk_sector_buffer," ");
 
-	printf("AM/PM XX:");
+	printf("AM/PM:");
 	scanf("%s", &user_ampm_input);
 	user_ampm_input[0] = tolower(user_ampm_input[0]);
 	user_ampm_input[1] = tolower(user_ampm_input[1]);
@@ -1013,12 +1013,14 @@ int main( int argc, char* argv[] ) {
 
 	reboot_register.pc = 0xFCE2; // this is the value that get sys'ed to reboot
 
-	// set_alias( "help" , "type chicli-readme" ); // like 20 bytes per call
+	// ********************************************************************************
+	// SET DEFAULT ALIASES
+	// ********************************************************************************
+	// set_alias( "readme" , "type chicli-userguide" ); // Adds around 25 bytes per call
 
 	// ********************************************************************************
 	// SET DEFAULT HOTKEYS
 	// ********************************************************************************
-
 	set_hotkey(1,"dir"); // like 10 bytes per call
 	// set_hotkey(2,"");
 	set_hotkey(3,"cls");
@@ -1037,10 +1039,10 @@ int main( int argc, char* argv[] ) {
 	// PROCESS ARGUMENTS
 	// ********************************************************************************
 
-    // Used for debugging
-	if ( argc > 1  &&  matching("-ddd",argv[1]) ) {
-		have_device_numbers_changed = TRUE; // this is loaded like this: RUN:REM -ddd // RUN:REM ARG1 " ARG2 IS QUOTED" ARG3 "" ARG5
-	};//end if 
+    // ***** USED FOR DEBUGGING IN THE FUTURE *****
+	// if ( argc > 1  &&  matching("-ddd",argv[1]) ) {
+	// 		have_device_numbers_changed = TRUE; // this is loaded like this: RUN:REM -ddd // RUN:REM ARG1 " ARG2 IS QUOTED" ARG3 "" ARG5
+	// };//end-if
 
 	// Start the prompt input stuff 
 	starting_x = wherex();
@@ -1049,16 +1051,13 @@ int main( int argc, char* argv[] ) {
 	// Display the logo, hardware info, and play the chirp 
 
 	if ( argc > 1  &&  matching("-st",argv[1]) ){
-		// read colors for text, background, and border, and set the vars so things don't get screwy 
-		// poke 53280,0 (for the border) // poke 53281,0 (for the background) // POKE 646,X (text)
-		// void set_colors(unsigned char text, unsigned char background, unsigned char border) {
-		// set_colors( PEEK(????) , PEEK(0xD021) , PEEK(0xD020) );
+		// Read colors for text, background, and border, and set the vars so things don't get screwy 
 		// Color RAM:
 		// $D800-$DBE7 	55296-56295 		1/2 kB (1000 nibbles) of color memory.
 		// $DBE8-$DBFF 	56296-56319 		Unused 
 
-		current_textcolor   = read_nibble_low(0xD800);// PEEK(0xD800) & 0x0F;    
-	    current_bgcolor     = read_nibble_low(0xD021);// PEEK(0xD021) & 0x0F ; //n eed to read teh low nibble, jsut doing a -240 this isn't right, because it depnds on the high nibble always being 1111 xxxx
+		current_textcolor   = read_nibble_low(0xD800);// PEEK(0xD800) & 0x0F ;
+	    current_bgcolor     = read_nibble_low(0xD021);// PEEK(0xD021) & 0x0F ; // need to read the low nibble, just doing a -240 this isn't right, because it depends on the high nibble always being 1111 xxxx
 	    current_bordercolor = read_nibble_low(0xD020);// PEEK(0xD020) & 0x0F ;
 
 		textcolor(   current_textcolor   );
@@ -3090,6 +3089,12 @@ int main( int argc, char* argv[] ) {
 		            (user_input_command_string[0]=='l' && user_input_command_string[1]=='s') ||
 					(user_input_command_string[0]=='d' && user_input_command_string[1]=='i' && user_input_command_string[2]=='r') ){
 
+			// Supported usage examples:
+			// ls -s
+			// ls chi*
+			// ls -s chi*
+			// ls chi* -ls
+
 			if        (user_input_command_string[0]=='d') {
 				files_per_screen = 48; // 2 column display mode
 			} else if (user_input_command_string[0]=='l') {
@@ -3098,23 +3103,7 @@ int main( int argc, char* argv[] ) {
 
 			strcpy(listing_string,"$"); // The default is $ to load the current directory.
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) {
-			// 	// printf("Detected SD2IEC!\n");
-			// 	string_add_character(listing_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-			// } else if (get_drive_type(dev) == DRIVE_1581) {
-			// 	string_add_character(listing_string,'0');
-			// } else {
-			// 	string_add_character(listing_string,par); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-			// };//end-if
-
-			// Example: device_command[1] = convert_partition_for_drive();
 			string_add_character(listing_string,convert_partition_for_drive());
-
-			// Supported usage examples:
-			// ls -s
-			// ls chi*
-			// ls -s chi*
-			// ls chi* -ls
 
 			switch (number_of_user_inputs) {
 				case 2 :
@@ -3615,15 +3604,15 @@ int main( int argc, char* argv[] ) {
 		// HELP COMMAND
 		// ********************************************************************************
 		} else if ( (user_input_command_string[0]=='?') ||
- 				    (user_input_command_string[0]=='h' && user_input_command_string[1]=='e' && user_input_command_string[2]=='l') ) {
+					(user_input_command_string[0]=='h' && user_input_command_string[1]=='e' && user_input_command_string[2]=='l') ||
+ 				    (user_input_command_string[0]=='m' && user_input_command_string[1]=='a' && user_input_command_string[2]=='n') ){
 
 			unsigned char help_entry_detected;
 			unsigned char help_entry_found;
-            // unsigned char command_to_find[6] = "about"; // For testing
 			unsigned char current_command_position; // The current char we are checking
 			unsigned char converted_character; // We need to convert thigns betwen ascii and petscii
 
-			// Compensate for petscii bullshit cc65 automatica FML fuck. 95+32
+			// Compensated for PETSCII bullshit cc65 automatic fuck FML.
 			#define marker_character 95
 
 			help_entry_detected = 0;
@@ -3632,7 +3621,11 @@ int main( int argc, char* argv[] ) {
 
 			if ( user_input_arg1_string[0]=='=' ) { // =
 				strcpy(user_input_arg1_string,"equals");
-			} else if ( user_input_arg1_string[0]=='.' ) { // ./
+			} else if ( user_input_arg1_string[0]=='?' ) { // ? --> help
+				strcpy(user_input_arg1_string,"help");
+			} else if ( user_input_arg1_string[0]=='/' ) { // / --> commands
+				strcpy(user_input_arg1_string,"commands");
+			} else if ( user_input_arg1_string[0]=='.' ) { // ./ --> dot
 				strcpy(user_input_arg1_string,"dot");
 			} else if ( user_input_arg1_string[1]=='#' ) { // d##:
 				strcpy(user_input_arg1_string,"dcd");
@@ -3644,8 +3637,8 @@ int main( int argc, char* argv[] ) {
 
 			switch (number_of_user_inputs) {
 				case 1 :
-					strcpy(user_input_arg1_string,"help"); 		//printf("Usage: help <command>\nList commands: help commands\nRUNSTOP / CTRL+C to cancel.\n"); //break; 
-					// Fall through
+					strcpy(user_input_arg1_string,"help");
+					// Then fall through to the next case...
 
 				case 2 : // This should be case 2 when we are actually using good shit below.
 
@@ -3684,8 +3677,6 @@ int main( int argc, char* argv[] ) {
 
 							// - Searching to match because we found an entry
 							} else if ( (converted_character != marker_character) && (help_entry_detected==TRUE) ) {
-								// printf("cc[%u]:%c ctf[%u]:%c\n",i,converted_character,current_command_position,user_input_arg1_string[current_command_position]);
-								// printf("cc[%u]:%u ctf[%u]:%u\n",i,converted_character,current_command_position,user_input_arg1_string[current_command_position]);
 
 								// If we've matched all the characters, the index will have been incremented past the last position, and therefore we know we have found the string.
 								if ( current_command_position == strlen(user_input_arg1_string) ) {
@@ -3732,6 +3723,7 @@ int main( int argc, char* argv[] ) {
 
 			END_HELP :
 			cbm_close(8);
+			if (help_entry_found==FALSE) printf("Not found.\n");
 
 
 		// // ********************************************************************************

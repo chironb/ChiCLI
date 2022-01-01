@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2021 by: Chiron Bramberger
+// (c) 2020 - 2022 by: Chiron Bramberger
 //
 // ********************************************************************************
 // ********************************************************************************
@@ -45,7 +45,7 @@
 #define MAX_LENGTH_ARGS 40 		      // Commodore DOS maximum length of command string is 40 characters
 /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
 #define MAX_DISK_SECTOR_BUFFER 255    // This is the size of the buffer used when transfering data over the UIEC bus.
-#define MAX_ALIASES 8   		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
+#define MAX_ALIASES 6   		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
 #define MAX_ALIAS_LENGTH 25  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
 #define MAX_HOTKEYS 8  			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
 #define MAX_HOTKEY_LENGTH 25	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
@@ -141,7 +141,7 @@ unsigned char convert_char(unsigned char char_to_convert) ;
 
 #define matching(testing_string,original_string) (strcmp(original_string,testing_string)==0)
 
-#define display_title_text() printf("ChiCLI %s (c) 2021 Chiron Bramberger\n", VERSION)
+#define display_title_text() printf("ChiCLI %s (c) 2022 Chiron Bramberger\n", VERSION)
 
 #define display_description_text() printf("ChiCLI: A CLI for Commodore Computers!\n")
 

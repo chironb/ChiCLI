@@ -1,7 +1,7 @@
 // ********************************************************************************
 //
 // ChiCLI - Chiron's CLI for 8-Bit Commodore Computers
-// (c) 2021 by: Chiron Bramberger
+// (c) 2020 - 2022 by: Chiron Bramberger
 //
 // ********************************************************************************
 
@@ -758,50 +758,64 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 
 		strcpy(error_message,error_message2); // Final string
 
-	// ********************
+	// ****************************************
 	// COMMODORE 1581
-	// ********************
+	// ****************************************
 	} else if ( matching( "copyright cbm dos v10 1581", error_message) ) {
 		set_drive_type(device_number, DRIVE_1581);
-		strncpy(error_message,error_message+10,17);
+		strncpy(error_message,error_message+10,16);
 		strupper(error_message); // make the string upper case
 		error_message[8] = 'v';  // "CBM DOS v10 1581"
+		error_message[16] = '\0';
 
-	// ********************
+	// ****************************************
+	// COMMODORE 1581 - JIFFYDOS
+	// ****************************************
+	} else if ( matching( "(c) 1989 jiffydos 6.0 1581", error_message) ) {
+		set_drive_type(device_number, DRIVE_1581);
+		strncpy(error_message,error_message+9,17);
+		// strupper(error_message); // make the string upper case
+		error_message[0] = 'J';  // "JiffyDOS 6.0 1581"
+		error_message[5] = 'D';  // "JiffyDOS 6.0 1581"
+		error_message[6] = 'O';  // "JiffyDOS 6.0 1581"
+		error_message[7] = 'S';  // "JiffyDOS 6.0 1581"
+		error_message[17] = '\0';  // "JiffyDOS 6.0 1581"
+
+	// ****************************************
 	// MSD SD-2
-	// ********************
+	// ****************************************
 	} else if ( matching( "m.s.d. dos v2.3", error_message) ) {
 		set_drive_type(device_number, DRIVE_SD2);
 		strupper(error_message); // make the string upper case
 		error_message[11] = 'v'; // "M.S.D. DOS v2.3"
 
-	// ********************
+	// ****************************************
 	// COMMODORE 4040
-	// ********************
+	// ****************************************
 	} else if ( matching( "cbm dos v2", error_message) ) {
 		set_drive_type(device_number, DRIVE_4040);
 		strupper(error_message); // make the string upper case
 		error_message[8] = 'v';  // "CBM DOS v2"
 
-	// ********************
+	// ****************************************
 	// COMMODORE 2031
-	// ********************
+	// ****************************************
 	} else if ( matching( "cbm dos v2.6 2031", error_message) ) {
 		set_drive_type(device_number, DRIVE_2031);
 		strupper(error_message); // make the string upper case
 		error_message[8] = 'v';  // "CBM DOS v2.6 2031"
 
-	// ********************
+	// ****************************************
 	// COMMODORE SFD-1001
-	// ********************
+	// ****************************************
 	} else if ( matching( "cbm dos v2.7", error_message) ) {
 		set_drive_type(device_number, DRIVE_SFD1001);
 		strupper(error_message); // make the string upper case
 		error_message[8] = 'v';  // "CBM DOS v2.7"
 
-	// ********************
+	// ****************************************
 	// UNKNOWN DRIVE
-	// ********************
+	// ****************************************
 	} else {
 		strupper(error_message); // make the string upper case
 
@@ -1060,7 +1074,7 @@ void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) 
 	if (result == 0) {
 		printf("Drive set.\n");
 	} else {
-		printf("Unknown error.\n");
+		printf("?\n");
 	};//end if
 
 };//end func

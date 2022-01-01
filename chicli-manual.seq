@@ -2,7 +2,7 @@
 cHIcli mANUAL
 ---------------------------------------
 
-cHIcli V1.r9 (C) 2021 cHIRON bRAMBERGER
+cHIcli V1.00 (C) 2022 cHIRON bRAMBERGER
 a cli FOR cOMMODORE cOMPUTERS!
 
 a cOMMODORE 64 COMMAND LINE
@@ -19,7 +19,7 @@ TERMINAL OR COMMAND LINE INTERFACE
 FAMILIAR TO MODERN COMPUTERS.
 
 tESTED HARDWARE INCLUDES:
-sd2iec, 1541, msd sd-2,
+sd2iec, 1541, msd sd-2, 1581
 2031, sfd-1001, 4040
 
 ----- cHIcli - qUICK cOMMAND lIST -----
