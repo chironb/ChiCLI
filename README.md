@@ -33,8 +33,6 @@ Quotes from public forums:
 *"Deym thanks for this! Looks amazing! Will try out soon."  
 ~ RBJeffrey, Reddit User*
 
-
-
 *Please note: these public quotes do not imply endorsement of any kind.*
 
 ChiCLI - Features List:
@@ -89,7 +87,7 @@ Latest News and Changelog:
 v1.01 - First Post-Final-Release Update! - Jan 7 2022
 - Added:     Support for the CMD HD! Also supports the real-time clock functions!
 - Added:     Support for the VICE FS Driver v2.0!
-- Added:     More support for the 1581. You can now move in and out of partitions like folders using the 'cd' command. To return to the root partition, use 'cd /' just like any other drive that supports folders. This should also let you enter nested sub-partitions. Also... the 1581... OMG shootme in the face...
+- Added:     More support for the 1581. You can now move in and out of partitions like folders using the 'cd' command. To return to the root partition, use 'cd /' just like any other drive that supports folders. This should also let you enter nested sub-partitions. Also... the 1581... OMG shoot me in the face...
 - Help:      Added a little section in the help for hardware support. Use 'help hardware' to bring it up.
 - Fixed:     Much rework done to the 'cd' and 'part' partition commands.
 - Fixed:     The delete command wasn't getting all the files on the first pass. Now it does. Needed to do some jumping around to restart the scan after every delete.
