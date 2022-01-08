@@ -4,7 +4,7 @@ A CLI for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot.png?raw=true)
 
-ChiCLI v1.00 (c) 2020 - 2022 Chiron Bramberger
+ChiCLI v1.01 (c) 2020 - 2022 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
