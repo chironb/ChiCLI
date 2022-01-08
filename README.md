@@ -35,7 +35,7 @@ Quotes from public forums:
 
 
 
-*Please note: these public quotes do not imply endorsment of any kind.*
+*Please note: these public quotes do not imply endorsement of any kind.*
 
 ChiCLI - Features List:
 
