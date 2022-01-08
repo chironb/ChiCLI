@@ -166,27 +166,26 @@ extern unsigned char jjj;
 // COMMANDS FUNCTIONS
 // ********************************************************************************
 
-unsigned char dir_file_count(){
+unsigned char dir_file_count(unsigned char * listing_string){
 
 	unsigned char total_files = 0;
 
-	strcpy(listing_string,"$0"); /* The default is $ to load the current directory.*/
-
-	if (get_drive_type(dev) == DRIVE_UIEC) {
-		listing_string[1] = par+1; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-	} else {
-		listing_string[1] = par; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-	};/*end for*/
+	// strcpy(listing_string,"$"); // The default is $ to load the current directory.
+	// string_add_character(listing_string,convert_partition_for_drive());
 
  	result = cbm_opendir(1, dev, listing_string);
 
+	// printf("B result: %u i:%u &dir_ent.name:%s\n",result,iii,&dir_ent.name);//&dir_ent);
+
 	for (iii = 0; iii <= 254 ; iii++) {
+
+	    result = cbm_readdir(1, &dir_ent);
+
+		// printf("result: %u i:%u &dir_ent.name:%s\n",result,iii,&dir_ent.name);//&dir_ent);
 
 		if (result != 0) {
 			break;
 		};/*end if*/
-
-	    result = cbm_readdir(1, &dir_ent);
 
 	    if (iii == 0) {
 			/* Start */
@@ -207,13 +206,17 @@ unsigned char dir_file_count(){
 
 void dir_goto_file_index(unsigned char file_index) 	{
 
-	strcpy(listing_string,"$0"); /* The default is $ to load the current directory.*/
+	//strcpy(listing_string,"$0"); /* The default is $ to load the current directory.*/
 
-	if (get_drive_type(dev) == DRIVE_UIEC) {
-		listing_string[1] = par+1; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-	} else {
-		listing_string[1] = par; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-	};/*end for*/
+	strcpy(listing_string,"$"); // The default is $ to load the current directory.
+
+	string_add_character(listing_string,convert_partition_for_drive());
+
+	// if (get_drive_type(dev) == DRIVE_UIEC) {
+	// 	listing_string[1] = par+1; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+	// } else {
+	// 	listing_string[1] = par; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
+	// };/*end for*/
 
  	result = cbm_opendir(1, dev, listing_string);
 
@@ -226,6 +229,9 @@ void dir_goto_file_index(unsigned char file_index) 	{
 };//end macro func 
 
 
+// ********************************************************************************
+// DCOPY COMMAND - Between Devices Copying - ChiCLI manually shovels bytes around.
+// ********************************************************************************
 void dcopy() {
 
 	switch (detected_filetype) {
@@ -301,9 +307,8 @@ void dcopy() {
 
 
 // ********************************************************************************
-// ACOPY COMMAND - Drive within Drive Copying - Drive and DOS handles the copying.
+// ACOPY COMMAND - Drive Within Drive Copying - Drive and DOS handles the copying.
 // ********************************************************************************
-
 void acopy() {
 
 	unsigned char user_input_arg1_string_length;
@@ -423,29 +428,31 @@ void acopy() {
 	/* -------------------- BUILD STRING -------------------- */
 	/* --> Copy FILEORIGINAL from Partition 1 to Partition 2 Called FILECOPY */
 
-                                               /*      C2/:FILECOPY=1/:FILEORIGINAL */
-    strcpy (drive_command_string,"c");         /* this is the copy command */
-    strncat (drive_command_string,&target_par,1);  /* this is the target partition */
+                                               			// Example: C2/:FILECOPY=1/:FILEORIGINAL
+    strcpy (drive_command_string,"c");         			// This is the copy command
+    // if (get_drive_type(dev)!=DRIVE_VICEFS) {   			// The VICE FS DRIVER doesn't fucking support *ANY* within device copying! Every God damn thing all the God damn time...
+    strncat (drive_command_string,&target_par,1);	// this is the target partition
+    // };//end-if
 
-	if (get_drive_type(dev) == DRIVE_UIEC) {
-	    strcat (drive_command_string,"/");         /* !!!!! this is the beginning of the target path */
+	if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
+	    strcat (drive_command_string,"/");         		// !!!!! this is the beginning of the target path
 	} else {
 		// do nothing
 	};//end-if
 
-    strcat (drive_command_string,target_path); /* this is the target path */
-    strcat (drive_command_string,":");         /* this finishes the target path */
-	if (target_filename_length == 0 ) {        /* add the SOURCE filename because it's inferred */
+    strcat (drive_command_string,target_path); 			/* this is the target path */
+    strcat (drive_command_string,":");         			/* this finishes the target path */
+	if (target_filename_length == 0 ) {        			/* add the SOURCE filename because it's inferred */
 		strcat (drive_command_string,source_filename_pointer);
-	} else {                                   /* otherwise, add the target filename */
+	} else {                                   			/* otherwise, add the target filename */
 		strcat (drive_command_string,target_filename_pointer);
 	};/*end_if*/
 
-	strcat (drive_command_string,"=");                     /* this finished the target path */
+	strcat (drive_command_string,"=");                  /* this finished the target path */
 
-	strncat (drive_command_string,&source_par,1);              /* this is the source partition */
+	strncat (drive_command_string,&source_par,1);       /* this is the source partition */
 
-	if (get_drive_type(dev) == DRIVE_UIEC) {
+	if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD || get_drive_type(dev)==DRIVE_VICEFS) {
 	    strcat (drive_command_string,"/");         /* !!!!! this is the beginning of the target path */
 	} else {
 		// do nothing

@@ -45,12 +45,12 @@
 #define MAX_LENGTH_ARGS 40 		      // Commodore DOS maximum length of command string is 40 characters
 /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
 #define MAX_DISK_SECTOR_BUFFER 255    // This is the size of the buffer used when transfering data over the UIEC bus.
-#define MAX_ALIASES 6   		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
+#define MAX_ALIASES 8			      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
 #define MAX_ALIAS_LENGTH 25  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
 #define MAX_HOTKEYS 8  			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
 #define MAX_HOTKEY_LENGTH 25	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
 /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-// 47
+//
 // // ****************************
 // // LOWEST MEMORY SAVINGS VALUES
 // // ****************************
@@ -145,17 +145,17 @@ unsigned char convert_char(unsigned char char_to_convert) ;
 
 #define display_description_text() printf("ChiCLI: A CLI for Commodore Computers!\n")
 
-#define wait_for_keypress() 			\
-										\
-	while(kbhit()) { /* flush buffer */	\
-		cgetc();						\
-	};/*end while*/						\
-										\
-	while(!kbhit()) {					\
-		/*do nothing*/					\
-	};/*end while*/ 					\
-										\
-//end macro func 
+// #define wait_for_keypress() 			\
+// 										\
+// 	while(kbhit()) { /* flush buffer */	\
+// 		cgetc();						\
+// 	};/*end while*/						\
+// 										\
+// 	while(!kbhit()) {					\
+// 		/*do nothing*/					\
+// 	};/*end while*/ 					\
+// 										\
+// //end macro func 
 
 
 #define display_title_screen(has_ddd) \

@@ -6,22 +6,36 @@ A CLI for Commodore Computers!
 
 ChiCLI v1.00 (c) 2020 - 2022 Chiron Bramberger
 
-A Commodore 64 command line interface terminal, similar to and inspired by: AmigaDOS, Commodore DOS, MS-DOS, and Linux.
+A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
 Pronunciation of ChiCLI: ky see-elle-eye
 
-Quote:
-"Your program completes me. I think i may even make my c64 boot directly to it. I like it that much. I have never seen anything this slick!! Major kudos and praise to this dev! It is a must have for every C64 enthusiast and raises the bar substantially! I have never seen or used such a perfect terminal on a C64 in all my decades using the platform. It is extremely powerful and easy to use. It modernizes the system and makes it perform equal to or better then a PC MS-DOS distro command line. Full featured copies quickly from folder to folder unlike CBM manager. It breaks new barriers on this platform! I highly recommend it to everyone. It does advanced stuff like mounting D64 containers on SD2IEC. Directory manipulation you name it! Partition manipulation. This terminal is epic!!! Major cheers to the dev! I'm going to make it my core drive boot!"
-- LordDarkenbeast, Reddit User
+Quotes from public forums:
 
-"Right on! I think that this is exactly the type of thing the Commodore 64 needs right now."
-- Privileged_Interface, Reddit User
+*"Your program completes me. I think i may even make my C64 boot directly to it. I like it that much. I have never seen anything this slick!! Major kudos and praise to this dev! It is a must have for every C64 enthusiast and raises the bar substantially! I have never seen or used such a perfect terminal on a C64 in all my decades using the platform. It is extremely powerful and easy to use. It modernizes the system and makes it perform equal to or better then a PC MS-DOS distro command line. Full featured copies quickly from folder to folder unlike CBM manager. It breaks new barriers on this platform! I highly recommend it to everyone. It does advanced stuff like mounting D64 containers on SD2IEC. Directory manipulation you name it! Partition manipulation. This terminal is epic!!! Major cheers to the dev! I'm going to make it my core drive boot!"  
+~ LordDarkenbeast, Reddit User*
 
-"I smiled when I did ls."
-- opi, Reddit User
+*"Right on! I think that this is exactly the type of thing the Commodore 64 needs right now."*  
+~ Privileged_Interface, Reddit User*
 
-"Awesome work!"
-- Oldbitcollector
+*"I smiled when I did ls."  
+~ opi, Reddit User*
+
+*"Oh cool, keeping an eye on this project."  
+~ Vijfhoek, Reddit User*
+
+*"Seriously, better than fast blue hogs of the hedge this is man. This looks bosssssss. I got so many f****n disks of absolute crap pirate games to murder, this is gonna be handy af dude"  
+~ LLH on Facebook*
+
+*"TAB-completion and I'll take it!"  
+~ PS on Facebook*
+
+*"Deym thanks for this! Looks amazing! Will try out soon."  
+~ RBJeffrey, Reddit User*
+
+
+
+*Please note: these public quotes do not imply endorsment of any kind.*
 
 ChiCLI - Features List:
 
@@ -70,8 +84,19 @@ Testing successfully with the following hardware:
 - Commodore 1581 hardware tested by Glenn Holmer as noted on the TPUG mailing list here: https://www.freelists.org/post/torontocbm/1581-Support,8
 - Commodore 1581 additionally tested as emulated under VICE.
 
-
 Latest News and Changelog:
+
+v1.01 - First Post-Final-Release Update! - Jan 7 2022
+- Added:     Support for the CMD HD! Also supports the real-time clock functions!
+- Added:     Support for the VICE FS Driver v2.0!
+- Added:     More support for the 1581. You can now move in and out of partitions like folders using the 'cd' command. To return to the root partition, use 'cd /' just like any other drive that supports folders. This should also let you enter nested sub-partitions. Also... the 1581... OMG shootme in the face...
+- Help:      Added a little section in the help for hardware support. Use 'help hardware' to bring it up.
+- Fixed:     Much rework done to the 'cd' and 'part' partition commands.
+- Fixed:     The delete command wasn't getting all the files on the first pass. Now it does. Needed to do some jumping around to restart the scan after every delete.
+- Fixed:     The Commodore 128 detection wasn't quite right for detecting DCR. These have the newer 9v SID, so this has been updated.
+- Optimized: Reworked many things to make more room for all the added hardware support.
+- Note:      The VICE FS Driver doesn't support copy, as noted in the VICE source code: VICE in file fsdevice-flush.c line 809 and 810:     } else if (*cmd == 'c' && arg != NULL) {        /* FIXME: not implemented */
+- Comments:  Swearing... so much swearing...
 
 v1.00 - Final Release - Jan 1 2022
 - Updated:   This is ready for a version 1.0 release!
@@ -336,3 +361,4 @@ Programming NES games in C by Shiru
 
 ---------------------------------------
 </pre>
+

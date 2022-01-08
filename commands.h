@@ -50,7 +50,7 @@
 	if (strlen(user_input_arg2_string)    > 0) { user_input_arg2_type    = 's'; };/*end if*/	\
 	if (strlen(user_input_arg3_string)    > 0) { user_input_arg3_type    = 's'; };/*end if*/	\
 																								\
-	if (is_string_only_numbers(user_input_command_string) == 1) { user_input_command_type = 'n'; user_input_command_number = atoi(user_input_command_string); };/*end if*/ \
+	/* if (is_string_only_numbers(user_input_command_string) == 1) { user_input_command_type = 'n'; user_input_command_number = atoi(user_input_command_string); }; // <-- MAJOR CHANGE - Seems like this variable is never used. */ \
 	if (is_string_only_numbers(user_input_arg1_string)    == 1) { user_input_arg1_type    = 'n'; user_input_arg1_number    = atoi(user_input_arg1_string   ); };/*end if*/ \
 	if (is_string_only_numbers(user_input_arg2_string)    == 1) { user_input_arg2_type    = 'n'; user_input_arg2_number    = atoi(user_input_arg2_string   ); };/*end if*/ \
 	if (is_string_only_numbers(user_input_arg3_string)    == 1) { user_input_arg3_type    = 'n'; user_input_arg3_number    = atoi(user_input_arg3_string   ); };/*end if*/ \
@@ -61,7 +61,7 @@
 // COMMANDS FUNCTIONS 
 // ********************************************************************************
 
-unsigned char dir_file_count() ;
+unsigned char dir_file_count(unsigned char * listing_string) ;
 void dir_goto_file_index(unsigned char file_index) ;
 void dcopy() ;
 void acopy() ;

@@ -7,9 +7,10 @@
 
 /* Compiling and deleting object files command, because who needs a make file!
 
-cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hotkeys.c hardware.c  commands.c -o chicli.prg && rm *.o && ls -l *.prg
+cl65 -g -Osr -t c64 --static-locals chicli.c string_processing.c alias.c hotkeys.c hardware.c commands.c -o chicli.prg && rm *.o && ls -l *.prg
 
 */
+
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
     // the Free Software Foundation, either version 3 of the License, or
@@ -30,7 +31,7 @@ cl65 -g -Osr -t c64 --static-locals  chicli.c  string_processing.c alias.c hotke
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.00"
+#define VERSION "v1.01"
 #define PROGRAM_NAME "chicli"
 
 
@@ -126,7 +127,7 @@ unsigned char hotkeys_list[MAX_HOTKEYS][MAX_HOTKEY_LENGTH];
 unsigned char entered_keystrokes[MAX_ENTERED_KEYSTROKES] ;
 unsigned char position_at_prompt_x = 0;
 unsigned char position_at_prompt_y = 0;	
-unsigned char extracted_program_name[MAX_LENGTH_COMMAND];
+unsigned char extracted_program_name[MAX_COMMODORE_DOS_FILENAME];
 unsigned char get_key = '\0';
 
 unsigned char keystroke;
@@ -164,7 +165,7 @@ unsigned char     user_input_arg1_string[MAX_LENGTH_ARGS]       = ""  ;
 unsigned char     user_input_arg2_string[MAX_LENGTH_ARGS]       = ""  ;
 unsigned char     user_input_arg3_string[MAX_LENGTH_ARGS]       = ""  ;
 
-unsigned long int user_input_command_number                     = 0   ;
+// unsigned long int user_input_command_number                     = 0   ; // <-- MAJOR CHANGE - Seems like this variable is never used.
 
 unsigned int      user_input_arg1_number                        = 0   ;
 unsigned int      user_input_arg2_number                        = 0   ;
@@ -195,7 +196,7 @@ struct        cbm_dirent dir_ent;
 unsigned int  number_of_files = 0;
 unsigned char displayed_count = 0;
 
-const char command_cdback[] = { ':', 0x5F, '\0' };
+const char command_cdback[] = { 0x5F, '\0' };
 
 unsigned char detected_filetype = 0;
 unsigned char detected_filetype_char[] = "  ";
@@ -251,9 +252,34 @@ unsigned int stopwatch_start_stamp;
 // FUNCTIONS
 // ********************************************************************************
 
+// SAVED 47 bytes!
+void wait_for_keypress() {
+	while(kbhit()) { /* flush buffer */
+		cgetc();
+	};/*end while*/
+
+	while(!kbhit()) {
+		/*do nothing*/
+	};/*end while*/
+};//end-func
+
 // ********************************************************************************
 // NEW DIRECT DISK ACCESS FUNCTIONS FOR THE 1541 DISK DRIVE
 // ********************************************************************************
+
+// BEFORE: -rw-rw-r-- 1 chiron chiron 48161 Jan  5 12:48 chicli.prg
+// AFTER:  -rw-rw-r-- 1 chiron chiron 48032 Jan  5 12:53 chicli.prg
+// SAVING: 129!!!
+void change_partition_command() {
+	// This is only supported by the SD2IEC and CMD HD.
+	part_command[0] = 'c';
+	part_command[1] = 'p';
+	part_command[2] = par+1;
+	part_command[3] = '\0';
+	cbm_open(1, dev, 15, part_command);
+	cbm_close(1);
+	printf("Partition %c set.\n", par+17);
+};//end-func
 
 // BEFORE: -rw-rw-r-- 1 chiron chiron 48044 Dec 25 16:39 chicli.prg
 // AFTER:  -rw-rw-r-- 1 chiron chiron 47368 Dec 25 16:52 chicli.prg
@@ -265,7 +291,7 @@ unsigned char convert_partition_for_drive() {
 	// dev = is the current device as a number
 	// par = is the current partition as a character
 
-	if ( get_drive_type(dev) == DRIVE_UIEC ) {
+	if ( get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD ) {
 		return( par+1 );
 	} else if (get_drive_type(dev) == DRIVE_1581 ) {
 		return(  '0'  );
@@ -327,7 +353,10 @@ void list_and_change_1581_par(unsigned char change_par) {
 unsigned char disk_label[16];
 unsigned char disk_id[2];
 
-void write_disk_label() {
+// BEFORE: 356 over
+// AFTER:   91 over
+// SAVED:  265 bytes!!!
+void write_disk_header(unsigned char write_label) {
 
 	// Instead of passing a var, we use a global var for this purpose,
 	// because it's faster in C programming esepcially on the 6502 processor.
@@ -356,70 +385,29 @@ void write_disk_label() {
 	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
 
-	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
+	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
 	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
 
 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
-	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-	strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
-	read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
+
+	if (write_label == TRUE) {
+		result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+		strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
+		read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
+
+ 	} else if (write_label == FALSE) {
+ 		result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+		strncpy(disk_sector_buffer,disk_id,2); // Create our new disk label string.
+		read_bytes = cbm_write(2, disk_id, 2); // Write our new disk label's 16 bytes to the commmand channel.
+	};//end-if
+
 	drive_command_string2[1] = '2';
 
 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-	result = cbm_open( 15, dev, 15, drive_command_string); // Open with the init command.
+	result = cbm_open( 15, dev, 15, drive_command_string); // Open ???
 
-	cbm_close(2); // Close the command channel.
-	cbm_close(15); // Close the other channel???
-
-	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
-	cbm_close(15); // Close the channel
-
-};//end-func
-
-
-void write_disk_id() {
-
-	// Instead of passing a var, we use a global var for this purpose,
-	// because it's faster in C programming esepcially on the 6502 processor.
-
-	result = get_drive_type(dev);
-
-	switch (result) {
-		case DRIVE_1541 :
-		case DRIVE_2031 :
-		case DRIVE_SD2  :
-		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
-			// These drives are supported! Keep executing.
-		break;
-
-		default :
-			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
-			return;
-		break;
-	};//end-switch
-
-	// This is the original initial command DOS string for drive 0.
-	strcpy(drive_command_string, "i0");
-	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
-	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
-	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
-	result = cbm_open( 2, dev, 2, "#"); // Open command channel.
-
-	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
- 	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-	strncpy(disk_sector_buffer,disk_id,2); // Create our new disk label string.
-
-	read_bytes = cbm_write(2, disk_id, 2); // Write our new disk label's 16 bytes to the commmand channel.
-	drive_command_string2[1] = '2';
-
-	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-
-	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
 	read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+
 	cbm_close(2); // Close the command channel.
 	cbm_close(15); // Close the other channel???
 
@@ -427,6 +415,111 @@ void write_disk_id() {
 	cbm_close(15); // Close the channel
 
 };//end-func
+
+
+
+// void write_disk_label() {
+
+// 	// Instead of passing a var, we use a global var for this purpose,
+// 	// because it's faster in C programming esepcially on the 6502 processor.
+
+// 	result = get_drive_type(dev);
+
+// 	switch (result) {
+// 		case DRIVE_1541 :
+// 		case DRIVE_2031 :
+// 		case DRIVE_SD2  :
+// 		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
+// 			// These drives are supported! Keep executing.
+// 		break;
+
+// 		default :
+// 			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
+// 			return;
+// 		break;
+// 	};//end-switch
+
+// 	// This is the original initial command DOS string for drive 0.
+// 	strcpy(drive_command_string, "i0");
+// 	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+// 	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
+// 	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
+// 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+// 	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
+// 	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
+
+// 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
+// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
+
+// 	read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
+// 	drive_command_string2[1] = '2';
+
+// 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	result = cbm_open( 15, dev, 15, drive_command_string); // Open with the init command.
+
+// 	cbm_close(2); // Close the command channel.
+// 	cbm_close(15); // Close the other channel???
+
+// 	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
+// 	cbm_close(15); // Close the channel
+
+// };//end-func
+
+
+// void write_disk_id() {
+
+// 	// Instead of passing a var, we use a global var for this purpose,
+// 	// because it's faster in C programming esepcially on the 6502 processor.
+
+// 	result = get_drive_type(dev);
+
+// 	switch (result) {
+// 		case DRIVE_1541 :
+// 		case DRIVE_2031 :
+// 		case DRIVE_SD2  :
+// 		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
+// 			// These drives are supported! Keep executing.
+// 		break;
+
+// 		default :
+// 			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
+// 			return;
+// 		break;
+// 	};//end-switch
+
+// 	// This is the original initial command DOS string for drive 0.
+// 	strcpy(drive_command_string, "i0");
+// 	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+// 	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
+// 	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
+// 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
+
+// 	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
+// 	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
+
+// 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
+//  	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	strncpy(disk_sector_buffer,disk_id,2); // Create our new disk label string.
+
+// 	read_bytes = cbm_write(2, disk_id, 2); // Write our new disk label's 16 bytes to the commmand channel.
+// 	drive_command_string2[1] = '2';
+
+// 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
+// 	result = cbm_open( 15, dev, 15, drive_command_string); // Open ???
+
+// 	read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
+
+// 	cbm_close(2); // Close the command channel.
+// 	cbm_close(15); // Close the other channel???
+
+// 	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
+// 	cbm_close(15); // Close the channel
+
+// };//end-func
 
 
 void BYTE_TO_BINARY(byte) {
@@ -502,12 +595,12 @@ unsigned char convert_char(unsigned char char_to_convert) {
 	     		char_to_convert <= 0x7f)   ||   // if it *IS* a good displaying character
 	     		char_to_convert >= 0xA0    ){
 
-		// So basically do nothing???
-		if (char_to_convert >= 65 && char_to_convert <= 90){   // if lower alphabet
+		// So basically do nothing??? Why did I comment out the code but left in the if statements in??????????
+		// if (char_to_convert >= 65 && char_to_convert <= 90){   // if lower alphabet
 			//char_to_convert = char_to_convert + 32 ;                    // then shift up 
-		} else if (char_to_convert >= 97 && char_to_convert <= 122) { // else if upper alphabet
+		// } else if (char_to_convert >= 97 && char_to_convert <= 122) { // else if upper alphabet
 			//char_to_convert = char_to_convert - 32 ;                    // then shift down 
-		};//end-if
+		// };//end-if
 
 	} else {
 
@@ -519,16 +612,15 @@ unsigned char convert_char(unsigned char char_to_convert) {
 
 };//end func
 
-
-// TODO: 1.R7b: This should be in string_processing.c
-char* replace_char(char* str, char find, char replace){
-    char *current_pos = strchr(str,find);
-    while (current_pos){
-        *current_pos = replace;
-        current_pos = strchr(current_pos,find);
-    };//end-while
-    return str;
-};//end-func
+// This unused function saved 67 bytes!!!
+// char* replace_char(char* str, char find, char replace){
+//     char *current_pos = strchr(str,find);
+//     while (current_pos){
+//         *current_pos = replace;
+//         current_pos = strchr(current_pos,find);
+//     };//end-while
+//     return str;
+// };//end-func
 
 void display_logo(unsigned char x, unsigned char y) {
 
@@ -669,7 +761,7 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 
 	switch(model_detected) {
 		case 0 : cputs("128D");       break;
-		case 1 : cputs("128");        break;	
+		case 1 : cputs("128");        break;
 		case 2 : cputs("128DCR");     break;
 		case 3 : cputs("64 (Early)"); break; // TEXT TOO LONG! "64 (Early)" Fall through to next
 		case 4 : cputs("64");         break;
@@ -788,14 +880,15 @@ void find_rtc_device(void) {
 	rtc_device = 0;
 
 	for (i = 8 ; i <= 15 ; i++) {
-		if ( get_drive_type(i) == DRIVE_UIEC ) {
+		if ( get_drive_type(i)==DRIVE_UIEC || get_drive_type(i)==DRIVE_CMDHD) {
 			rtc_device = i;
 		};//end-if
 	};//end-for
 
 };//end-func
 
-void display_date_nice() {
+// This saved: 72 bytes!!!!
+void datetime_helper() {
 
 	find_rtc_device();
 	if ( rtc_device == 0 ) {
@@ -808,6 +901,25 @@ void display_date_nice() {
 		read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer));
 	} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
 	cbm_close (15);
+
+};//end-func
+
+
+void display_date_nice() {
+
+	// find_rtc_device();
+	// if ( rtc_device == 0 ) {
+	// 	// printf("Error, no RTC found!\n");
+	// 	return;
+	// };//end-if
+
+	// result = cbm_open(15, rtc_device, 15, "t-ra");
+	// do {
+	// 	read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer));
+	// } while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+	// cbm_close (15);
+
+	datetime_helper();
 
 	// Convert the day-of-the-week to upper case.
 	disk_sector_buffer[0] = toupper(disk_sector_buffer[0]);
@@ -819,17 +931,19 @@ void display_date_nice() {
 
 void display_time_nice() {
 
-	find_rtc_device();
-	if ( rtc_device == 0 ) {
-		// printf("Error, no RTC found!\n");
-		return;
-	};//end-if
+	// find_rtc_device();
+	// if ( rtc_device == 0 ) {
+	// 	// printf("Error, no RTC found!\n");
+	// 	return;
+	// };//end-if
 
-	result = cbm_open(15, rtc_device, 15, "t-ra");
-	do {
-		read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer));
-	} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
-	cbm_close (15);
+	// result = cbm_open(15, rtc_device, 15, "t-ra");
+	// do {
+	// 	read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer));
+	// } while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+	// cbm_close (15);
+
+	datetime_helper();
 
 	// Convert the time am or pm to upper case.
 	disk_sector_buffer[23] = toupper(disk_sector_buffer[23]);
@@ -839,6 +953,7 @@ void display_time_nice() {
 	printf("%.11s", disk_sector_buffer+14);
 
 };//end func 
+
 
 // Variable to get input.
 unsigned char user_weekday_input[3];
@@ -850,59 +965,61 @@ void date_helper() {
 	strcat(disk_sector_buffer,user_date_input);
 };//end-func
 
-void set_date() {
+// void set_date() {
 
-	find_rtc_device();
-	if ( rtc_device == 0 ) {
-		printf("Error, no RTC found!\n");
-		return;
-	};//end-if
+// 	// This function takes up 451 bytes!!!
 
-	// Varible reused to build string for setting the date.
-	strcpy(disk_sector_buffer,"t-wa");
+// 	find_rtc_device();
+// 	if ( rtc_device == 0 ) {
+// 		printf("Er: No RTC.\n");
+// 		return;
+// 	};//end-if
 
-	printf("Day XXXX:");
-	scanf("%s", &user_weekday_input);
-	user_weekday_input[0] = tolower(user_weekday_input[0]);
-	user_weekday_input[1] = tolower(user_weekday_input[1]);
-	user_weekday_input[2] = tolower(user_weekday_input[2]);
-	strcat(disk_sector_buffer,user_weekday_input);
-	strcat(disk_sector_buffer,". ");
+// 	// Varible reused to build string for setting the date.
+// 	strcpy(disk_sector_buffer,"t-wa");
 
-	printf("M ##:");
-	date_helper();
-	strcat(disk_sector_buffer,"/");
+// 	printf("Day XXXX:");
+// 	scanf("%s", &user_weekday_input);
+// 	user_weekday_input[0] = tolower(user_weekday_input[0]);
+// 	user_weekday_input[1] = tolower(user_weekday_input[1]);
+// 	user_weekday_input[2] = tolower(user_weekday_input[2]);
+// 	strcat(disk_sector_buffer,user_weekday_input);
+// 	strcat(disk_sector_buffer,". ");
 
-	printf("D:");
-	date_helper();
-	strcat(disk_sector_buffer,"/");
+// 	printf("M ##:");
+// 	date_helper();
+// 	strcat(disk_sector_buffer,"/");
 
-	printf("Y ##:");
-	date_helper();
-	strcat(disk_sector_buffer," ");
+// 	printf("D:");
+// 	date_helper();
+// 	strcat(disk_sector_buffer,"/");
 
-	printf("12H:");
-	date_helper();
-	strcat(disk_sector_buffer,":");
+// 	printf("Y ##:");
+// 	date_helper();
+// 	strcat(disk_sector_buffer," ");
 
-	printf("Min:");
-	date_helper();
-	strcat(disk_sector_buffer,":");
+// 	printf("12H:");
+// 	date_helper();
+// 	strcat(disk_sector_buffer,":");
 
-	printf("Sec:");
-	date_helper();
-	strcat(disk_sector_buffer," ");
+// 	printf("Min:");
+// 	date_helper();
+// 	strcat(disk_sector_buffer,":");
 
-	printf("AM/PM:");
-	scanf("%s", &user_ampm_input);
-	user_ampm_input[0] = tolower(user_ampm_input[0]);
-	user_ampm_input[1] = tolower(user_ampm_input[1]);
-	strcat(disk_sector_buffer,user_ampm_input);
+// 	printf("Sec:");
+// 	date_helper();
+// 	strcat(disk_sector_buffer," ");
 
-	result = cbm_open(15, rtc_device, 15, disk_sector_buffer); // Example date and time string: "t-wasat. 11/13/21 10:57:00 pm"
-	cbm_close (15);
+// 	printf("AM/PM:");
+// 	scanf("%s", &user_ampm_input);
+// 	user_ampm_input[0] = tolower(user_ampm_input[0]);
+// 	user_ampm_input[1] = tolower(user_ampm_input[1]);
+// 	strcat(disk_sector_buffer,user_ampm_input);
 
-};//end func 
+// 	result = cbm_open(15, rtc_device, 15, disk_sector_buffer); // Example date and time string: "t-wasat. 11/13/21 10:57:00 pm"
+// 	cbm_close (15);
+
+// };//end func 
 
 
 // ********************************************************************************
@@ -1016,7 +1133,9 @@ int main( int argc, char* argv[] ) {
 	// ********************************************************************************
 	// SET DEFAULT ALIASES
 	// ********************************************************************************
-	// set_alias( "readme" , "type chicli-userguide" ); // Adds around 25 bytes per call
+	set_alias( "cd.." , "cd .." ); // Adds around 25 bytes per call
+	set_alias( "cd/"  , "cd /"  ); // Adds around 25 bytes per call
+
 
 	// ********************************************************************************
 	// SET DEFAULT HOTKEYS
@@ -1088,13 +1207,13 @@ int main( int argc, char* argv[] ) {
 		// ERASE EVERYTHING!
 		memset( entered_keystrokes,        0, sizeof(entered_keystrokes)    );
 
-		memset( user_input_processed,      0, sizeof(user_input_processed)      );	
+		memset( user_input_processed,      0, sizeof(user_input_processed)      );
 		memset( user_input_command_string, 0, sizeof(user_input_command_string) );
 		memset( user_input_arg1_string,    0, sizeof(user_input_arg1_string)    );
 		memset( user_input_arg2_string,    0, sizeof(user_input_arg2_string)    );
 		memset( user_input_arg3_string,    0, sizeof(user_input_arg3_string)    );
 
-		user_input_command_number = 0 ;
+		// user_input_command_number = 0 ; // <-- MAJOR CHANGE - Seems like this variable is never used.
 		user_input_arg1_number    = 0 ;
 		user_input_arg2_number    = 0 ;
 		user_input_arg3_number    = 0 ;
@@ -1287,14 +1406,6 @@ int main( int argc, char* argv[] ) {
 				// TODO: Add partition variable par to this!
 				strcpy(listing_string,"$"); /* The default is $ to load the current directory.*/ 
 
-				// if (get_drive_type(dev) == DRIVE_UIEC) {
-				// 	string_add_character(listing_string,par+1); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-				// } else if (get_drive_type(dev) == DRIVE_1581) {
-				// 	string_add_character(listing_string,'0');
-				// } else {
-				// 	string_add_character(listing_string,par); /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-				// };/*end for*/
-
 				// Example: device_command[1] = convert_partition_for_drive();
 				string_add_character(listing_string,convert_partition_for_drive());
 
@@ -1436,7 +1547,7 @@ int main( int argc, char* argv[] ) {
 			 	case 2 :
 	 	 			printf("%s\n",user_input_arg1_string);
 			    break;
-			};//end switch	
+			};//end switch
 
 
 		// ********************************************************************************
@@ -1569,11 +1680,13 @@ int main( int argc, char* argv[] ) {
 		    cputs("load\"");// print load"0:---name_of_program---",9
 
 			// Place the partition number in the run command on the screen.
-			if (get_drive_type(dev) == DRIVE_UIEC) {
-			   cputc(par+1);
-			} else {
-				cputc(par);
-			};//end-if
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+			//    cputc(par+1);
+			// } else {
+			// 	cputc(par);
+			// };//end-if
+			cputc(convert_partition_for_drive());
+
 			drive_command_string[2] = '\0';
 		    cputc(':');
 		    cputs(user_input_arg1_string);
@@ -1698,7 +1811,7 @@ int main( int argc, char* argv[] ) {
 
 			if (they_are_sure() == TRUE) {
 				result = cbm_open(1, dev, 15, user_input_arg1_string);
-				printf( "cbm_open: %i \n", result );
+				// printf( "cbm_open: %i \n", result ); // This saved 36 bytes!
 				cbm_close(1);
 			};//end if
 
@@ -1797,11 +1910,14 @@ int main( int argc, char* argv[] ) {
 				printf("Initializing... ");
 
 		    drive_command_string[0] = 'i';
-			if (get_drive_type(dev) == DRIVE_UIEC) {
-			    drive_command_string[1] = par+1;
-			} else {
-				drive_command_string[1] = par;
-			};//end-if
+
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+			//     drive_command_string[1] = par+1;
+			// } else {
+			// 	drive_command_string[1] = par;
+			// };//end-if
+			drive_command_string[1] = convert_partition_for_drive();
+
 			drive_command_string[2] = '\0';
 
 				result = cbm_open(1, dev, 15, drive_command_string);
@@ -1824,11 +1940,14 @@ int main( int argc, char* argv[] ) {
 				result = get_status(dev, TRUE);
 
 				drive_command_string[0] = 'v';
-				if (get_drive_type(dev) == DRIVE_UIEC) {
-				    drive_command_string[1] = par+1;
-				} else {
-					drive_command_string[1] = par;
-				};//end-if
+
+				// if (get_drive_type(dev) == DRIVE_UIEC) {
+				//     drive_command_string[1] = par+1;
+				// } else {
+				// 	drive_command_string[1] = par;
+				// };//end-if
+				drive_command_string[1] = convert_partition_for_drive();
+
 				drive_command_string[2] = '\0';
 
 				if (result != 255) {
@@ -1923,92 +2042,170 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// CD COMMAND
 		// ********************************************************************************
-		} else if (user_input_command_string[0]=='c' && user_input_command_string[1]=='d') {
+		} else if ( matching("c",user_input_command_string) ||
+					matching("cd",user_input_command_string) ){
 
 			strcpy (drive_command_string,"cd");
 
 			switch (number_of_user_inputs) {
 
-				case 1 :
-					if ( user_input_command_string[2] == '.' && user_input_command_string[3] == '.' ) { 
-						strcat (drive_command_string,command_cdback);
-					} else if ( user_input_command_string[2] == '/' ) {
-						strcat (drive_command_string,"//");
-					};//end_if
-				break;//end-case
+				// This section costs 143
+				// Adding the aliases instead cost only 43
+				// case 1 :
+				// 	// cd..
+				// 	if ( user_input_command_string[2] == '.' && user_input_command_string[3] == '.' ) {
+				// 		strcat (drive_command_string,command_cdback);
+
+				// 	// cd/ for 1581
+				// 	} else if ( user_input_command_string[2] == '/' && get_drive_type(dev) == DRIVE_1581) {
+				// 		change_1581_root_par();
+				// 		goto END_CD;
+
+				// 	// cd/
+				// 	} else if ( user_input_command_string[2] == '/' ) {
+				// 		strcat (drive_command_string,"//");
+
+				// 	// cd/ for 1581
+				// 	} else if ( user_input_command_string[2] == '.' && get_drive_type(dev) == DRIVE_1581) {
+				// 		goto END_1581_UNSUPPORTED;
+
+				// 	};//end_if
+				// break;//end-case
 
 				case 2 :
-					if ( matching("..",user_input_arg1_string) ) {
+					// cd ..
+					if ( user_input_arg1_string[0]=='.' &&  get_drive_type(dev) == DRIVE_1581) {
+						goto END_1581_UNSUPPORTED;
+
+					} else if ( matching("..",user_input_arg1_string) ) {
 						strcat (drive_command_string,command_cdback);
 
+					// cd / for 1581
+					} else if ( matching("/",user_input_arg1_string) && get_drive_type(dev) == DRIVE_1581) {
+						change_1581_root_par();
+						goto END_CD;
+
+					// cd /
 					} else 	if ( matching("/",user_input_arg1_string) ) {
 						strcat (drive_command_string,"//");
 
-					} else if ( user_input_arg1_string[0]=='d' && user_input_arg1_string[3]==':' ) {
-
+					// cd d##:
+					} else if ( user_input_arg1_string[0]=='d' && (user_input_arg1_string[3]==':'||user_input_arg1_string[3]=='['||user_input_arg1_string[3]==';') ) {
 						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);
 						if (user_input_arg1_number == 255) { // The above macro "function" updates user_input_arg1_number with 255 if user_input_arg1_string[2] is fucked.
-							printf("Error: Invalid device.\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-							goto END_CD;
+							printf("Device"); // printf("Er arg:%i\n", number_of_user_inputs);
+							goto END_INVALID_ERROR;
 						};//end-if
 						change_drive(user_input_arg1_number);
-
 						goto END_CD;
 
-					} else if (user_input_arg1_string[0] == 'd' && user_input_arg1_string[4] == ':') { // copy * d08b:
+					// cd d##?:
+					} else if (user_input_arg1_string[0] == 'd' && (user_input_arg1_string[4]==':'||user_input_arg1_string[4]=='['||user_input_arg1_string[4]==';')) {
 
-						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);
-						if (user_input_arg1_number == 255) { // The above macro "function" updates user_input_arg1_number with 255 if user_input_arg1_string[2] is fucked.
-							printf("Error: Invalid device.\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-							goto END_CD;
-						};//end-if
-						change_drive(user_input_arg1_number);
+						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);	// Convert number to valid device character
 
-						convert_partition_string(user_input_arg1_string[3], par);
-						if (par == 255) { // The above macro "function" updates par with 255 if user_input_arg1_string[3] is fucked.
-							printf("Error: Invalid partition.\n"); // printf("Er arg:%i\n", number_of_user_inputs);
-							goto END_CD;
+						if (user_input_arg1_number == 255) { 										// If it's wrong, do this. Also ??? --> The above macro "function" updates user_input_arg1_number with 255 if user_input_arg1_string[2] is fucked.
+							printf("Device"); // printf("Er arg:%i\n", number_of_user_inputs);
+							goto END_INVALID_ERROR;															// Jump directly out of here to the end because we are done.
 						};//end-if
 
-						if (get_drive_type(dev) == DRIVE_UIEC) {
+						change_drive(user_input_arg1_number); 										// Here we are changing the drive or partition, using the nubmer we converted above.
+
+						// convert_partition_string(user_input_arg1_string[3], par); 				// Pull the drive or partition letter out of the user input and convert it to a valid character to use in changin the partition.
+						par = convert_partition_string(user_input_arg1_string[3]);					// Pull the drive or partition letter out of the user input and convert it to a valid character to use in changin the partition.
+						if (par == 255) { 															// If it's wrong, do this. Also ??? --> The above macro "function" updates par with 255 if user_input_arg1_string[3] is fucked.
+							printf("Partition"); // printf("Er arg:%i\n", number_of_user_inputs);
+							goto END_INVALID_ERROR;															// Jump directly out of here to the end because we are done.
+						};//end-if																	// All that's left to do is to change the partition or drive.
+
+						if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {	// If it's an SD2IEC or a CMD HD
+							change_partition_command();												// Change the partition using the custom function.
 							// Add the current partition, or drive, for MSD SD-2 and 4040 support.
-							part_command[0] = 'c';
-							part_command[1] = 'p';
-							part_command[2] = par+1;
-							part_command[3] = '\0';
+							// part_command[0] = 'c';
+							// part_command[1] = 'p';
+							// part_command[2] = par+1;
+							// part_command[3] = '\0';
+							// cbm_open(1, dev, 15, part_command);
+							// cbm_close(1);
+							// printf("Partition %c set.\n", par+17);
 
-							cbm_open(1, dev, 15, part_command);
-							cbm_close(1);
+						} else if (get_drive_type(dev) == DRIVE_1581) {								// If it's an 1581... with it's fucking rediculus partitions functionality...
+							change_1581_root_par(); 												// We are doing this first, because the request is to change directly to the device's first, second, third, etc... partition.
+							list_and_change_1581_par(TRUE);											// Change the partition using the custom function.
 
-							printf("Partition %c set.\n", par+17);
-
-						} else if (get_drive_type(dev) == DRIVE_1581) {
-							change_1581_root_par(); // We are doing this first, because the request is to change directly to the device's first, second, third, etc... partition.
-							list_and_change_1581_par(TRUE);
-
-						} else {
-							printf("Drive %c set.\n", par+17);
+						} else {																	// For everything else, which is single or dual drives
+							printf("Drive %c set.\n", par+17);										// We jsut remember what the currently sert partition is, so it gets passed to whatever dos commands need it set.
 
 						};//end-if
 
 						goto END_CD;
 
-					} else {
-						strcat (drive_command_string,"/");
+					// cd [PARTITION] 1581
+					} else if (get_drive_type(dev) == DRIVE_1581) {
+						strcpy (drive_command_string,"/0:");
 						strcat (drive_command_string,user_input_arg1_string);
-						strcat (drive_command_string,"/");
+
+					// cd [DIRECTORY] SD2IEC
+					} else if (get_drive_type(dev)==DRIVE_UIEC) {
+						strcpy (drive_command_string,"cd0:");
+						drive_command_string[2] = convert_partition_for_drive();
+						strcat(drive_command_string,user_input_arg1_string);
+
+					// cd [DIRECTORY] CMD HD
+					} else if (get_drive_type(dev)==DRIVE_CMDHD) {
+					// If we are on a CMD HD device, and trying to "cd" into a
+					// non-directory or non-1581-partition ( 1=="CBM" 2=="DIR" )
+					// then it'll let us do that, and then get screwed up.
+					// So we need to prevent that. The SD2IEC handles this
+					// gracefully, however, we shouldn't try it anyway.
+					// i = detect_filetype(user_input_arg1_string,FALSE);
+					//	if (i==1 || i==2){
+						if (detect_filetype(user_input_arg1_string,FALSE)==2) {
+							strcpy (drive_command_string,"cd0:");
+							drive_command_string[2] = convert_partition_for_drive();
+							strcat(drive_command_string,user_input_arg1_string);
+						} else {
+							goto END_ERROR;
+						};//end-if
+
+					// cd [DIRECTORY] VICE FS DRIVER
+					} else if (get_drive_type(dev)==DRIVE_VICEFS) {
+					// The VICE FS driver *DOES NOT* support drive names, even 0!!!
+					// This cost me an extra 31 bytes! Every God damn thing all the God damn time...
+						strcpy(drive_command_string,"cd:");
+						strcat(drive_command_string,user_input_arg1_string);
+
+					// cd [WHATEVER] on drives that don't support directories
+					} else {
+						goto END_ERROR;
 
 					};//end-if
+
 			    break;//end-case
 
 			    default :
-			    	printf("Er arg\n");
+						goto END_ERROR;
 			    break;//end-default
 
 			};//end switch	
 
-			result = cbm_open(1, dev, 15, drive_command_string);
+			// printf("dcs:%s\n",drive_command_string);
+			result = cbm_open(1, dev, 15, drive_command_string); 
 			cbm_close(1);
+			goto END_CD;
+
+			// Doing all this saved about 50 bytes!
+			END_ERROR : ;
+			printf("Er.\n");
+			goto END_CD;
+
+			END_1581_UNSUPPORTED : ;
+			printf("1541 can't do this.\n");
+			goto END_CD;
+
+			END_INVALID_ERROR : ;
+			printf(" invalid error.\n");
+			goto END_CD;
 
             END_CD : ; // This skips the above closing of the command channel, for cases where it isn't needed.
 
@@ -2018,6 +2215,10 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("mount",user_input_command_string) ) {
 
+			// If we are on a CMD HD device, and trying to "mount" anything,
+			// that's not supported. So prevent that from happeneing.
+			if (get_drive_type(dev)==DRIVE_CMDHD) goto END_MOUNT;
+
 			switch (number_of_user_inputs) {
 				case 2 :
 					strcpy (drive_command_string,"cd:"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
@@ -2025,12 +2226,13 @@ int main( int argc, char* argv[] ) {
 					strcat (drive_command_string,"");
 					result = cbm_open(1, dev, 15, drive_command_string);
 					cbm_close(1);
-			    break;	
+			    break;
 
-			    default : 
-			    	printf("Er arg\n");
-			    //end default
-			};//end switch
+			    default :
+			    	END_MOUNT :
+			    	printf("Er!\n");
+			    break;
+			};//end-switch
 
 
 		// ********************************************************************************
@@ -2059,13 +2261,11 @@ int main( int argc, char* argv[] ) {
 		} else if ( (user_input_command_string[0]=='l' && user_input_command_string[1]=='d') || \
 					(user_input_command_string[0]=='l' && user_input_command_string[1]=='p') ){
 
-			// unsigned char read_drive_number;
-			// unsigned int  read_bytes_free;
-			// unsigned char first_partition = 0;
-			// unsigned char last_partition;
-			// unsigned char sd2iec_offset = 0;
+			first_partition = 0;
+			last_partition  = 0;
+			sd2iec_offset   = 0;
 
-			if (get_drive_type(dev) == DRIVE_UIEC) {
+			if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
 
 				memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
 				result = cbm_open(8, dev, CBM_READ, "$=p");
@@ -2073,8 +2273,22 @@ int main( int argc, char* argv[] ) {
 				cbm_close (8);
 
 				first_partition = 1;
-				last_partition  = disk_sector_buffer[4];
+				last_partition  = 0;
+				// last_partition  = disk_sector_buffer[4];
 				sd2iec_offset = 1;
+
+				for (i = 0; i <= read_bytes ; i++) {
+					if (disk_sector_buffer[i] == 0x22) { // Let's count the quote characters.
+						last_partition++;
+					};//end-if
+				};//end-for
+
+				last_partition = (last_partition / 2) - 2; // There's only 2 quote per entry, so divide by 2, and then we subtract 1 because we don't want the first entry because it's the header.
+				// printf("last_partition:%u\n",last_partition);
+
+				// Doesn't work!
+				// strcpy(listing_string,"$=P"); // The default is $ to load the current directory.
+				// last_partition = dir_file_count(listing_string);
 
 			} else if (get_drive_type(dev) == DRIVE_SD2 || get_drive_type(dev) == DRIVE_4040) {
 				last_partition = 1;
@@ -2086,31 +2300,12 @@ int main( int argc, char* argv[] ) {
 			detect_drive(dev, TRUE); // TODO: Maybe move? This is WHY the 1581 resets to the root partition.
 
 			if (get_drive_type(dev) == DRIVE_1581) {
-				// void list_and_change_1581_par(unsigned char change_par) {
+
 				list_and_change_1581_par(FALSE);
 
+			} else if (get_drive_type(dev) == DRIVE_VICEFS) {
 
-
-				// memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
-		  //   	result = cbm_opendir(1, dev, "$"); // need to deal with errors here
-				// read_drive_number = 0; // use this to count partitions
-
-		  //   	for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
-
-				// 	result = cbm_readdir(1, &dir_ent);
-
-				// 	if (result == 2) {
-				// 		break;
-				// 	};//end-if
-
-				// 	if (dir_ent.type == 1){ // dir_ent.name dir_ent.type dir_ent.size
-				// 		read_drive_number++;
-				// 		printf(" %c:%16.16s Size:%u BL\n", read_drive_number+48+16, dir_ent.name, dir_ent.size);
-				// 	};//end-if
-
-				// };//end-for
-
-				// cbm_closedir(1);
+				// Do nothing.
 
 			} else {
 
@@ -2136,76 +2331,64 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// CHANGE PARTITION COMMAND
+		// PART COMMAND
 		// ********************************************************************************
 		} else if ( /* matching("partition",user_input_command_string) || */ \
 					matching("part",user_input_command_string)      || \
 					matching("prt",user_input_command_string)       || \
 					matching("drive",user_input_command_string)     ){
 
-			convert_partition_string(user_input_arg1_string[0], par);
+			if ( matching("root",user_input_arg1_string) ) {
+				strcpy(user_input_arg1_string,"/");
+			};//end-if
 
-			if (get_drive_type(dev) == DRIVE_UIEC) {
-				part_command[0] = 'c';
-		        part_command[1] = 'p';
-		        part_command[2] = par+1;
-		        part_command[3] = '\0';
+			par = convert_partition_string(user_input_arg1_string[0]); // convert_partition_string(user_input_arg1_string[0], par);
 
-		        cbm_open(1, dev, 15, part_command);
-				cbm_close(1);
+			// ROOT
+			if (par == '/') {
+				if ( get_drive_type(dev)==DRIVE_1581 ) {
+					par = 0;
+					change_1581_root_par();
+				} else {
+					// Do the cd root thing for everything else.
+					strcpy (drive_command_string,"cd//");
+					result = cbm_open(1, dev, 15, drive_command_string); 
+					cbm_close(1);
+				};//end-if
 
-				printf("Partition %c set.\n", par+17);
+			} else if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
+				change_partition_command();
 
-			} else if (get_drive_type(dev) == DRIVE_1581 && matching("root",user_input_arg1_string)) {
-				par = 0;
+			} else if (get_drive_type(dev)==DRIVE_1581) {
 				change_1581_root_par();
-
-			} else if (get_drive_type(dev) == DRIVE_1581) {
 				list_and_change_1581_par(TRUE);
-
-				// memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
-		  //   	result = cbm_opendir(1, dev, "$"); // need to deal with errors here
-				// i = 0; // use this to count partitions
-
-		  //   	for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
-
-				// 	result = cbm_readdir(1, &dir_ent);
-
-				// 	if (result == 2) {
-				// 		break;
-				// 	};//end-if
-
-				// 	if (dir_ent.type == 1){ // dir_ent.name dir_ent.type dir_ent.size
-				// 		i++;
-				// 		// printf("i:%u,p:%u\n",i,par);
-				// 		// printf("?%u>%c|%u:%16.16s Size:%u BL\n", par, i+48+16, i+48+16, dir_ent.name, dir_ent.size);
-				// 		if (i+47 == par) {
-				// 			printf(" %c:%16.16s Size:%u BL\n", i+48+16, dir_ent.name, dir_ent.size);
-				// 			// printf("?%c:%16.16s Size:%u BL\n", i+48+16, dir_ent.name, dir_ent.size);
-				// 			// printf("dir_ent.name: '%s'\n",dir_ent.name);
-				// 			strcpy(drive_command_string, "/0:");
-				// 			strcat(drive_command_string, dir_ent.name);
-				// 			// printf("dir_ent.name: '%s'\n",dir_ent.name);
-				// 			// printf("drive_command_string: '%s'\n",drive_command_string);
-				// 			cbm_open(15, dev, 15, drive_command_string);
-				// 			cbm_close(15);
-				// 			printf("Partition %c set.\n", par+17);
-				// 			// Partition areas which meet the qualifications of being a subdirectory can then be selected by the following command.
-				// 			// PRINT#file#,"/0:partition name"
-				// 			cbm_closedir(1);
-				// 			break;
-				// 		};//end-if
-				// 	};//end-if
-
-				// };//end-for
-
-				// //printf("Partition not found!\n");
-				// cbm_closedir(1); // This should only execute if we never find a partition at all.
 
 			} else {
 				printf("Drive %c set.\n", par+17);
 
 			};//end-if
+
+
+			// OLD
+			// } else if ( get_drive_type(dev)==DRIVE_1581 && matching("root",user_input_arg1_string) ) {
+			// 	par = 0;
+			// 	change_1581_root_par();
+			//
+			// } else if (matching("root",user_input_arg1_string)) {
+			// 	printf("Er.\n");
+			//
+			// VS 
+			//
+			// NEW
+			// if ( matching("root",user_input_arg1_string) ) {
+			// 	if ( get_drive_type(dev)==DRIVE_1581 ) {
+			// 		par = 0;
+			// 		change_1581_root_par();
+			// 	} else {
+			// 		printf("Er.\n");
+			// 	};//end-if
+			//
+			// Saves: 22 bytes
 
 
 		// ********************************************************************************
@@ -2214,7 +2397,7 @@ int main( int argc, char* argv[] ) {
 		} else if (user_input_command_string[0]=='p' && user_input_command_string[1]=='w' && user_input_command_string[2] == 'd') { // --> THIS SAVES 8 BYTES!!! --> } else if ( matching("cd",user_input_command_string) ) { 
 
 			printf("Device:%i ", dev);
-			if (get_drive_type(dev) == DRIVE_UIEC) {
+			if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
 				printf("Partition:%c\n", par+17);
 			} else {
 				printf("Drive:%c\n", par+17);
@@ -2238,16 +2421,18 @@ int main( int argc, char* argv[] ) {
 			convert_device_string(user_input_command_string[2], user_input_arg1_number);
 			change_drive(user_input_arg1_number);
 
-			convert_partition_string(user_input_command_string[3], par);
+			// convert_partition_string(user_input_command_string[3], par);
+			par = convert_partition_string(user_input_command_string[3]);
 
-			if (get_drive_type(dev) == DRIVE_UIEC) {
-				part_command[0] = 'c';
-		        part_command[1] = 'p';
-		        part_command[2] = par+1;
-		        part_command[3] = '\0';
-		        cbm_open(1, dev, 15, part_command);
-				cbm_close(1);
-				printf("Partition %c set.\n", par+17);
+			if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
+				// part_command[0] = 'c';
+		  //       part_command[1] = 'p';
+		  //       part_command[2] = par+1;
+		  //       part_command[3] = '\0';
+		  //       cbm_open(1, dev, 15, part_command);
+				// cbm_close(1);
+				// printf("Partition %c set.\n", par+17);
+				change_partition_command();
 
 			} else if (get_drive_type(dev) == DRIVE_1581) {
 				change_1581_root_par(); // We are doing this first, because the request is to change directly to the device's first, second, third, etc... partition.
@@ -2313,39 +2498,46 @@ int main( int argc, char* argv[] ) {
 				case 2 : 	
 					if ( matching("*",user_input_arg1_string) ) { 			// copy * d08:     
 
-						dir_file_total = dir_file_count(); // get the total number of files to copy and store in dir_file_total 
-						printf("Files to del: %i\n", dir_file_total);
+						strcpy(listing_string,"$"); // The default is $ to load the current directory.
+						string_add_character(listing_string,convert_partition_for_drive());
+						dir_file_total = dir_file_count(listing_string); // get the total number of files to copy and store in dir_file_total 
+						printf("Files to delete: %i\n", dir_file_total);
 
 						if (they_are_sure() == TRUE) {
+
+							fresh_start : ; // This is a jump point. We have to start, and re-start anew, every time. Basically, when we delete a file, the list of files changes, and as such, we need to start all over again looking for the first valid candidate to delete.
+											// This kind of programming may offend some but I don't care! Yeah, I broke out of a for loop just to run it all over again, and I don't even care! Fucks given == NULL.
+
+							strcpy(listing_string,"$"); // The default is $ to load the current directory.
+							string_add_character(listing_string,convert_partition_for_drive());
+							dir_file_total = dir_file_count(listing_string); // get the total number of files to copy and store in dir_file_total 
 
 							for (loop_k = 0; loop_k <= dir_file_total ; loop_k++) {
 
 								if (loop_k == 0) { //first entry is the disk anme 
 									//do nothing
-								} else { 
+
+								} else {
 									dir_goto_file_index(loop_k);
 									detected_filetype = dir_ent.type;
-									strcpy (user_input_arg1_string, dir_ent.name);   
 
-									strcpy (drive_command_string,"s0:");
+									strcpy (user_input_arg1_string, dir_ent.name);
 
-									// if (get_drive_type(dev) == DRIVE_UIEC ) {
-									// 	drive_command_string[1] = par+1;
-									// } else if (get_drive_type(dev) == DRIVE_1581 ) {
-									// 	drive_command_string[1] = '0';
-									// } else {
-									// 	drive_command_string[1] = par;
-									// };//end-f
+									if 	(dir_ent.type == 2 || dir_ent.type == 1 ) { // 1 == "CBM" for 1581 partitions, and 2 == "DIR" for SD2IEC directories.
+										// We don't print anything because if we did, it would output the same directories as skipped multiple times, because we iterate over the remaining list of file over and over again.
 
-									// Example: device_command[1] = convert_partition_for_drive();
-									drive_command_string[1] = convert_partition_for_drive();
+									} else {
+										strcpy (drive_command_string,"s0:");
+										drive_command_string[1] = convert_partition_for_drive();
+										strcat (drive_command_string,user_input_arg1_string);
 
-									strcat (drive_command_string,user_input_arg1_string);
-
-									printf("-> %s ",user_input_arg1_string);   
-									result = cbm_open(1, dev, 15, drive_command_string);
-									cbm_close(1);
-									printf("[Deleted]\n");
+										printf("-> %s ",user_input_arg1_string);
+										result = cbm_open(1, dev, 15, drive_command_string);
+										cbm_close(1);
+										printf("Deleted\n");
+										goto fresh_start; // Since we've deleted a file, the file list and length have changed, so we jump back to the fresh_start. 
+														  // This is such a hacky non-modern way of doing things, however, it's also the most efficent, in terms of code size. It's what you would do in aseembly or even BASIC. This is *why* C Programming is so cool - You can do things like this! Also, *FUCK* object oriented programming!
+									};//end-if
 
                     				get_key = 0;
 									if (kbhit() != 0) { /* If key has been pressed */
@@ -2353,7 +2545,7 @@ int main( int argc, char* argv[] ) {
 									};/*end_if*/
 
 									if (get_key == 3) { /* RUN/STOP or CTRL-C */
-										printf("Deleting aborted!\n");
+										printf("Aborted!\n");
 										get_key = 0;
 										break;
 									};/*end_if*/
@@ -2367,15 +2559,7 @@ int main( int argc, char* argv[] ) {
 					} else {
 
 						strcpy (drive_command_string,"s0:");
-						// if (get_drive_type(dev) == DRIVE_UIEC ) {
-						// 	drive_command_string[1] = par+1;
-						// } else if (get_drive_type(dev) == DRIVE_1581 ) {
-						// 	drive_command_string[1] = '0';
-						// } else {
-						// 	drive_command_string[1] = par;
-						// };//end-f
 
-						// Example: device_command[1] = convert_partition_for_drive();
 						drive_command_string[1] = convert_partition_for_drive();
 
 						strcat (drive_command_string,user_input_arg1_string);
@@ -2400,13 +2584,16 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("format",user_input_command_string) ) {
 
 			drive_command_string[0] = 'n';
-			if (get_drive_type(dev) == DRIVE_UIEC) {
-			    drive_command_string[1] = par+1;
-			} else if (get_drive_type(dev) == DRIVE_UIEC) {
-	    		drive_command_string[1] = '0';
-			} else {
-				drive_command_string[1] = par;
-			};//end-if
+
+			// if (get_drive_type(dev) == DRIVE_UIEC) {
+			//     drive_command_string[1] = par+1;
+			// } else if (get_drive_type(dev) == DRIVE_UIEC) {
+	  		//	   drive_command_string[1] = '0';
+			// } else {
+			// 	drive_command_string[1] = par;
+			// };//end-if
+			drive_command_string[1] = convert_partition_for_drive();
+
 			drive_command_string[2] = ':';
 			drive_command_string[3] = '\0';
 
@@ -2488,7 +2675,9 @@ int main( int argc, char* argv[] ) {
 			// };//end-if
 
 			// Example: device_command[1] = convert_partition_for_drive();
-			string_add_character(drive_command_string,convert_partition_for_drive());
+			if (get_drive_type(dev) != DRIVE_VICEFS) { 			  // If it's *NOT* the VICE FS DRIVER
+				string_add_character(drive_command_string,convert_partition_for_drive());
+			};//end-if
 
 			strcat (drive_command_string,":");
 			strcat (drive_command_string,user_input_arg2_string);
@@ -2503,11 +2692,14 @@ int main( int argc, char* argv[] ) {
 			// };//end-if
 
 			// Example: device_command[1] = convert_partition_for_drive();
-			string_add_character(drive_command_string,convert_partition_for_drive());
-
-			strcat (drive_command_string,":");
+			if (get_drive_type(dev) != DRIVE_VICEFS) { 			  // If it's *NOT* the VICE FS DRIVER
+				string_add_character(drive_command_string,convert_partition_for_drive());
+				strcat (drive_command_string,":");
+			};//end-if
 
 			strcat (drive_command_string,user_input_arg1_string);
+
+			// printf("drive_command_string:%s\n",drive_command_string);
 
 			switch (number_of_user_inputs) {
 
@@ -2530,16 +2722,16 @@ int main( int argc, char* argv[] ) {
 
 			switch (number_of_user_inputs) {
 				case 2 :
-					if (get_drive_type(dev) == DRIVE_UIEC) {
+					if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) { // SD2IEC based it's commands on CMD HD, and therefore we can share the uiec_set between them. 
 						uiec_set(dev, user_input_arg1_string);
 					} else if (get_drive_type(dev) == DRIVE_1541 || get_drive_type(dev) == DRIVE_SD2 ) {
 						c1541_set(dev, user_input_arg1_string); // They both write to the same memory area to set the device number in software
 					} else {
 						printf("Er: drv!\n");
 					};//end-if
-			    break;	
+			    break;
 
-			    default : 
+			    default :
 			    	printf("Er arg\n");
 			    //end-default
 			};//end-switch
@@ -2838,8 +3030,8 @@ int main( int argc, char* argv[] ) {
 					// Setup TARGET FILE for WRITING 
 					strcpy (drive_command_string2, "0:"  );
 					strcat (drive_command_string2, user_input_arg3_string); // filename
-					strcat (drive_command_string2, ",w," );
-					strcat (drive_command_string2, "p"   ); // needs to be PRG type becuase SEQ type adds the floowing text to the beginning of the file: C64File *FILENAME*
+					strcat (drive_command_string2, ",w,p" ); // needs to be PRG type becuase SEQ type adds the floowing text to the beginning of the file: C64File *FILENAME*
+					//strcat (drive_command_string2, "p"   ); 
 
 					// if (get_drive_type(dev) == DRIVE_UIEC ) { // This was like 30 bytes over
 					// 	drive_command_string2[0] = par+1;
@@ -2873,7 +3065,7 @@ int main( int argc, char* argv[] ) {
 						strcpy(peeked_string,""); // lame!!!
 						string_add_character(peeked_string,peeked_byte); //super lame!!!
 						result = cbm_write(7, peeked_string, 1);
-						printf(".");
+						//printf(".");// This saved 12 bytes!
 						if (end_address == 65535L && mem_counter == 65535L) {
 							break;
 						};//end-if
@@ -2881,12 +3073,12 @@ int main( int argc, char* argv[] ) {
 
 					cbm_close (7);
 					printf("\nDone.\n");
-					printf("Saved memory %u - %u to\nfile:%s on device:%i\n",start_address,end_address,user_input_arg3_string,dev);
+					printf("Saved mem %u - %u to\nfile:%s on device:%i\n",start_address,end_address,user_input_arg3_string,dev);
 
 			    break;
 
 			    default :
-					printf("Error!\n");
+					printf("Er!\n");
 			    break;
 
 			};//end switch
@@ -2926,7 +3118,8 @@ int main( int argc, char* argv[] ) {
             } else if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') { // copy * d08b:
 
 		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
-		        convert_partition_string(user_input_arg2_string[3], target_par); // do it deucimo...
+		        // convert_partition_string(user_input_arg2_string[3], target_par); // do it deucimo...
+		        target_par = convert_partition_string(user_input_arg2_string[3]);
 
             } else {
 
@@ -2942,28 +3135,34 @@ int main( int argc, char* argv[] ) {
 
 			// The source device is dev
 			// The target device is user_input_arg2_number
-			if (get_drive_type(dev) == DRIVE_UIEC) { // TODO: DOES THIS NEED 1581 SUPPORT?????
-				// printf("Source is SD2IEC!\n");
+			if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) { // TODO: DOES THIS NEED 1581 SUPPORT?????
 				source_par = source_par+1;
 			};//end-if
 
 			// We can't use something like this: device_command[1] = convert_partition_for_drive(); because this is custom logic for this edge case.
-			if (get_drive_type(user_input_arg2_number) == DRIVE_UIEC) {
+			if (get_drive_type(user_input_arg2_number)==DRIVE_UIEC || get_drive_type(user_input_arg2_number)==DRIVE_CMDHD) {
 				// printf("Target is NOT SD2IEC!\n");
 				target_par = target_par+1;
 			} else if ( get_drive_type(user_input_arg2_number)==DRIVE_1581 && user_input_arg2_string[4] == ':') {
 				// printf("Partition direct copying on 1581\nis not supported.\n");
-				printf("Not supported by the 1581.\n");
+				printf("Not supported on 1581.\n");
 				goto end_copying;
 			} else if ( get_drive_type(user_input_arg2_number)==DRIVE_1581) {
 				target_par = '0';
+			};//end-if
+
+			if (get_drive_type(dev)==DRIVE_VICEFS && get_drive_type(user_input_arg2_number)==DRIVE_VICEFS) {
+				printf("VICE FS can't copy. :-(\n");
+				goto end_copying;
 			};//end-if
 
 		    switch (number_of_user_inputs) {
 			    case 3 :
 				    if ( matching("*",user_input_arg1_string) ) { 			// copy * d08:     
 
-					    dir_file_total = dir_file_count(); // get the total number of files to copy and store in dir_file_total 
+						strcpy(listing_string,"$"); // TODO: If I change things here, I can make DOS wildcard copying work... I think...
+						string_add_character(listing_string,convert_partition_for_drive());
+					    dir_file_total = dir_file_count(listing_string); // get the total number of files to copy and store in dir_file_total 
 					    printf("Files to copy: %i\n", dir_file_total);
 
 					    if (they_are_sure() == TRUE) {
@@ -2976,17 +3175,16 @@ int main( int argc, char* argv[] ) {
 						        	dir_goto_file_index(loop_k);
 								    detected_filetype = dir_ent.type; //use this to detect if it's a directory or not
 
-								    strcpy (user_input_arg1_string, dir_ent.name); // NOTE!!! If I switch this to arg2 isntead, teh partion copy works, but drive to drive doesn't work
-                                    // strcpy (user_input_arg2_string, dir_ent.name);
+								    strcpy (user_input_arg1_string, dir_ent.name);
 
-								    if 	(dir_ent.type ==  2) {
-				        				printf("Skipping: %s\n", dir_ent.name);
+								    if 	(dir_ent.type==1 || dir_ent.type==2) { // 1 is CBM, 2 is DIR
+				        				// printf("Skipping: %s\n", dir_ent.name); // Let's not do this and make it match the delete command. This saves 34 bytes.
 
 				        			} else {
-							        	if (use_dcopy == TRUE) {   
-										    dcopy(); // use dcopy for another drive and acopy for bulk moving to a folder on the current drive
+							        	if (use_dcopy == TRUE) {
+										    dcopy(); // DCOPY COMMAND - Between Devices Copying - ChiCLI manually shovels bytes around.
 									    } else {
-										    acopy(); // use acopy to copy a bunch of files to another folder on the same drive 
+										    acopy(); // ACOPY COMMAND - Drive Within Drive Copying - Drive and DOS handles the copying.
 									    };//end_if
 
 								    };//end_if
@@ -3298,8 +3496,10 @@ int main( int argc, char* argv[] ) {
 			if (number_of_user_inputs != 2) {
 				printf("Er: No file.");
 				goto END_FILEDATE;
-			} else if ( get_drive_type(dev) != DRIVE_UIEC) {
-				printf("Er: Not SD2IEC.");
+			} else if ( get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD ) {
+				// Do nothing, this is fine.
+			} else {
+				printf("Er: Not Supported.");
 				goto END_FILEDATE;
 			};//end-if
 
@@ -3456,36 +3656,45 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("datetime",user_input_command_string) ){
 
+			find_rtc_device();
+			switch (rtc_device) {
+				case 0 : goto DT_NO_RTC_FOUND; break;
+			};//end-switch
+
 			switch (number_of_user_inputs) {
-				case 2 :
-					find_rtc_device();
-					if ( rtc_device != 0 ) {
-						printf("Current date & time:\n");
-						display_date_nice();
-						display_time_nice();
-						printf("\n");
-						set_date();
-						printf("New date & time set to:\n");
-						display_date_nice();
-						display_time_nice();
-						printf("\n");
-					} else {
-        				printf("Err: No RTC found!\n");
-					};//end-if
+				case 3 :
+
+						// BEFORE: 48137
+						// AFTER:  47737
+						// SAVED:    400!!!
+
+						// Varible reused to build string for setting the date.
+						strcpy(disk_sector_buffer,"t-wa"); 						// Start of date time set DOS command.
+
+						if ( matching(user_input_arg1_string,"-set") ) { 		// If arg 1 is -set.
+							strcat(disk_sector_buffer,user_input_arg2_string); 	// Then arg 2 much be the date adn time to set this thing to.
+						} else { 												// Otherwise they fucked up.
+							goto DT_NO_RTC_FOUND;
+						};//end-if
+
+						printf("Format: \"sat. 11/13/21 10:57:00 pm\"\n");
+						if (they_are_sure() == FALSE) goto END_DATETIME;
+						result = cbm_open(15, rtc_device, 15, disk_sector_buffer); // Example date and time string: "t-wasat. 11/13/21 10:57:00 pm"
+						cbm_close (15);
+						goto END_DATETIME;
 			    break;
 
 			    default:
-			    	find_rtc_device();
-					if ( rtc_device != 0 ) {
 						display_date_nice();
-						printf("\n");
 						display_time_nice();
-						printf("\n");
-					} else {
-						printf("Err: No RTC found!\n");
-					};//end-if
+						goto END_DATETIME;
 				break;
 			};//end_switch
+
+			DT_NO_RTC_FOUND :
+			printf("Er.");
+			END_DATETIME : ;
+			printf("\n");
 
 
 		// ********************************************************************************
@@ -3495,7 +3704,7 @@ int main( int argc, char* argv[] ) {
 
 			find_rtc_device();
 			switch (rtc_device) {
-				case 0  : printf("Err: No RTC found!\n");   break;
+				case 0  : printf("Er: No RTC.\n");   		break;
 				default : display_time_nice();printf("\n"); break;
 			};//end-switch
 
@@ -3507,7 +3716,7 @@ int main( int argc, char* argv[] ) {
 
 			find_rtc_device();
 			switch (rtc_device) {
-				case 0  : printf("Err: No RTC found!\n");   break;
+				case 0  : printf("Er: No RTC.\n");			break;
 				default : display_date_nice();printf("\n"); break;
 			};//end-switch
 
@@ -3548,7 +3757,7 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("vars",user_input_command_string) ) {
 
-			printf("Maximum Bytes:\nCommand Line:%u\nArgs:%u\nDisk Buffer:%u\nAliases:%u\nAlias:%u\nHotkeys:%u\nHotkey:%u\n",MAX_LENGTH_COMMAND,MAX_LENGTH_ARGS,MAX_DISK_SECTOR_BUFFER,MAX_ALIASES,MAX_ALIAS_LENGTH,MAX_HOTKEYS,MAX_HOTKEY_LENGTH);
+			printf("Maximum Bytes:\nUser Input:%u\nArgs:%u\nBuffer:%u\nAlias:%u\nHotkey:%u\n",MAX_LENGTH_COMMAND,MAX_LENGTH_ARGS,MAX_DISK_SECTOR_BUFFER,MAX_ALIAS_LENGTH,MAX_HOTKEY_LENGTH);
 
 
 		// ********************************************************************************
@@ -3567,7 +3776,7 @@ int main( int argc, char* argv[] ) {
 							string_add_character(disk_label, 0xA0);
 						};//end-while
 
-						write_disk_label();
+						write_disk_header(TRUE); // TRUE means we write the label
 						printf("Done!\n");
 					};//end if
 				break;
@@ -3589,7 +3798,7 @@ int main( int argc, char* argv[] ) {
 				case 2 :
 					if (they_are_sure() == TRUE) {
 						strncpy(disk_id, user_input_arg1_string, 2);
-						write_disk_id();
+						write_disk_header(FALSE); // FALSE means we write the id
 						printf("Done!\n");
 					};//end if
 			    break;
@@ -3642,7 +3851,7 @@ int main( int argc, char* argv[] ) {
 
 				case 2 : // This should be case 2 when we are actually using good shit below.
 
-					printf("Searching help...\n\n");
+					printf("Searching...\n\n");
 
 					// - Have a single file called chicli-help.seq
   					memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));

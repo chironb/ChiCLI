@@ -139,7 +139,6 @@ unsigned char string_deinsert_character ( unsigned char * input_string , unsigne
 
 };//end func
 
-
 unsigned char display_substring( unsigned char * string_to_display , unsigned char positon_to_start ) {
 
 	unsigned char i;
@@ -164,7 +163,6 @@ unsigned char display_substring( unsigned char * string_to_display , unsigned ch
 	return(screen_scrolled);
 
 };//end func 
-
 
 unsigned char display_blank_substring( unsigned char * string_to_display , unsigned char positon_to_start ) {
 
