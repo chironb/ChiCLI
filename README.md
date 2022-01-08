@@ -33,6 +33,9 @@ Quotes from public forums:
 *"Deym thanks for this! Looks amazing! Will try out soon."  
 ~ RBJeffrey, Reddit User*
 
+*"Awesome work!"  
+~ Oldbitcollector*
+
 *Please note: these public quotes do not imply endorsement of any kind.*
 
 ChiCLI - Features List:
