@@ -36,6 +36,9 @@ Quotes from public forums:
 *"Awesome work!"  
 ~ Oldbitcollector*
 
+*"ChiCLI is a stroke of genius and even if Bash and Z-Shell play in a completely different league, this tool is a real enrichment for the little Commodore."  
+~ https://8bitnews.io/archive/2022-01-07/6502-fantasy-console*
+
 *Please note: these public quotes do not imply endorsement of any kind.*
 
 ChiCLI - Features List:
