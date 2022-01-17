@@ -31,7 +31,7 @@ cl65 -g -Osr -t c64 --static-locals chicli.c string_processing.c alias.c hotkeys
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.01"
+#define VERSION "v1.02"
 #define PROGRAM_NAME "chicli"
 
 
@@ -90,6 +90,10 @@ cl65 -g -Osr -t c64 --static-locals chicli.c string_processing.c alias.c hotkeys
 // ********************************************************************************
 // GLOBAL VARS
 // ********************************************************************************
+
+unsigned int stopwatch_difference;
+unsigned int stopwatch_seconds;
+unsigned int stopwatch_jiffies;
 
 unsigned char read_drive_number;
 unsigned int  read_bytes_free;
@@ -267,9 +271,6 @@ void wait_for_keypress() {
 // NEW DIRECT DISK ACCESS FUNCTIONS FOR THE 1541 DISK DRIVE
 // ********************************************************************************
 
-// BEFORE: -rw-rw-r-- 1 chiron chiron 48161 Jan  5 12:48 chicli.prg
-// AFTER:  -rw-rw-r-- 1 chiron chiron 48032 Jan  5 12:53 chicli.prg
-// SAVING: 129!!!
 void change_partition_command() {
 	// This is only supported by the SD2IEC and CMD HD.
 	part_command[0] = 'c';
@@ -281,9 +282,6 @@ void change_partition_command() {
 	printf("Partition %c set.\n", par+17);
 };//end-func
 
-// BEFORE: -rw-rw-r-- 1 chiron chiron 48044 Dec 25 16:39 chicli.prg
-// AFTER:  -rw-rw-r-- 1 chiron chiron 47368 Dec 25 16:52 chicli.prg
-// SAVING: 676 bytes!
 unsigned char convert_partition_for_drive() {
 
 	// Example: device_command[1] = convert_partition_for_drive();
@@ -353,9 +351,6 @@ void list_and_change_1581_par(unsigned char change_par) {
 unsigned char disk_label[16];
 unsigned char disk_id[2];
 
-// BEFORE: 356 over
-// AFTER:   91 over
-// SAVED:  265 bytes!!!
 void write_disk_header(unsigned char write_label) {
 
 	// Instead of passing a var, we use a global var for this purpose,
@@ -415,111 +410,6 @@ void write_disk_header(unsigned char write_label) {
 	cbm_close(15); // Close the channel
 
 };//end-func
-
-
-
-// void write_disk_label() {
-
-// 	// Instead of passing a var, we use a global var for this purpose,
-// 	// because it's faster in C programming esepcially on the 6502 processor.
-
-// 	result = get_drive_type(dev);
-
-// 	switch (result) {
-// 		case DRIVE_1541 :
-// 		case DRIVE_2031 :
-// 		case DRIVE_SD2  :
-// 		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
-// 			// These drives are supported! Keep executing.
-// 		break;
-
-// 		default :
-// 			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
-// 			return;
-// 		break;
-// 	};//end-switch
-
-// 	// This is the original initial command DOS string for drive 0.
-// 	strcpy(drive_command_string, "i0");
-// 	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-// 	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
-// 	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
-// 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-// 	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
-// 	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
-
-// 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
-// 	result = cbm_write(15, "b-p:2,144", sizeof("b-p:2,144")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	strcpy(disk_sector_buffer,disk_label); // Create our new disk label string.
-
-// 	read_bytes = cbm_write(2, disk_sector_buffer, 16); // Write our new disk label's 16 bytes to the commmand channel.
-// 	drive_command_string2[1] = '2';
-
-// 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	result = cbm_open( 15, dev, 15, drive_command_string); // Open with the init command.
-
-// 	cbm_close(2); // Close the command channel.
-// 	cbm_close(15); // Close the other channel???
-
-// 	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
-// 	cbm_close(15); // Close the channel
-
-// };//end-func
-
-
-// void write_disk_id() {
-
-// 	// Instead of passing a var, we use a global var for this purpose,
-// 	// because it's faster in C programming esepcially on the 6502 processor.
-
-// 	result = get_drive_type(dev);
-
-// 	switch (result) {
-// 		case DRIVE_1541 :
-// 		case DRIVE_2031 :
-// 		case DRIVE_SD2  :
-// 		case DRIVE_UIEC : // This is supported but only for mounted D64 disk images.
-// 			// These drives are supported! Keep executing.
-// 		break;
-
-// 		default :
-// 			printf("Er: drv!\n"); // It's not one of the above drive. Break out of this function.
-// 			return;
-// 		break;
-// 	};//end-switch
-
-// 	// This is the original initial command DOS string for drive 0.
-// 	strcpy(drive_command_string, "i0");
-// 	drive_command_string[1] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-// 	// This is the block write command, file#:15 channel#:2 drive#:0 track#:18 sector#:0
-// 	strcpy(drive_command_string2, "u1:2,0,18,0"); // Also used for: "u2:2,0,18,0"
-// 	drive_command_string2[5] = par; // Here, we update the drive number with the current partition which is the variable par.
-
-// 	result = cbm_open(15, dev, 15, drive_command_string); // Open ???
-// 	result = cbm_open( 2, dev,  2, "#"); // Open command channel.
-
-// 	result = cbm_write(15, drive_command_string2, sizeof("u1:2,0,18,0")); // // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u1:2,0,18,0" --> Send the block read command to load track and sector to RAM command.
-//  	result = cbm_write(15, "b-p:2,162", sizeof("b-p:2,162")); // Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	strncpy(disk_sector_buffer,disk_id,2); // Create our new disk label string.
-
-// 	read_bytes = cbm_write(2, disk_id, 2); // Write our new disk label's 16 bytes to the commmand channel.
-// 	drive_command_string2[1] = '2';
-
-// 	result = cbm_write(15, drive_command_string2, sizeof("u2:2,0,18,0")); // TODO: <-- WARNING! THIS IS A *WACKJOB* THING TO DO BUT WAS THE ONLY WAY IT WOULD WORK! "u2:2,0,18,0" --> Send the buffer pointer command to move the pointer to the start of the disk label.
-// 	result = cbm_open( 15, dev, 15, drive_command_string); // Open ???
-
-// 	read_bytes = cbm_read(2, disk_sector_buffer, sizeof(disk_sector_buffer)); // Read the 16 bytes that are the current disk label from the commmand channel.
-
-// 	cbm_close(2); // Close the command channel.
-// 	cbm_close(15); // Close the other channel???
-
-// 	result = cbm_open(15, dev, 15, drive_command_string); // Open with the init command.
-// 	cbm_close(15); // Close the channel
-
-// };//end-func
 
 
 void BYTE_TO_BINARY(byte) {
@@ -595,13 +485,6 @@ unsigned char convert_char(unsigned char char_to_convert) {
 	     		char_to_convert <= 0x7f)   ||   // if it *IS* a good displaying character
 	     		char_to_convert >= 0xA0    ){
 
-		// So basically do nothing??? Why did I comment out the code but left in the if statements in??????????
-		// if (char_to_convert >= 65 && char_to_convert <= 90){   // if lower alphabet
-			//char_to_convert = char_to_convert + 32 ;                    // then shift up 
-		// } else if (char_to_convert >= 97 && char_to_convert <= 122) { // else if upper alphabet
-			//char_to_convert = char_to_convert - 32 ;                    // then shift down 
-		// };//end-if
-
 	} else {
 
 		char_to_convert = '.' ;                                     // output this instead 
@@ -612,15 +495,6 @@ unsigned char convert_char(unsigned char char_to_convert) {
 
 };//end func
 
-// This unused function saved 67 bytes!!!
-// char* replace_char(char* str, char find, char replace){
-//     char *current_pos = strchr(str,find);
-//     while (current_pos){
-//         *current_pos = replace;
-//         current_pos = strchr(current_pos,find);
-//     };//end-while
-//     return str;
-// };//end-func
 
 void display_logo(unsigned char x, unsigned char y) {
 
@@ -680,11 +554,11 @@ void display_logo(unsigned char x, unsigned char y) {
 
 		for ( ii = 8 ; ii > 0 ; ii--) {
 			if (get_bit(binary_logo[i],ii-1) ) {
-				revers(TRUE);
-				gotoxy    ( x+current_x , y+current_y );
+				revers( TRUE );
+				gotoxy( x+current_x , y+current_y );
 				cputc( CHAR_SQUARE );
 			} else {
-				revers(FALSE);
+				revers( FALSE );
 				cputc( ' ' );
 			};//end-if
 			current_x++;
@@ -702,7 +576,10 @@ void display_logo(unsigned char x, unsigned char y) {
 
 };//end func
 
-void sys_info(unsigned char is_drive_detection_disabled) {	
+
+unsigned char ntsc_status = TRUE; // NTSC is the TRUE C64!!!
+
+void sysinfo(unsigned char is_drive_detection_disabled) {
 
     unsigned char how_many_fit_vice_pattern = 0;
     unsigned char how_many_fit_thec64mini_pattern = 0;
@@ -711,11 +588,16 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 	starting_x = wherex();
 	starting_y = wherey();
 
-	ntscpal_detected = detect_ntsc_pal() ; // printf("N:%i ",ntscpal_detected);
-		sid_detected = detect_sid()      ; // printf("S:%i ",sid_detected);
-	 kernal_detected = detect_kernal()   ; // printf("K:%i ",kernal_detected);
-	  model_detected = detect_model()    ; // printf("M:%i ",model_detected);
-	    cpu_detected = detect_cpu()      ; // printf("C:%i \n",cpu_detected);
+	ntscpal_detected = detect_ntsc_pal();
+		sid_detected = detect_sid();
+	 kernal_detected = detect_kernal();
+	  model_detected = detect_model();
+	    cpu_detected = detect_cpu();
+
+	switch(ntscpal_detected) {
+		case 0 : ntsc_status = TRUE;  break; // NTSC
+		case 1 : ntsc_status = FALSE; break; // PAL
+	};//end switch
 
 	display_logo(starting_x,starting_y+1);
 
@@ -727,6 +609,9 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 	gotoxy(starting_x+14,starting_y+7); cputs("Sound");
 
 	#define SYS_INFO_RESULTS_OFFSET 20
+
+	// For debugging. This let's me see if things fail specifically.
+	#define showquestion() /* cputs("?") */
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+2);
 
@@ -756,26 +641,29 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 	} else if ( how_many_fit_thec64mini_pattern == 8 && how_many_nibbles_fit_emulator_pattern == 8) { // so if 1 out of 7 values is either 0x00 or 0xFF 
 	    cputs("TheC64   C");
 	} else {
-	    cputs("Commodore "); 
+	    cputs("Commodore ");
 	};//end_switch
 
+	// TODO: For the weird problem, maybe I need to move this code to run and display itself *BEFORE* the emulator detection!
 	switch(model_detected) {
 		case 0 : cputs("128D");       break;
 		case 1 : cputs("128");        break;
 		case 2 : cputs("128DCR");     break;
-		case 3 : cputs("64 (Early)"); break; // TEXT TOO LONG! "64 (Early)" Fall through to next
-		case 4 : cputs("64");         break;
-		case 5 : cputs("64C");        break;
-		case 6 : cputs("64");         break;
+		case 3 : cputs("64 (Early)"); break;
+		case 5 :
 		case 7 : cputs("64C");        break;
 		case 8 : cputs("SX-64");      break;
-		case 9 : cputs("4064");       break;	// } else if (kernal_detected == 6)                                               { return(9); // Model: Educator 64
+		case 9 : cputs("4064");       break;
+		case 4 :
+		case 6 :
+		default: cputs("64");         break; // Catch-all when we have trouble detecting the exact model.
 	};//end switch 
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+3);
 	switch(ntscpal_detected) {
 		case 0 : cputs("NTSC"); break;
 		case 1 : cputs("PAL");  break;
+		default: showquestion();break; // Should never see this!
 	};//end switch
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+4);
@@ -788,7 +676,7 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 		case  6 : cputs("R3 901246-01");   break; // 4064 Educator 64 --> ? Fair to say this is most similar to a stock R3 901227-03 kernal. From here: "Note that some patches of 901227-03 are included." http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/revisions.txt
 		case 10 : cputs("R3 JiffyDOS ");   break; // R3 C64 JiffyDOS
 		case 11 : cputs("SX-64 JiffyDOS"); break; // R3 SX-64 JiffyDOS
-		default : cputs("?");              break; // Default Unknown Kernal
+		default : showquestion();          break; // Default Unknown Kernal
 	};//end switch
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+5);
@@ -798,73 +686,108 @@ void sys_info(unsigned char is_drive_detection_disabled) {
 		case 9  : cputs("8502"); break;
 		case 10 : cputs("8500"); break;
 		case 11 : cputs("6510"); break;
-		default : cputs("?");    //end-default
+		default : showquestion();break;
 	};//end-switch
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+6);
 	cputs("VIC-II ");
 
     switch(cpu_detected) {
-        case 9 :
+        case 9 : // C128
             switch(ntscpal_detected) {
                 case 0 : cputs("8564");      break; // VIC-II in the NTSC C128
                 case 1 : cputs("8566/8569"); break; // VIC-II in the PAL C128
             };//end_switch
         break;
 
-        default :
-            switch(sid_detected) {
-                case 1 : 
-                    switch(ntscpal_detected) {
-                        case 0 : cputs("6567");      break; // VIC-II in the NTSC C64C
-                        case 1 : cputs("6569/6572"); break; // VIC-II in the PAL C64C
-                    };//end_switch
-                break;
-
-                case 2 : 
-                    switch(ntscpal_detected) {
-                        case 0 : cputs("8562"); break; // VIC-II in the NTSC C64C
-                        case 1 : cputs("8565"); break; // VIC-II in the PAL C64C
-                    };//end_switch
-                break;
-
+        case 10 : // C64C
+            switch(ntscpal_detected) {
+                case 0 : cputs("8562"); break; // VIC-II in the NTSC C64C
+                case 1 : cputs("8565"); break; // VIC-II in the PAL C64C
             };//end_switch
         break;
+
+        case 11 : // C64
+            switch(ntscpal_detected) {
+		        case 0 : cputs("6567");      break; // VIC-II in the NTSC C64
+		        case 1 : cputs("6569/6572"); break; // VIC-II in the PAL C64
+            };//end_switch
+        break;
+
+		default :
+			showquestion();
+		break;
 
     };//end_switch
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+7);
 	cputs("SID ");
 	switch(sid_detected) {
-		case    1 : cputs("6581");   break;
-		case    2 : cputs("8580");   break;
-		default   : /* do nothing */ break; //end default 
+		case    1 : cputs("6581");  break;
+		case    2 : cputs("8580");  break;
+		default   : showquestion(); break;
 	};//end switch
 
-	if ( is_drive_detection_disabled == TRUE ) {  // THIS IS CRASHES SOMETIMES AND WHEN I USE THE BUSCARD 		
+	switch(is_drive_detection_disabled) {
 
-		gotoxy(starting_x+14,starting_y+8); // if drive 8, dusoplay it 
-		printf("Detect disabled.");
+		case TRUE : // THIS IS CRASHES SOMETIMES AND WHEN I USE THE BUSCARD.
+			gotoxy(starting_x+14,starting_y+8); // if drive 8, dusoplay it 
+			printf("Detect disabled.");
+		break;
 
-	} else {
+		default :
 
-		gotoxy(starting_x+14,starting_y+8); // if drive 8, dusoplay it 
-		detect_drive(8, 3); 				// move back to x+25 and wherey()+1
+			gotoy(starting_y+8); // Starting position
 
-		gotoxy(starting_x+14,wherey()+1);	// if drive 9, dusoplay it 
-		detect_drive(9, 3);  			// move back to x+25 and wherey()+1
+			for (i = 0 ; i <= 7 ; i++) {
 
-		gotoxy(starting_x+14,wherey()+1); // if drive 8, dusoplay it 
-		detect_drive(10, 3); 			// move back to x+25 and wherey()+1
+				gotox(starting_x+14); 				// Go the starting location for y.
+				result = detect_drive(8+i, 3);  	// Detect the drive, and print the device string, if any.
+				if (result!=255) {					// If a drive is detected, then...
+					gotoy(wherey()+1);				// ...move the cursor down one.
+				// } else {							// Printing filler for undetected drives.
+					// printf("%u No drive.",8+i);	// Print no drive message.
+					// gotoy(wherey()+1);			// ...move the cursor down one.
+				};//end-if							// Note: detect_drive should return 255 if no drive is detected.
 
-		gotoxy(starting_x+14,wherey()+1);	// if drive 9, dusoplay it 
-		detect_drive(11, 3);  			// move back to x+25 and wherey()+1	
+			};//end-for
 
-	};//endif 
+			// Saved 34 bytes!
+			// OLD
+			// gotoxy(starting_x+14,starting_y+8); // if drive 8, dusoplay it 
+			// detect_drive(8, 3); 				// move back to x+25 and wherey()+1
 
-	gotoy(wherey()+1);
+			// gotoxy(starting_x+14,wherey()+1);	// if drive 9, dusoplay it 
+			// detect_drive(9, 3);  			// move back to x+25 and wherey()+1
+
+			// gotoxy(starting_x+14,wherey()+1); // if drive 8, dusoplay it 
+			// detect_drive(10, 3); 			// move back to x+25 and wherey()+1
+
+			// gotoxy(starting_x+14,wherey()+1);	// if drive 9, dusoplay it 
+			// detect_drive(11, 3);  			// move back to x+25 and wherey()+1	
+
+		break;
+
+	};//end-switch
+
+	// OLD gotoy(wherey()+1);
+
+	if (wherey() < 15) {
+		gotoy(15);
+	};//end-if
+
+	gotox(0);
 
 };//end func 
+
+
+void display_title_screen(unsigned char has_ddd) {
+	clrscr();
+	display_title_text();
+	sysinfo(has_ddd);
+	pet_chirp();
+	printf("Ready!\n");
+};//end-func
 
 
 // ********************************************************************************
@@ -907,18 +830,6 @@ void datetime_helper() {
 
 void display_date_nice() {
 
-	// find_rtc_device();
-	// if ( rtc_device == 0 ) {
-	// 	// printf("Error, no RTC found!\n");
-	// 	return;
-	// };//end-if
-
-	// result = cbm_open(15, rtc_device, 15, "t-ra");
-	// do {
-	// 	read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer));
-	// } while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
-	// cbm_close (15);
-
 	datetime_helper();
 
 	// Convert the day-of-the-week to upper case.
@@ -930,18 +841,6 @@ void display_date_nice() {
 };//end func 
 
 void display_time_nice() {
-
-	// find_rtc_device();
-	// if ( rtc_device == 0 ) {
-	// 	// printf("Error, no RTC found!\n");
-	// 	return;
-	// };//end-if
-
-	// result = cbm_open(15, rtc_device, 15, "t-ra");
-	// do {
-	// 	read_bytes = cbm_read(15, disk_sector_buffer, sizeof(disk_sector_buffer));
-	// } while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
-	// cbm_close (15);
 
 	datetime_helper();
 
@@ -964,62 +863,6 @@ void date_helper() {
 	scanf("%s", &user_date_input);
 	strcat(disk_sector_buffer,user_date_input);
 };//end-func
-
-// void set_date() {
-
-// 	// This function takes up 451 bytes!!!
-
-// 	find_rtc_device();
-// 	if ( rtc_device == 0 ) {
-// 		printf("Er: No RTC.\n");
-// 		return;
-// 	};//end-if
-
-// 	// Varible reused to build string for setting the date.
-// 	strcpy(disk_sector_buffer,"t-wa");
-
-// 	printf("Day XXXX:");
-// 	scanf("%s", &user_weekday_input);
-// 	user_weekday_input[0] = tolower(user_weekday_input[0]);
-// 	user_weekday_input[1] = tolower(user_weekday_input[1]);
-// 	user_weekday_input[2] = tolower(user_weekday_input[2]);
-// 	strcat(disk_sector_buffer,user_weekday_input);
-// 	strcat(disk_sector_buffer,". ");
-
-// 	printf("M ##:");
-// 	date_helper();
-// 	strcat(disk_sector_buffer,"/");
-
-// 	printf("D:");
-// 	date_helper();
-// 	strcat(disk_sector_buffer,"/");
-
-// 	printf("Y ##:");
-// 	date_helper();
-// 	strcat(disk_sector_buffer," ");
-
-// 	printf("12H:");
-// 	date_helper();
-// 	strcat(disk_sector_buffer,":");
-
-// 	printf("Min:");
-// 	date_helper();
-// 	strcat(disk_sector_buffer,":");
-
-// 	printf("Sec:");
-// 	date_helper();
-// 	strcat(disk_sector_buffer," ");
-
-// 	printf("AM/PM:");
-// 	scanf("%s", &user_ampm_input);
-// 	user_ampm_input[0] = tolower(user_ampm_input[0]);
-// 	user_ampm_input[1] = tolower(user_ampm_input[1]);
-// 	strcat(disk_sector_buffer,user_ampm_input);
-
-// 	result = cbm_open(15, rtc_device, 15, disk_sector_buffer); // Example date and time string: "t-wasat. 11/13/21 10:57:00 pm"
-// 	cbm_close (15);
-
-// };//end func 
 
 
 // ********************************************************************************
@@ -1186,11 +1029,16 @@ int main( int argc, char* argv[] ) {
 	} else {
 		// New White on Black /* White on L.Blue on Blue */
 		set_profile_colors(7);
-		clrscr();
-		display_title_text();
-		sys_info(have_device_numbers_changed);	 // this is loaded like this: RUN:REM -ddd // RUN:REM ARG1 " ARG2 IS QUOTED" ARG3 "" ARG5	
-		pet_chirp();
-		puts("\n\nReady!");
+
+		// OLD
+		// clrscr();
+		// display_title_text();
+		// sysinfo(have_device_numbers_changed);	 // this is loaded like this: RUN:REM -ddd // RUN:REM ARG1 " ARG2 IS QUOTED" ARG3 "" ARG5	
+		// pet_chirp();
+		// puts("\n\nReady!");
+
+		// NEW
+		display_title_screen(have_device_numbers_changed);
 
 	};//end if 
 
@@ -1679,12 +1527,6 @@ int main( int argc, char* argv[] ) {
 		    gotoxy(0,3);// move down 3 lines 
 		    cputs("load\"");// print load"0:---name_of_program---",9
 
-			// Place the partition number in the run command on the screen.
-			// if (get_drive_type(dev) == DRIVE_UIEC) {
-			//    cputc(par+1);
-			// } else {
-			// 	cputc(par);
-			// };//end-if
 			cputc(convert_partition_for_drive());
 
 			drive_command_string[2] = '\0';
@@ -1692,12 +1534,6 @@ int main( int argc, char* argv[] ) {
 		    cputs(user_input_arg1_string);
 		    cputs("\",");
 			printf("%i,", dev); // 8,
-
-			// if ( matching("-0",user_input_arg2_string) ) {
-			// 	cputc('0'); // LOAD "RUNME" ,8,0
-			// } else {
-			// 	cputc('1'); // LOAD "RUNME" ,8,1
-			// };//end-if
 
 		    if ( matching("-t",user_input_arg2_string) ) { // TMP Turbo Macro Pro shortcut
 		    	cputc('1'); // LOAD "RUNME" ,8,1
@@ -1780,7 +1616,6 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("restart",user_input_command_string) ) {
 
 		    if (they_are_sure() == TRUE) {
-		        // printf("Restarting...\n");
 		        exec(PROGRAM_NAME, "-r"); // This reloads whatever the program name is 
 		        return EXIT_SUCCESS;      // I don't even know if we ever get here.
 		    };//end_if
@@ -1792,7 +1627,6 @@ int main( int argc, char* argv[] ) {
 		} else if ( matching("reboot",user_input_command_string) ) {
 
 			if (they_are_sure() == TRUE) {
-	    		//printf("\n\nRebooting...\n\n");
 	    		reboot_register.pc = 0xFCE2;
 	    		_sys(&reboot_register);
 			};//end if
@@ -1811,7 +1645,6 @@ int main( int argc, char* argv[] ) {
 
 			if (they_are_sure() == TRUE) {
 				result = cbm_open(1, dev, 15, user_input_arg1_string);
-				// printf( "cbm_open: %i \n", result ); // This saved 36 bytes!
 				cbm_close(1);
 			};//end if
 
@@ -1911,11 +1744,6 @@ int main( int argc, char* argv[] ) {
 
 		    drive_command_string[0] = 'i';
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) {
-			//     drive_command_string[1] = par+1;
-			// } else {
-			// 	drive_command_string[1] = par;
-			// };//end-if
 			drive_command_string[1] = convert_partition_for_drive();
 
 			drive_command_string[2] = '\0';
@@ -1941,11 +1769,6 @@ int main( int argc, char* argv[] ) {
 
 				drive_command_string[0] = 'v';
 
-				// if (get_drive_type(dev) == DRIVE_UIEC) {
-				//     drive_command_string[1] = par+1;
-				// } else {
-				// 	drive_command_string[1] = par;
-				// };//end-if
 				drive_command_string[1] = convert_partition_for_drive();
 
 				drive_command_string[2] = '\0';
@@ -2040,6 +1863,44 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
+		// 1571 COMMAND
+		// ********************************************************************************
+		} else if ( matching("1571",user_input_command_string) ) {
+
+			// Single Sided Example: 1571 -s
+			// Double Sided Example: 1571 -d
+
+			strcpy(drive_command_string,"u0>m1");
+
+			if (number_of_user_inputs!=2)       goto END_1571_ERROR;
+			if (user_input_arg1_string[0]!='-') goto END_1571_ERROR;
+
+			switch (user_input_arg1_string[1]) {
+				case 's' : // Single Sided Example: 1571 -s "u0>m0"
+					drive_command_string[4]='0';
+				break;
+
+				case 'd' : // Double Sided Example: 1571 -d "u0>m1"
+					// Already set; Do nothing.
+				break;
+
+			    default :
+			    	goto END_1571_ERROR;
+			    break;//end-default
+			};//end-switch
+
+			cbm_open(1, dev, 15, drive_command_string); // "U0>M1" = 1571 Mode
+			cbm_close(1);
+			goto END_1571;
+
+			END_1571_ERROR : ;
+			printf("Er.\n");
+			goto END_1571;
+
+			END_1571 : ;
+
+
+		// ********************************************************************************
 		// CD COMMAND
 		// ********************************************************************************
 		} else if ( matching("c",user_input_command_string) ||
@@ -2048,29 +1909,6 @@ int main( int argc, char* argv[] ) {
 			strcpy (drive_command_string,"cd");
 
 			switch (number_of_user_inputs) {
-
-				// This section costs 143
-				// Adding the aliases instead cost only 43
-				// case 1 :
-				// 	// cd..
-				// 	if ( user_input_command_string[2] == '.' && user_input_command_string[3] == '.' ) {
-				// 		strcat (drive_command_string,command_cdback);
-
-				// 	// cd/ for 1581
-				// 	} else if ( user_input_command_string[2] == '/' && get_drive_type(dev) == DRIVE_1581) {
-				// 		change_1581_root_par();
-				// 		goto END_CD;
-
-				// 	// cd/
-				// 	} else if ( user_input_command_string[2] == '/' ) {
-				// 		strcat (drive_command_string,"//");
-
-				// 	// cd/ for 1581
-				// 	} else if ( user_input_command_string[2] == '.' && get_drive_type(dev) == DRIVE_1581) {
-				// 		goto END_1581_UNSUPPORTED;
-
-				// 	};//end_if
-				// break;//end-case
 
 				case 2 :
 					// cd ..
@@ -2111,7 +1949,6 @@ int main( int argc, char* argv[] ) {
 
 						change_drive(user_input_arg1_number); 										// Here we are changing the drive or partition, using the nubmer we converted above.
 
-						// convert_partition_string(user_input_arg1_string[3], par); 				// Pull the drive or partition letter out of the user input and convert it to a valid character to use in changin the partition.
 						par = convert_partition_string(user_input_arg1_string[3]);					// Pull the drive or partition letter out of the user input and convert it to a valid character to use in changin the partition.
 						if (par == 255) { 															// If it's wrong, do this. Also ??? --> The above macro "function" updates par with 255 if user_input_arg1_string[3] is fucked.
 							printf("Partition"); // printf("Er arg:%i\n", number_of_user_inputs);
@@ -2120,14 +1957,6 @@ int main( int argc, char* argv[] ) {
 
 						if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {	// If it's an SD2IEC or a CMD HD
 							change_partition_command();												// Change the partition using the custom function.
-							// Add the current partition, or drive, for MSD SD-2 and 4040 support.
-							// part_command[0] = 'c';
-							// part_command[1] = 'p';
-							// part_command[2] = par+1;
-							// part_command[3] = '\0';
-							// cbm_open(1, dev, 15, part_command);
-							// cbm_close(1);
-							// printf("Partition %c set.\n", par+17);
 
 						} else if (get_drive_type(dev) == DRIVE_1581) {								// If it's an 1581... with it's fucking rediculus partitions functionality...
 							change_1581_root_par(); 												// We are doing this first, because the request is to change directly to the device's first, second, third, etc... partition.
@@ -2189,7 +2018,6 @@ int main( int argc, char* argv[] ) {
 
 			};//end switch	
 
-			// printf("dcs:%s\n",drive_command_string);
 			result = cbm_open(1, dev, 15, drive_command_string); 
 			cbm_close(1);
 			goto END_CD;
@@ -2284,11 +2112,6 @@ int main( int argc, char* argv[] ) {
 				};//end-for
 
 				last_partition = (last_partition / 2) - 2; // There's only 2 quote per entry, so divide by 2, and then we subtract 1 because we don't want the first entry because it's the header.
-				// printf("last_partition:%u\n",last_partition);
-
-				// Doesn't work!
-				// strcpy(listing_string,"$=P"); // The default is $ to load the current directory.
-				// last_partition = dir_file_count(listing_string);
 
 			} else if (get_drive_type(dev) == DRIVE_SD2 || get_drive_type(dev) == DRIVE_4040) {
 				last_partition = 1;
@@ -2369,28 +2192,6 @@ int main( int argc, char* argv[] ) {
 			};//end-if
 
 
-			// OLD
-			// } else if ( get_drive_type(dev)==DRIVE_1581 && matching("root",user_input_arg1_string) ) {
-			// 	par = 0;
-			// 	change_1581_root_par();
-			//
-			// } else if (matching("root",user_input_arg1_string)) {
-			// 	printf("Er.\n");
-			//
-			// VS 
-			//
-			// NEW
-			// if ( matching("root",user_input_arg1_string) ) {
-			// 	if ( get_drive_type(dev)==DRIVE_1581 ) {
-			// 		par = 0;
-			// 		change_1581_root_par();
-			// 	} else {
-			// 		printf("Er.\n");
-			// 	};//end-if
-			//
-			// Saves: 22 bytes
-
-
 		// ********************************************************************************
 		// PWD COMMAND - PRINT DEVICE/PARTITION
 		// ******************************************************************************** 		
@@ -2405,18 +2206,20 @@ int main( int argc, char* argv[] ) {
 
 
 		// ********************************************************************************
-		// CHANGE DRIVE COMMAND
+		//  D##: COMMAND / CHANGE DEVICE
 		// ********************************************************************************
-        } else if ( user_input_command_string[0]=='d' && user_input_command_string[3]==':' ) {
+        } else if ( user_input_command_string[0]=='d' && (user_input_command_string[3]==':'||user_input_command_string[3]=='['||user_input_command_string[3]==';') ) {
+        // } else if ( user_input_command_string[0]=='d' && user_input_command_string[3]==':' ) {
 
 			convert_device_string(user_input_command_string[2], user_input_arg1_number);
 			change_drive(user_input_arg1_number);
 
 
 		// ********************************************************************************
-		// D08: COMMAND / D08A: COMMAND / CHANGE DRIVE AND PARTITION COMMAND
+		// D##?: COMMAND / CHANGE DEVICE
 		// ********************************************************************************
-        } else if ( user_input_command_string[0]=='d' && user_input_command_string[4]==':' ) {
+        } else if (user_input_command_string[0] == 'd' && (user_input_command_string[4]==':'||user_input_command_string[4]=='['||user_input_command_string[4]==';')) {
+		// } else if ( user_input_command_string[0]=='d' && user_input_command_string[4]==':' ) {
 
 			convert_device_string(user_input_command_string[2], user_input_arg1_number);
 			change_drive(user_input_arg1_number);
@@ -2425,13 +2228,6 @@ int main( int argc, char* argv[] ) {
 			par = convert_partition_string(user_input_command_string[3]);
 
 			if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
-				// part_command[0] = 'c';
-		  //       part_command[1] = 'p';
-		  //       part_command[2] = par+1;
-		  //       part_command[3] = '\0';
-		  //       cbm_open(1, dev, 15, part_command);
-				// cbm_close(1);
-				// printf("Partition %c set.\n", par+17);
 				change_partition_command();
 
 			} else if (get_drive_type(dev) == DRIVE_1581) {
@@ -2559,13 +2355,9 @@ int main( int argc, char* argv[] ) {
 					} else {
 
 						strcpy (drive_command_string,"s0:");
-
 						drive_command_string[1] = convert_partition_for_drive();
-
 						strcat (drive_command_string,user_input_arg1_string);
-
 						result = cbm_open(1, dev, 15, drive_command_string);
-
 						cbm_close(1);
 
 					};//end-if
@@ -2585,13 +2377,6 @@ int main( int argc, char* argv[] ) {
 
 			drive_command_string[0] = 'n';
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) {
-			//     drive_command_string[1] = par+1;
-			// } else if (get_drive_type(dev) == DRIVE_UIEC) {
-	  		//	   drive_command_string[1] = '0';
-			// } else {
-			// 	drive_command_string[1] = par;
-			// };//end-if
 			drive_command_string[1] = convert_partition_for_drive();
 
 			drive_command_string[2] = ':';
@@ -2666,14 +2451,6 @@ int main( int argc, char* argv[] ) {
 
 			strcpy (drive_command_string,"r");
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
-			// 	string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-			// } else if (get_drive_type(dev) == DRIVE_1581) {
-			// 	string_add_character(drive_command_string,'0');
-			// } else {											  // Any other device
-			// 	string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-			// };//end-if
-
 			// Example: device_command[1] = convert_partition_for_drive();
 			if (get_drive_type(dev) != DRIVE_VICEFS) { 			  // If it's *NOT* the VICE FS DRIVER
 				string_add_character(drive_command_string,convert_partition_for_drive());
@@ -2683,14 +2460,6 @@ int main( int argc, char* argv[] ) {
 			strcat (drive_command_string,user_input_arg2_string);
 			strcat (drive_command_string,"=");
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) { 			  // Detected SD2IEC
-			// 	string_add_character(drive_command_string,par+1); // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-			// } else if (get_drive_type(dev) == DRIVE_1581) {
-			// 	string_add_character(drive_command_string,'0');
-			// } else {											  // Any other device
-			// 	string_add_character(drive_command_string,par);   // Add the current partition, or drive, for MSD SD-2 and 4040 support.
-			// };//end-if
-
 			// Example: device_command[1] = convert_partition_for_drive();
 			if (get_drive_type(dev) != DRIVE_VICEFS) { 			  // If it's *NOT* the VICE FS DRIVER
 				string_add_character(drive_command_string,convert_partition_for_drive());
@@ -2698,8 +2467,6 @@ int main( int argc, char* argv[] ) {
 			};//end-if
 
 			strcat (drive_command_string,user_input_arg1_string);
-
-			// printf("drive_command_string:%s\n",drive_command_string);
 
 			switch (number_of_user_inputs) {
 
@@ -2720,20 +2487,33 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("driveset",user_input_command_string) ) {
 
+			result = get_drive_type(dev);
+
 			switch (number_of_user_inputs) {
 				case 2 :
-					if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) { // SD2IEC based it's commands on CMD HD, and therefore we can share the uiec_set between them. 
-						uiec_set(dev, user_input_arg1_string);
-					} else if (get_drive_type(dev) == DRIVE_1541 || get_drive_type(dev) == DRIVE_SD2 ) {
-						c1541_set(dev, user_input_arg1_string); // They both write to the same memory area to set the device number in software
-					} else {
-						printf("Er: drv!\n");
-					};//end-if
-			    break;
+					switch (result) { 	   // Result of drive scan.
+						case DRIVE_1541  : // They both write to the same memory area to set the device number in software
+						case DRIVE_SD2   :
+							c1541_set(dev, user_input_arg1_string);
+						break;
+
+						case DRIVE_UIEC  : // The SD2IEC, CMD HD, 1570, 1571, and 1581 all use this method.
+						case DRIVE_CMDHD :
+						case DRIVE_1570  :
+						case DRIVE_1571  :
+						case DRIVE_1581  :
+							uiec_set(dev, user_input_arg1_string);
+						break;
+
+						default :
+							printf("Er.\n");
+						break;
+					};//end-switch
+				break;
 
 			    default :
-			    	printf("Er arg\n");
-			    //end-default
+			    	printf("Er.\n");
+			    break;
 			};//end-switch
 
 
@@ -3031,17 +2811,7 @@ int main( int argc, char* argv[] ) {
 					strcpy (drive_command_string2, "0:"  );
 					strcat (drive_command_string2, user_input_arg3_string); // filename
 					strcat (drive_command_string2, ",w,p" ); // needs to be PRG type becuase SEQ type adds the floowing text to the beginning of the file: C64File *FILENAME*
-					//strcat (drive_command_string2, "p"   ); 
 
-					// if (get_drive_type(dev) == DRIVE_UIEC ) { // This was like 30 bytes over
-					// 	drive_command_string2[0] = par+1;
-					// } else if (get_drive_type(dev) == DRIVE_1581 ) {
-					// 	drive_command_string2[0] = '0';
-					// } else {
-					// 	drive_command_string2[0] = par;
-					// };//end-f
-
-					// Example: device_command[1] = convert_partition_for_drive();
 					drive_command_string2[0] = convert_partition_for_drive();
 
 				    printf("Saving %u - %u to\nfile:%s on device:%i\n",start_address,end_address,user_input_arg3_string,dev);
@@ -3111,11 +2881,13 @@ int main( int argc, char* argv[] ) {
 			// has been chapping my ass forever!
 			// This fix adds only 5 bytes to the overall compiled code.
 
-            if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[3] == ':') { // copy * d08:
+        	if ( user_input_arg2_string[0]=='d' && (user_input_arg2_string[3]==':'||user_input_arg2_string[3]=='['||user_input_arg2_string[3]==';') ) {
+            // if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[3] == ':') { // copy * d08:
 
 		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 
-            } else if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') { // copy * d08b:
+			} else if ( user_input_arg2_string[0]=='d' && (user_input_arg2_string[4]==':'||user_input_arg2_string[4]=='['||user_input_arg2_string[4]==';') ) {
+            // } else if (user_input_arg2_string[0] == 'd' && user_input_arg2_string[4] == ':') { // copy * d08b:
 
 		        convert_device_string(user_input_arg2_string[2], user_input_arg2_number);
 		        // convert_partition_string(user_input_arg2_string[3], target_par); // do it deucimo...
@@ -3239,8 +3011,9 @@ int main( int argc, char* argv[] ) {
 				case 2 :
 					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
 					switch(detected_filetype){
+						case 1 : // case  2 : printf("DIR"); break;	// CBM
 						case 2 : // case  2 : printf("DIR"); break;	// DIR
-							printf("Err: Dir.\n");
+							printf("Not file.\n");
 						break;
 
 						case 16 : // case 16 : printf("SEQ"); break; // SEQ
@@ -3251,34 +3024,52 @@ int main( int argc, char* argv[] ) {
 							type_prg(user_input_arg1_string); // if PRG use type-prg
 						break;
 
-						case 18 : 
+						case 18 :
 						case 19 : // case 19 : printf("REL"); break;	// REL
 							type_hex(user_input_arg1_string); // if USR use type-hex
 						break;
 
 						default : // case  2 : printf("DIR"); break;	// DIR
-							printf("Er: Type?\n");
-						//end default
+							goto TYPE_ERROR;
+						break;
 					};//end switch
 				break;
 
 				case 3 :
-					detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // detect filetype
-					if (matching("-hex",user_input_arg2_string)) {
-						type_hex(user_input_arg1_string); 
-					} else if (matching("-text",user_input_arg2_string)) {
-						type_text(user_input_arg1_string); // if SEQ use type 
+					// detected_filetype = detect_filetype(user_input_arg1_string, TRUE); // Detect filetype
+					// SAVED 15 BYTES!!!
+
+					// if (matching("-hex",user_input_arg2_string)) {
+					// 	type_hex(user_input_arg1_string); 
+					// } else if (matching("-text",user_input_arg2_string)) {
+					// 	type_text(user_input_arg1_string);
+					// } else if (matching("-prg",user_input_arg2_string)) {
+					// 	type_prg(user_input_arg1_string);
+					// } else {
+					// 	printf("Er arg3:%s\n", user_input_arg2_string);
+					// };//end if
+					// SAVED 81 BYTES!!!
+
+					if (user_input_arg2_string[0]!='-') goto TYPE_ERROR;
+
+					if        (user_input_arg2_string[1]=='h') { type_hex(  user_input_arg1_string );
+					} else if (user_input_arg2_string[1]=='t') { type_text( user_input_arg1_string );
+					} else if (user_input_arg2_string[1]=='p') { type_prg(  user_input_arg1_string );
 					} else {
-						printf("Er arg3:%s\n", user_input_arg2_string);
+						goto TYPE_ERROR;
 					};//end if 
 				break;
 
 			    default :
-			    	printf("Er arg\n");
-			    //end default
+			    	goto TYPE_ERROR;
+			    break;
 
 			};//end switch
 
+			goto TYPE_END;
+			TYPE_ERROR : ;
+			printf("Er.\n");
+			TYPE_END : ;
 
 		// ********************************************************************************
 		// LIST COMMAND
@@ -3663,11 +3454,6 @@ int main( int argc, char* argv[] ) {
 
 			switch (number_of_user_inputs) {
 				case 3 :
-
-						// BEFORE: 48137
-						// AFTER:  47737
-						// SAVED:    400!!!
-
 						// Varible reused to build string for setting the date.
 						strcpy(disk_sector_buffer,"t-wa"); 						// Start of date time set DOS command.
 
@@ -3736,16 +3522,12 @@ int main( int argc, char* argv[] ) {
 
             } else {
 
-                unsigned int stopwatch_difference;
-                unsigned int stopwatch_seconds;
-                unsigned int stopwatch_jiffies;
-
                 stopwatch_difference = ( PEEK(161)*256 + PEEK(162) ) - stopwatch_start_stamp; // 18 mins max roughly 
 
                 stopwatch_seconds = stopwatch_difference/60;
                 stopwatch_jiffies = stopwatch_difference-(stopwatch_seconds*60);
 
-                printf("Stopwatch: %u.%u secs.\n", stopwatch_seconds, ((stopwatch_jiffies*166)/100) );
+                printf("Time: %u.%u secs.\n", stopwatch_seconds, ((stopwatch_jiffies*166)/100) );
 
                 stopwatch_start_stamp = 0;
 
@@ -3757,7 +3539,7 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( matching("vars",user_input_command_string) ) {
 
-			printf("Maximum Bytes:\nUser Input:%u\nArgs:%u\nBuffer:%u\nAlias:%u\nHotkey:%u\n",MAX_LENGTH_COMMAND,MAX_LENGTH_ARGS,MAX_DISK_SECTOR_BUFFER,MAX_ALIAS_LENGTH,MAX_HOTKEY_LENGTH);
+			printf("Bytes:\nInput:%u\nArgs:%u\nBuffer:%u\nAlias:%ux%u\nHotkey:%ux%u\n",MAX_LENGTH_COMMAND,MAX_LENGTH_ARGS,MAX_DISK_SECTOR_BUFFER,MAX_ALIAS_LENGTH,MAX_ALIASES,MAX_HOTKEY_LENGTH,MAX_HOTKEYS);
 
 
 		// ********************************************************************************
@@ -3777,7 +3559,7 @@ int main( int argc, char* argv[] ) {
 						};//end-while
 
 						write_disk_header(TRUE); // TRUE means we write the label
-						printf("Done!\n");
+						// printf("Done!\n");
 					};//end if
 				break;
 
@@ -3799,7 +3581,6 @@ int main( int argc, char* argv[] ) {
 					if (they_are_sure() == TRUE) {
 						strncpy(disk_id, user_input_arg1_string, 2);
 						write_disk_header(FALSE); // FALSE means we write the id
-						printf("Done!\n");
 					};//end if
 			    break;
 
@@ -3809,130 +3590,161 @@ int main( int argc, char* argv[] ) {
 			};//end_switch
 
 
-		// ********************************************************************************
-		// HELP COMMAND
-		// ********************************************************************************
-		} else if ( (user_input_command_string[0]=='?') ||
-					(user_input_command_string[0]=='h' && user_input_command_string[1]=='e' && user_input_command_string[2]=='l') ||
- 				    (user_input_command_string[0]=='m' && user_input_command_string[1]=='a' && user_input_command_string[2]=='n') ){
+          // ********************************************************************************
+          // HELP COMMAND
+          // ********************************************************************************
+          } else if ( (user_input_command_string[0]=='?') ||
+                         (user_input_command_string[0]=='h' && user_input_command_string[1]=='e' && user_input_command_string[2]=='l') ||
+                        (user_input_command_string[0]=='m' && user_input_command_string[1]=='a' && user_input_command_string[2]=='n') ){
 
-			unsigned char help_entry_detected;
-			unsigned char help_entry_found;
-			unsigned char current_command_position; // The current char we are checking
-			unsigned char converted_character; // We need to convert thigns betwen ascii and petscii
+               unsigned char help_entry_detected;
+               unsigned char help_entry_found;
+               unsigned char current_command_position; // The current char we are checking
+               unsigned char converted_character; // We need to convert thigns betwen ascii and petscii
 
-			// Compensated for PETSCII bullshit cc65 automatic fuck FML.
-			#define marker_character 95
+               // Compensated for PETSCII bullshit cc65 automatic fuck FML.
+               #define marker_character 95
 
-			help_entry_detected = 0;
-			help_entry_found = 0;
-			current_command_position = 0;
+               help_entry_detected = 0;
+               help_entry_found = 0;
+               current_command_position = 0;
 
-			if ( user_input_arg1_string[0]=='=' ) { // =
-				strcpy(user_input_arg1_string,"equals");
-			} else if ( user_input_arg1_string[0]=='?' ) { // ? --> help
-				strcpy(user_input_arg1_string,"help");
-			} else if ( user_input_arg1_string[0]=='/' ) { // / --> commands
-				strcpy(user_input_arg1_string,"commands");
-			} else if ( user_input_arg1_string[0]=='.' ) { // ./ --> dot
-				strcpy(user_input_arg1_string,"dot");
-			} else if ( user_input_arg1_string[1]=='#' ) { // d##:
-				strcpy(user_input_arg1_string,"dcd");
-			} else if ( user_input_arg1_string[3]=='2' ) { // d##:
-				user_input_arg1_string[3]='t';
-			} else if ( user_input_arg1_string[2]=='2' ) { // d##:
-				user_input_arg1_string[2]='t';
-			};//end-if
+               // Adding this cost 67 bytes!
+               if ( matching("-h",user_input_arg2_string) ) { 
+                    strcpy (drive_command_string,"0:chicli-hardware,r,s");
+               } else {
+                    strcpy (drive_command_string,"0:chicli-help,r,s");
+               };//end-if
 
-			switch (number_of_user_inputs) {
-				case 1 :
-					strcpy(user_input_arg1_string,"help");
-					// Then fall through to the next case...
+               // TODO: This needs to instead massage the search string so it matches whatever is in the file.
+               // TODO: This is needed to make non-alphabetic characters work, like numbers and other symbols.
+               // TODO: This should take up some space, but save enough space by ditching the old workarounds.
+               // If between A and Z
+               // Else if between a and z
+               // Everything else
+               // right now current character compared to current character in string + 32
+               // I think my hack was a bad workaround. I think I needed to just do a toupper or tolower on the user input???
 
-				case 2 : // This should be case 2 when we are actually using good shit below.
+               // if ( user_input_arg1_string[0]=='=' ) { // =
+               //      strcpy(user_input_arg1_string,"equals");
+               // } else 
 
-					printf("Searching...\n\n");
+               if ( user_input_arg1_string[0]=='?' ) { // ? --> help
+                    strcpy(user_input_arg1_string,"help");
+               } else if ( user_input_arg1_string[0]=='/' ) { // / --> commands
+                    strcpy(user_input_arg1_string,"commands");
+               };//end-if
 
-					// - Have a single file called chicli-help.seq
-  					memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
-					strcpy (drive_command_string,"0:chicli-help,r,s");
-  					drive_command_string[0] = convert_partition_for_drive();
-					result = cbm_open(8, dev, CBM_READ, drive_command_string);
+               // } else if ( user_input_arg1_string[0]=='.' ) { // ./ --> dot
+               //      strcpy(user_input_arg1_string,"dot");
+               // } else if ( user_input_arg1_string[1]=='#' ) { // d##:
+               //      strcpy(user_input_arg1_string,"dcd");
+               // } else if ( user_input_arg1_string[3]=='2' ) { // d##:
+               //      user_input_arg1_string[3]='t';
+               // } else if ( user_input_arg1_string[2]=='2' ) { // d##:
+               //      user_input_arg1_string[2]='t';
+               // };//end-if
 
-					// - Each entry starts with _commandname
-					do {
-						read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+               switch (number_of_user_inputs) {
+                    case 1 :
+                         strcpy(user_input_arg1_string,"help");
+                         // Then fall through to the next case...
 
-						// loop over buffer and barf out bytes to the screen 
-						for (i = 0 ; i < read_bytes ; i++) {
+                    case 2 : // This should be case 2 when we are actually using good shit below.
+                    case 3 : // This is because the code for the hardware lookup is exactly the same.
 
-							converted_character = disk_sector_buffer[i];
+                         printf("Searching...\n\n");
 
-							// - Searching for marker and we are displaying because we matched an entry
-							if ( (converted_character != marker_character) && (help_entry_found==TRUE) ) {
-								printf("%c", converted_character); // Output the character because we've matched the command.
+                         // user_input_arg1_string = toupper(user_input_arg1_string); //  disk_sector_buffer[0] = toupper(disk_sector_buffer[0]);
 
-							// - Quiting because we've found and matched an entry and we found a marker
-							} else if ( (converted_character == marker_character) && (help_entry_found==TRUE) ) {
-								goto END_HELP;
+                         // - Have a single file called chicli-help.seq OR chicli-hardware.seq
+                         memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+                         // strcpy (drive_command_string,"0:chicli-help,r,s");
+                         drive_command_string[0] = convert_partition_for_drive();
+                         result = cbm_open(8, dev, CBM_READ, drive_command_string);
 
-							// - Searching for marker and haven't found an entry
-							} else if ( (converted_character != marker_character) && (help_entry_detected==FALSE) ) {
-								// Do nothing and keep searching.
+                         // - Each entry starts with _commandname
+                         do {
+                              read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
 
-							// - We found an entry
-							} else if ( (converted_character == marker_character) && (help_entry_detected==FALSE) ) {
-								help_entry_detected = TRUE; // We found an entry marker. Don't display anything yet.
+                              // loop over buffer and barf out bytes to the screen 
+                              for (i = 0 ; i < read_bytes ; i++) {
 
-							// - Searching to match because we found an entry
-							} else if ( (converted_character != marker_character) && (help_entry_detected==TRUE) ) {
+									// Convert for matching because ascii to petscci bullshit...
+								   if ( isalpha(user_input_arg1_string[current_command_position]) ) {
+								   		converted_character = toupper(user_input_arg1_string[current_command_position])-96;
+								   } else {
+										converted_character = user_input_arg1_string[current_command_position];
+								   };//end-if
 
-								// If we've matched all the characters, the index will have been incremented past the last position, and therefore we know we have found the string.
-								if ( current_command_position == strlen(user_input_arg1_string) ) {
-									help_entry_found         = TRUE;	// We've found it, so make help_entry_found = TRUE.
-									help_entry_detected      = FALSE;	// Also make help_entry_detected = FALSE, because we don't want to keeping trying to compare the current char to the commnad we're trying to find.
-									current_command_position = 0;		// Reset this for the next time we search.
+                                   // - Searching for marker and we are displaying because we matched an entry
+                                   if ( (disk_sector_buffer[i] != marker_character) && (help_entry_found==TRUE) ) {
+                                        printf("%c", disk_sector_buffer[i]); // Output the character because we've matched the command.
 
-								// If the current buffer character matches the index in the command we are trying to find...
-								} else if ( converted_character == user_input_arg1_string[current_command_position] + 32 ) {
-									current_command_position++;		// We matched a character, so increment and keep searching.
+                                   // - Quiting because we've found and matched an entry and we found a marker
+                                   } else if ( (disk_sector_buffer[i] == marker_character) && (help_entry_found==TRUE) ) {
+                                        goto END_HELP;
 
-								// If it doesn't match, stop trying to match...
-								} else if ( converted_character != user_input_arg1_string[current_command_position] + 32 ) {
-									help_entry_detected = FALSE;	// The characters don't match, so stop searching, and go back to looking for the next marker.
-									current_command_position = 0;		// Reset this for the next time we search.
+                                   // - Searching for marker and haven't found an entry
+                                   } else if ( (disk_sector_buffer[i] != marker_character) && (help_entry_detected==FALSE) ) {
+                                        // Do nothing and keep searching.
+                    // printf("f:%c%u u:%c%u\n",disk_sector_buffer[i],disk_sector_buffer[i],converted_character ,converted_character );
 
-								};//end-if
+                                   // - We found an entry
+                                   } else if ( (disk_sector_buffer[i] == marker_character) && (help_entry_detected==FALSE) ) {
+                                        help_entry_detected = TRUE; // We found an entry marker. Don't display anything yet.
 
-							// - If we found another entry marker before we've matched the command.
-							} else if ( (converted_character == marker_character) && (help_entry_detected==TRUE) ) {
-								help_entry_detected = FALSE; // We found an entry marker but didn't match the command. Go back to searching for another marker.
+                                   // - Searching to match because we found an entry
+                                   } else if ( (disk_sector_buffer[i] != marker_character) && (help_entry_detected==TRUE) ) {
 
-							};//end-if
+                                        // If we've matched all the characters, the index will have been incremented past the last position, and therefore we know we have found the string.
+                                        if ( current_command_position == strlen(user_input_arg1_string) ) {
+                                             help_entry_found         = TRUE;   // We've found it, so make help_entry_found = TRUE.
+                                             help_entry_detected      = FALSE;  // Also make help_entry_detected = FALSE, because we don't want to keeping trying to compare the current char to the commnad we're trying to find.
+                                             current_command_position = 0;      // Reset this for the next time we search.
 
-						};//end-for
+                                        // If the current buffer character matches the index in the command we are trying to find...
+                                        // } else if ( disk_sector_buffer[i] == converted_character + 32 ) {
+                                        } else if ( disk_sector_buffer[i] == converted_character ) {
+                                             current_command_position++;        // We matched a character, so increment and keep searching.
 
-		                get_key = 0;
-						if (kbhit() != 0) { /* If key has been pressed */
-							get_key = cgetc();
-						};/*end_if*/
+                                        // If it doesn't match, stop trying to match...
+                                        // } else if ( disk_sector_buffer[i] != converted_character + 32 ) {
+                                        } else if ( disk_sector_buffer[i] != converted_character ) {
+                                             help_entry_detected = FALSE;  // The characters don't match, so stop searching, and go back to looking for the next marker.
+                                             current_command_position = 0;      // Reset this for the next time we search.
 
-						if (get_key == 3) { /* RUN/STOP or CTRL-C */
-							goto END_HELP;
-						};/*end_if*/
+                                        };//end-if
 
-					} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+                                   // - If we found another entry marker before we've matched the command.
+                                   } else if ( (disk_sector_buffer[i] == marker_character) && (help_entry_detected==TRUE) ) {
+                                        help_entry_detected = FALSE; // We found an entry marker but didn't match the command. Go back to searching for another marker.
 
-			    break;
+                                   };//end-if
 
-			    default:
-					printf("Er. args!\n");
-				break;
-			};//end_switch
+                              };//end-for
 
-			END_HELP :
-			cbm_close(8);
-			if (help_entry_found==FALSE) printf("Not found.\n");
+                          get_key = 0;
+                              if (kbhit() != 0) { /* If key has been pressed */
+                                   get_key = cgetc();
+                              };/*end_if*/
+
+                              if (get_key == 3) { /* RUN/STOP or CTRL-C */
+                                   goto END_HELP;
+                              };/*end_if*/
+
+                         } while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+
+                   break;
+
+                   default:
+                         printf("Er. args!\n");
+                    break;
+               };//end_switch
+
+               END_HELP :
+               cbm_close(8);
+               if (help_entry_found==FALSE) printf("Not found.\n");
 
 
 		// // ********************************************************************************

@@ -474,6 +474,9 @@ void acopy() {
 };//end-func
 
 
+// ********************************************************************************
+// TYPE COMMAND - TEXT - Displays a file as if it were a text file.
+// ********************************************************************************
 void type_text( unsigned char * file_to_type ) {
 
 	memset(disk_sector_buffer,0,sizeof(disk_sector_buffer)); // I think I need to blank out the disk_sector_buffer right here.
@@ -482,6 +485,7 @@ void type_text( unsigned char * file_to_type ) {
 	detected_filetype = detect_filetype(file_to_type, TRUE);
 
 	switch (detected_filetype) {
+		case  1 : /* bad */      break;	// CBM
 		case  2 : /* bad */      break;	// DIR
 		case 16 : strcpy(detected_filetype_char,"s"); break; // SEQ
 		case 17 : strcpy(detected_filetype_char,"p"); break; // PRG
@@ -492,13 +496,6 @@ void type_text( unsigned char * file_to_type ) {
 
 	/* Setup SOURCE FILE for READING */
 	strcpy (drive_command_string, "");
-	// if (get_drive_type(dev) == DRIVE_UIEC) {
-	//     drive_command_string[0] = par+1;
-	// } else if (get_drive_type(dev) == DRIVE_1581) {
-	//     drive_command_string[0] = '0';
-	// } else {
-	// 	drive_command_string[0] = par;
-	// };//end-if
 
 	// Example: device_command[1] = convert_partition_for_drive();
 	drive_command_string[0] = convert_partition_for_drive();
@@ -550,6 +547,9 @@ void type_text( unsigned char * file_to_type ) {
 };//end func
 
 
+// ********************************************************************************
+// TYPE COMMAND - PROGRAM - Displays a file as if it were a BASIC program file.
+// ********************************************************************************
 void type_prg( unsigned char * file_to_type ) {
 
 	// I was helped in this section by studying this code:
@@ -562,15 +562,6 @@ void type_prg( unsigned char * file_to_type ) {
 			/* Setup SOURCE FILE for READING */
 			strcpy (drive_command_string, "");
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) {
-			//     drive_command_string[0] = par+1;
-			// } else if (get_drive_type(dev) == DRIVE_1581) {
-			// 	drive_command_string[0] = '0';
-			// } else {
-			// 	drive_command_string[0] = par;
-			// };//end-if
-
-			// Example: device_command[1] = convert_partition_for_drive();
 			drive_command_string[0] = convert_partition_for_drive();
 
 			drive_command_string[1] = ':';
@@ -683,12 +674,16 @@ void type_prg( unsigned char * file_to_type ) {
 };//end-func
 
 
+// ********************************************************************************
+// TYPE COMMAND - HEXIDECIMAL - Displays a file as series of characters and in hex.
+// ********************************************************************************
 void type_hex( unsigned char * file_to_type ) {
 
 			printf("Detected file: %s ", file_to_type );
 			detected_filetype = detect_filetype(file_to_type, TRUE);
 
 			switch (detected_filetype) {
+				case  1 : /* bad */      break;	// CBM
 				case  2 : /* bad */      break;	// DIR
 				case 16 : strcpy(detected_filetype_char,"s"); break; // SEQ
 				case 17 : strcpy(detected_filetype_char,"p"); break; // PRG
@@ -700,15 +695,6 @@ void type_hex( unsigned char * file_to_type ) {
 			/* Setup SOURCE FILE for READING */
 			strcpy (drive_command_string, "");
 
-			// if (get_drive_type(dev) == DRIVE_UIEC) {
-			//     drive_command_string[0] = par+1;
-			// } else if (get_drive_type(dev) == DRIVE_1581) {
-			// 	drive_command_string[0] = '0';
-			// } else {
-			// 	drive_command_string[0] = par;
-			// };//end-if
-
-			// Example: device_command[1] = convert_partition_for_drive();
 			drive_command_string[0] = convert_partition_for_drive();
 
 			drive_command_string[1] = ':';
@@ -800,8 +786,3 @@ void type_hex( unsigned char * file_to_type ) {
 			printf("\n");
 
 };//end func
-
-
-
-
-

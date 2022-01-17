@@ -4,7 +4,7 @@ A CLI for Commodore Computers!
 
 ![alt text](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot.png?raw=true)
 
-ChiCLI v1.00 (c) 2020 - 2022 Chiron Bramberger
+ChiCLI v1.01 (c) 2020 - 2022 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
@@ -33,9 +33,10 @@ Quotes from public forums:
 *"Deym thanks for this! Looks amazing! Will try out soon."  
 ~ RBJeffrey, Reddit User*
 
+*"Awesome work!"  
+~ Oldbitcollector*
 
-
-*Please note: these public quotes do not imply endorsment of any kind.*
+*Please note: these public quotes do not imply endorsement of any kind.*
 
 ChiCLI - Features List:
 
@@ -83,13 +84,36 @@ Testing successfully with the following hardware:
 - Commodore Flyer Internet Modem --> http://www.retroswitch.com/products/flyer/ (Not Sponsored)
 - Commodore 1581 hardware tested by Glenn Holmer as noted on the TPUG mailing list here: https://www.freelists.org/post/torontocbm/1581-Support,8
 - Commodore 1581 additionally tested as emulated under VICE.
+- Commodore CMD FD-2000 and CMD FD-4000 additionally tested as emulated under VICE.
+- Commodore 1570 and 1571 additionally tested as emulated under VICE.
+- Commodore VICE FS Driver 2.0 additionally tested as emulated under VICE.
+- Additional testing on actual hardware for the CMD HD and Pi1541 graciously provided by Raj W. / ZappedC64. Thanks so much!
 
 Latest News and Changelog:
+
+v1.02 - Mega Refinement Update! - Jan 17 2022
+- Added:     Support for FD-2000 and FD-4000 drives.
+- Added:     Support for 1571 and 1570 drives.
+- Added:     Support for the VICE FS Driver 2.0 which currently *does not* support the local DOS copy command. But you can still copy from another device into a VICE FS device and vice-versa.
+- Added:     A command, "1571", to put the drive into single-sided or double-sided mode.
+- Added:     Compatibility for Pi1541 by waiting just a little longer for it to reset when doing drive detection.
+- Added:     A new mode to the help command for hardware, which searches a separate hardware file. To use it type: "help 1581 -h" and it will output specific support information for the 1581.
+- Updated:   Usability is better now. The commands: cd, d##?:, d##:, and copy, all accept d08: d08; or d08[, which means that muscle memory between using VICE on a PC and using a *real* Commodore 64 is the same.
+- Updated:   The command "chirp" and "sysinfo" now produce a more authentic Commodore PET and Commodore PC style startup chime.
+- Updated:   The command "chirp" and "sysinfo" now also produce almost in-tune chimes on PAL. I say almost because using stretch tuning on the highest note doesn't work, because PAL systems can't go that high in terms frequency.
+- Updated:   The SID detection works a little more flexibly. It now doesn't hang when there is no SID installed, or if a non-standard SID is installed, such as the modern ARMSID.
+- Updated:   The overall hardware detection now gracefully only displays basic information when it can't reliably determine the machine's details. For example it will show things like SID and VIC-II without any more details.
+- Updated:   The sysinfo command so that it detects from device 8 to 15.
+- Updated:   The sysinfo command now has nicer looking output, starting at the top and working it's way down, without leaving any empty lines.
+- Updated:   The type command no longer tries to type CBM "files" which are actually 1581 partitions.
+- Updated:   The type command so that you can force outputing as if the file were a program file. You can also use just one letter for the option.
+- Updated:   The driveset command now supports changing the device number for the following devices: 1541, SD-2, SD2IEC, CMD HD, 1570, 1571, 1581.
+- Note:      There are now, technically, 64 commands, which is fitting. :-)
 
 v1.01 - First Post-Final-Release Update! - Jan 7 2022
 - Added:     Support for the CMD HD! Also supports the real-time clock functions!
 - Added:     Support for the VICE FS Driver v2.0!
-- Added:     More support for the 1581. You can now move in and out of partitions like folders using the 'cd' command. To return to the root partition, use 'cd /' just like any other drive that supports folders. This should also let you enter nested sub-partitions. Also... the 1581... OMG shootme in the face...
+- Added:     More support for the 1581. You can now move in and out of partitions like folders using the 'cd' command. To return to the root partition, use 'cd /' just like any other drive that supports folders. This should also let you enter nested sub-partitions. Also... the 1581... OMG shoot me in the face...
 - Help:      Added a little section in the help for hardware support. Use 'help hardware' to bring it up.
 - Fixed:     Much rework done to the 'cd' and 'part' partition commands.
 - Fixed:     The delete command wasn't getting all the files on the first pass. Now it does. Needed to do some jumping around to restart the scan after every delete.
@@ -361,4 +385,5 @@ Programming NES games in C by Shiru
 
 ---------------------------------------
 </pre>
+
 

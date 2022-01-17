@@ -116,7 +116,9 @@
 #define DRIVE_HD_500  0xC5
 #define DRIVE_HD_1000 0xC1
 #define DRIVE_HD_2000 0xC2
-#define DRIVE_CMDHD   0xCD
+#define DRIVE_CMDHD   0xCD          // I believe all these
+#define DRIVE_FD2000  DRIVE_CMDHD   // work in exactly
+#define DRIVE_FD4000  DRIVE_CMDHD   // the same way.
 
 // MSD Floppy Drives
 #define DRIVE_SD1     0xD1
