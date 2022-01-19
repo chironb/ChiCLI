@@ -5,12 +5,6 @@
 //
 // ********************************************************************************
 
-/* Compiling and deleting object files command, because who needs a make file!
-
-cl65 -g -Osr -t c64 --static-locals chicli.c string_processing.c alias.c hotkeys.c hardware.c commands.c -o chicli.prg && rm *.o && ls -l *.prg
-
-*/
-
     // This program is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
     // the Free Software Foundation, either version 3 of the License, or
@@ -31,7 +25,7 @@ cl65 -g -Osr -t c64 --static-locals chicli.c string_processing.c alias.c hotkeys
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.02"
+#define VERSION "v1.03"
 #define PROGRAM_NAME "chicli"
 
 
@@ -983,7 +977,7 @@ int main( int argc, char* argv[] ) {
 	// ********************************************************************************
 	// SET DEFAULT HOTKEYS
 	// ********************************************************************************
-	set_hotkey(1,"dir"); // like 10 bytes per call
+	set_hotkey(1,"ls"); // like 10 bytes per call
 	// set_hotkey(2,"");
 	set_hotkey(3,"cls");
 	// set_hotkey(4,"");

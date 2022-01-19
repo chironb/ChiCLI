@@ -15,24 +15,34 @@
 // CURSOR MACRO FUNCTIONS
 // ********************************************************************************
 
-#define cursor_home() 																		\
-	if ( position_in_string == strlen(entered_keystrokes) ) {								\
-		cputc(' ');																			\
-	} else {																				\
-		cputc(entered_keystrokes[position_in_string]); /* restore char where cursor was */	\
-	};/*end if*/																			\
-																							\
-	gotox(position_at_prompt_x);															\
-	gotoy(position_at_prompt_y);															\
-																							\
-	position_in_string = 0;																	\
-																							\
-	previous_x = wherex();	/* remember where we are...    */								\
-	previous_y = wherey(); 	/* ...so we can come back here */								\
-	cputc(CURSOR_CHARACTER);																\
-	gotoy(previous_y);  /* go back to...  */												\
-	gotox(previous_x);  /* ...where we were, but move forward 1	*/							\
-//end macro func
+// If the cursor is at the position that is equal to the length of the entered keystrokes,
+// that actually is correct, because the cursor is just past the end of the string
+// that is the entered text. So if the entered text string length is 10, then positions
+// 0 through 9 represent previously entered characters, and position 10 means that
+// the cursor is one past the end, waiting to insert another character onto the end of the
+// string. Therefore --> position_in_string == (strlen(entered_keystrokes)-1) *IS WRONG*!
+
+
+#define cursor_home() 																			\
+	if ( position_in_string != 0 ) {															\
+		if ( position_in_string == strlen(entered_keystrokes) ) { /* See Note above. */         \
+			cputc(' ');																			\
+		} else {																				\
+			cputc(entered_keystrokes[position_in_string]); /* restore char where cursor was */	\
+		};/*end-if*/																			\
+																								\
+		gotox(position_at_prompt_x);															\
+		gotoy(position_at_prompt_y);															\
+																								\
+		position_in_string = 0;																	\
+																								\
+		previous_x = wherex();	 /* remember where we are...             */						\
+		previous_y = wherey(); 	 /* ...so we can come back here          */						\
+		cputc(CURSOR_CHARACTER); /* ...so we can come back here          */						\
+		gotoy(previous_y);       /* go back to...                        */						\
+		gotox(previous_x);       /* ...where we were, but move forward 1 */						\
+	};/*end-if*/																				\
+//end-macro
 
 
 #define cursor_end() 																		\
@@ -42,17 +52,27 @@
 		gotoy(position_at_prompt_y);														\
 																							\
 		result = display_substring(entered_keystrokes, 0);	/* moving forward so +1 */		\
-		if (result == 1) { 									/* has scrolled */				\
+		if (result == 1) { 									/* has scrolled         */		\
 			previous_y = previous_y-result;													\
-		};/*end if*/ 			    														\
+		};/*end-if*/ 			    														\
 																							\
 		position_in_string = strlen(entered_keystrokes);									\
 																							\
-		cputc(CURSOR_CHARACTER);															\
-		gotox(wherex()-1);																	\
+		if (wherex()==39) {																	\
+			/* actual cursor has line wrapped therefore:        */ 							\
+			/* move up one and then move to the last x position */ 							\
+			/* otherwise just move back one                     */ 							\
+			cputc(CURSOR_CHARACTER);														\
+			gotoy(wherey()-1);																\
+			gotox(39);																		\
+		} else {																			\
+			cputc(CURSOR_CHARACTER);														\
+			gotox(wherex()-1);																\
+		};/*end-if*/																		\
 																							\
-	};/*end if*/																			\
-//end macro func
+	};/*end-if*/																			\
+//end-macro
+
 
 
 // we need to create a "stashed" commmand string, so when they press down it gets them back to whatever they werwe typign 
