@@ -4,9 +4,13 @@ A CLI for Commodore Computers!
 
 ![ChiCLI v1 Screenshot](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot.png?raw=true)
 
+![ChiCLI v1 Screenshot 2](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_2.png?raw=true)
+
 ![ChiCLI v1 Screenshot Commands](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Commands.png?raw=true)
 
-ChiCLI v1.03 (c) 2020 - 2022 Chiron Bramberger
+![ChiCLI v1 Screenshot Commands](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Screensaver.png?raw=true)
+
+ChiCLI v1.04 (c) 2020 - 2022 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
@@ -37,6 +41,9 @@ Quotes from public forums:
 
 *"Awesome work!"  
 ~ Oldbitcollector*
+
+*"My new GOTO tool for file management! Thank you!"  
+~ JL on Facebook*
 
 *Please note: these public quotes do not imply endorsement of any kind.*
 
@@ -71,9 +78,12 @@ Testing successfully with the following hardware:
 - The Commodore SX-64
 - TheC64 Mini hardware, which is based on Linux and VICE
 - VICE: Emulated Commodore machines: 64, 64C, SX-64, 4064, NTSC, PAL
-- SD2IEC by Jim Brain --> Get One Here --> http://store.go4retro.com/uiec-sd/ (Not Sponsored)
-- IDE64 tested by Leif Bloomquist --> Leif's GitHub --> https://github.com/LeifBloomquist
+- SD2IEC made by Jim Brain --> Get One Here --> http://store.go4retro.com/uiec-sd/ (Not Sponsored)
+- EasyFlash 3 made by Jim Brain --> Get One Here --> https://store.go4retro.com/easyflash-3/ (Not Sponsored)
+- IDE64 & Ultimate 64 tested by Leif Bloomquist --> Leif's GitHub --> https://github.com/LeifBloomquist
+- MiSTer tested by NML32 in this video: --> https://www.youtube.com/watch?v=DmkLLup9YLY
 - Ultimate 64 tested by Oldbitcollector. Note: When using a Virtual IEC, you need to use "dir *". I'm not sure why. Feel free to donate an Ultimate 64 for me to figure it out and update the software!
+- CMD HD and Pi1541 testing graciously provided by Raj W. / ZappedC64. Thanks so much!
 - Commodore 1541 Disk Drive with stock ROM
 - MSD SD-2 Disk Drive via Serial IEC
 - MSD SD-2 Disk Drive via a Batteries Included IEEE-488 BusCardII
@@ -88,10 +98,29 @@ Testing successfully with the following hardware:
 - Commodore 1581 additionally tested as emulated under VICE.
 - Commodore CMD FD-2000 and CMD FD-4000 additionally tested as emulated under VICE.
 - Commodore 1570 and 1571 additionally tested as emulated under VICE.
-- Commodore VICE FS Driver 2.0 additionally tested as emulated under VICE.
-- Additional testing on actual hardware for the CMD HD and Pi1541 graciously provided by Raj W. / ZappedC64. Thanks so much!
+- VICE FS Driver 2.0 additionally tested as emulated under VICE.
+- SuperCPU additionally tested as emulated under VICE.
+- IDE64 additionally tested as emulated under VICE.
+
+*Please note: the people above are thanked for their help, but that does not imply endorsement or fitness for any purpose of any kind.*
 
 Latest News:
+
+v1.04 - Another Big Update! - Feb 1 2022
+- Added:     Essential support for the IDE64! Also supports the real-time clock functions, and the driveset command! Note: Partitions are not yet supported as well as other advanced features of the IDE64. Look out for future updates!
+- Added:     A ide64 command. There are only two options at the moment: "ide64 -wp" which turns on write-protection and "ide64 -we" which write-enables the drive.
+- Added:     I wrote functions to wait one second and another to wait one decisecond to create delays that don't use CPU cycles as the timing method, so fast C64's still work.
+- Added:     Support for SuperCPU and Ultimate 64! Now things don't hang on fast systems. Also, the SuperCPU is automatically disabled and enabled for DOS disk operations. Without this, fast systems screw up the kernal routines that expact exact timing based on the C64's default CPU 6502 1 MHz speed.
+- Added:     A new speed command, which shows the estimated speed of the CPU in MHz. It also shows the number of raster scan lines it takes for running it's NOP payload. For PAL systems, this is a little less accurate on the C128, but it's close enough. I don't have any real life PAL machines to test with. This gets less accurate on *shenanigan setups* :-P that run faster than 20 MHz like the Ultimate 64. Who needs a 40 MHz Commodore 64? This is out-of-control. At some point I'll get a Turbo Chameleon 64 for future refinements since I can't find or afford a real SuperCPU and it's ridiculous eBay prices!
+- Added:     Support for CMD heads that like using the back arrow for moving up a directory. Like this: "cd←".
+- Fixed:     The re-written cd command needs to send the cd DOS command even if the current drive isn't known to explictly support it. This should help with custom SD2IEC firmware.
+- Fixed:     The ./ command used to exit the program when no file name was given. Now it gives an error when you don't give it a file name to execute.
+- Fixed:     Some devices are sensitive to the amount of time they are given to reset. I've added an additional decisecond delay to the drive reset command. 
+- Updated:   The sysinfo command, which now displays the current estimated speed in MHz using the speed command. For the C128, it shows it's maximum speed, even though ChiCLI runs at regular 1 MHz speed.
+- Updated:   The sysinfo command, which now detects and displays the WDC 65816 cpu.
+- Updated:   The basic keywords array is now only as big as the text needs, through an array of pointers to strings. This saved about 111 bytes!
+- Updated:   The list command to use only KB even with decimal. For example it now lists 0.25 KB instead of 256 B. So now you can use VICE with a listing and copy and paste the text into a spreadsheet and all the file sizes are in the same unit of measurement.
+- Added:     More space to suppport all this new stuff! I can't believe how, with every version, I run out of room. But then somehow I find another trick to free up some space. But that's why I use C Programming and not assembly. I want to get better at writing tight C code. I had to reduce the amount of aliases from 8 to 7 for now, but in a future I'll bring this back to 8.
 
 v1.03 - Small But Important Update! - Jan 17 2022
 - Fixed:     A very rare but old bug where the cursor home key (CTRL+U) and cursor end key (CTRL+O) would lead to a corrupt display.

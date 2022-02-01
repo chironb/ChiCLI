@@ -6,7 +6,7 @@
 // ********************************************************************************
 
 // ********************************************************************************
-// hardware.h 
+// hardware.h
 // ********************************************************************************
 
 // ********************************************************************************
@@ -36,48 +36,8 @@
 #define LIGHT_GRAY  16-1
 
 // ********************************************************************************
-// HARDWARE MACRO FUNCTIONS 
+// DRIVE TYPE DEFINITIONS
 // ********************************************************************************
-#define set_drive_detection(drive,detected) drive_detected[drive-8] = detected
-#define get_drive_detection(drive) drive_detected[drive-8]
-#define set_drive_type(drive,type) drive_detected_type[drive-8] = type
-#define get_drive_type(drive) drive_detected_type[drive-8]
-
-// Convert from device string to DOS ready string
-// Valid devices: 8,9,0,1,2,3,4,5
-// We "return" 255 if the input was out of range or invalid.
-#define convert_device_string(device_character, device_number)    \
-    switch(device_character) {                                    \
-        case '8' : device_number = 8; break;                      \
-        case '9' : device_number = 9; break;                      \
-        case '0' : ;											  \
-        case '1' : ;											  \
-        case '2' : ;											  \
-        case '3' : ;											  \
-        case '4' : ;											  \
-        case '5' : device_number = device_character - 38; break;  \
-        default  : device_number = 255; break; /*INVALID DEVICE*/ \
-    };/*end-switch*/                                              \
-//end-func
-
-// // Convert from partition or drive string to DOS ready string
-// // Valid partitions: a,b,c,d,e,f,g,h,i
-// // We "return" 255 if the input was out of range or invalid.
-// // convert_partition_string(user_input_arg1_string[0], par);
-// #define convert_partition_string(user_input_partition, dos_ready_character) \
-//     switch(user_input_partition) {                                          \
-//         case 'a' : ;                                                        \
-//         case 'b' : ;                                                        \
-//         case 'c' : ;                                                        \
-//         case 'd' : ;                                                        \
-//         case 'e' : ;                                                        \
-//         case 'f' : ;                                                        \
-//         case 'g' : ;                                                        \
-//         case 'h' : ;                                                        \
-//         case 'i' : dos_ready_character = user_input_partition - 17; break;  \
-//         default  : dos_ready_character = 255; break; /*INVALID PARTITION*/  \
-//     };/*end-switch*/                                                        \
-// //end-func
 
 // DRIVE TYPE MACROS
 // Commodore IEEE Floppy
@@ -125,7 +85,8 @@
 #define DRIVE_SD2     0xD2
 
 // Modern SD Card Drives
-#define DRIVE_UIEC    0xEC // TODO:Make one for SD2IEC or find/replace all references.
+#define DRIVE_UIEC    0xEC          // TODO: Make one for SD2IEC or find/replace all references.
+#define DRIVE_IDE64   0x64
 #define DRIVE_PI1541  0x1E
 #define DRIVE_VICEFS  0xF5
 
@@ -148,11 +109,87 @@
 // running drive-detect before every command would be too slow (we need 1 sec after the drive reboots itself) 
 
 
+
 // ********************************************************************************
-// HARDWARE FUNCTIONS 
+// HARDWARE MACRO FUNCTIONS
 // ********************************************************************************
 
-void wait(unsigned int delay);
+// ********************************************************************
+// SuperCPU Functions
+// Disk routines are timing sensitive, so we gotta turn that shit off.
+// See "Load with 1 MHz" here: http://supercpu.cbm8bit.com/comp.htm
+// ********************************************************************
+#define supercpu_enable()  POKE(0xD07B,255) // Enable SuperCPU.  Switch to 20 MHz mode. STA $D07B
+#define supercpu_disable() POKE(0xD07A,255) // Disable SuperCPU. Switch to  1 MHz mode. STA $D07A
+
+
+// MAKING THESE FUNCTIONS ONLY SAVES A FEW BYTES
+// BUT THEY NEED TO HAPPEN AS QUICKLY AS POSSIBLE
+// BECAUSE THEY ARE *TIME* FUNCTIONS!
+
+// These are Commodore 64 only!
+#define delay_one_decisecond()              \
+	POKE(0xDC08,0); /* Start TOD Clock. */  \
+	while(PEEK(0xDC08) == 0){};             \
+//end-func
+
+#define delay_one_second()                  \
+	POKE(0xDC08,0); /* Start TOD Clock. */  \
+	POKE(0xDC09,0); /* Start TOD Clock. */  \
+	while(PEEK(0xDC09) == 0){};             \
+//end-func
+
+#define delay_one_rasterscanline(void)              \
+	last_raster_scan_line = PEEK(0xD012);           \
+	while(PEEK(0xD012) == last_raster_scan_line){}; \
+//end-func
+
+#define set_drive_detection(drive,detected) drive_detected[drive-8] = detected
+#define get_drive_detection(drive) drive_detected[drive-8]
+#define set_drive_type(drive,type) drive_detected_type[drive-8] = type
+#define get_drive_type(drive) drive_detected_type[drive-8]
+
+// Convert from device string to DOS ready string
+// Valid devices: 8,9,0,1,2,3,4,5
+// We "return" 255 if the input was out of range or invalid.
+#define convert_device_string(device_character, device_number)    \
+    switch(device_character) {                                    \
+        case '8' : device_number = 8; break;                      \
+        case '9' : device_number = 9; break;                      \
+        case '0' : ;											  \
+        case '1' : ;											  \
+        case '2' : ;											  \
+        case '3' : ;											  \
+        case '4' : ;											  \
+        case '5' : device_number = device_character - 38; break;  \
+        default  : device_number = 255; break; /*INVALID DEVICE*/ \
+    };/*end-switch*/                                              \
+//end-func
+
+// // Convert from partition or drive string to DOS ready string
+// // Valid partitions: a,b,c,d,e,f,g,h,i
+// // We "return" 255 if the input was out of range or invalid.
+// // convert_partition_string(user_input_arg1_string[0], par);
+// #define convert_partition_string(user_input_partition, dos_ready_character) \
+//     switch(user_input_partition) {                                          \
+//         case 'a' : ;                                                        \
+//         case 'b' : ;                                                        \
+//         case 'c' : ;                                                        \
+//         case 'd' : ;                                                        \
+//         case 'e' : ;                                                        \
+//         case 'f' : ;                                                        \
+//         case 'g' : ;                                                        \
+//         case 'h' : ;                                                        \
+//         case 'i' : dos_ready_character = user_input_partition - 17; break;  \
+//         default  : dos_ready_character = 255; break; /*INVALID PARTITION*/  \
+//     };/*end-switch*/                                                        \
+// //end-func
+
+// ********************************************************************************
+// HARDWARE FUNCTIONS
+// ********************************************************************************
+
+// void wait(unsigned int delay);
 void wait_one_second(void);
 void process_status(char * input_string);
 void pet_chirp(void);

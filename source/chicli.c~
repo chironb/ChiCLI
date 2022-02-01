@@ -574,119 +574,56 @@ void display_logo(unsigned char x, unsigned char y) {
 };//end func
 
 
-unsigned char ntsc_status = TRUE; // NTSC is the TRUE C64!!!
-
-
-void fifteen_nops(void) {
-    /* 10 */	__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
-    /* 10 */	__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
-    /* 10 */	__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
-    /* 10 */	__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
-    /*  5 */	__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
-};//end-func
-
-
 unsigned char 	  raster_scan_line;
 unsigned long int estimated_original_hz;
 unsigned char     estimated_mhz_only;
 unsigned long int estimated_remaining_hz;
 
-// Using this for the fastest loops below for CPU MHz detection.
-// https://cc65.github.io/doc/cc65.html#register-vars
-#pragma register-vars(on)
+void print_speed(void) {
 
-void print_speed(unsigned char display_mhz) {
-
- 	register unsigned char cycles_to_burn; // This is a zero page variable so it's super fast. https://cc65.github.io/doc/cc65.html#register-vars
-	unsigned long int scaling_factor;
-
-	// 1.02 MHz NTSC / 0.985 MHz PAL
-	// The clock speed doubles when 80-column display modes are in use (2.02 MHz for NTSC, 1.97 MHz for PAL)
-	// C64  CLOCK=1022730 for NTSC systems and CLOCK= 985250 for PAL systems.
-	// C128 CLOCK=2045460 for NTSC systems and CLOCK=1970500 for PAL systems.
-
-	// TODO: FUCKING PAL! I FUCKING HATE PAL!!!
-	// TODO: I need to make a function full of 10 NOP's
-	// TODO: And then call that to save some space.
-	// TODO: And then I need to make PAL versions
-	// TODO: For the C64/C128 and the SuperCPU.
-	// TODO: FUCK YOU PAL!
-
-       estimated_mhz_only = 0;
-   estimated_remaining_hz = 0;
 	estimated_original_hz = 0;
-	     raster_scan_line = 0;
-						i = 0;
-		   scaling_factor = 0;
-		   cycles_to_burn = 0;
+	raster_scan_line      = 0;
 
-	SEI(); 				// Disable interupts.
+	SEI(); 																			// Disable interupts.
 
-	if ( detect_cpu() == CPU_65816 ) {
+	while(PEEK(0xD012) != 100){}; 													// Wait until raster scan line 100 so we can ignore the high byte of the scan lins.
 
-		// Display mode $D011 Bit #7: Read: Current raster line (bit #8). C64 generates 262 (0-255 0) scanlines total on NTSC, 312 for Pal
-		// TODO: Do teh proper bit shift thing here!
-		while(1){
-			if ( PEEK(0xD012) == 0 && PEEK(0xD011) == 27 ) break;
-		};//end-while
+	POKE(0xD030,253);																// Put C128 into fast mode.
 
-		for (i = 0; i < 7; ++i) ;		// *THIS IS HERE INTENTIONALLY!* This is because this slows down the SuperCPU and somehow this makes the timing math work out perfectly!
+	// I'm doing this exact combination of NOP and loops because, it takes exactly 40 rasterlines 
+	// on a stock 1 MHz C64 and 2 rasterlines on a SuperCPU, which is exactly 20 times faster.
+	// Running this loop 20 times, which does literally nothing, 10 * 5 + 1 = 51 times, 
+	// for a grand total of 20 * 51 = 1020 do nothings.
 
-		for (i = 1; i <= 60; ++i) {
-		    fifteen_nops();
-		};//end-for
+	// for (i = 1 ; i <= 20 ; ++i){
+	for (i = 1 ; i <= 40 ; ++i){
+		__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
+		__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
+		__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
+		__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
+		__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");__asm__ ("NOP");
+		__asm__ ("NOP"); 															// Do literally nothing... one more time. Makes the math easier.
+	};//end-for
 
-		raster_scan_line = PEEK(0xD012); 												// Record the current raster scan line.
-
-		if (ntsc_status == TRUE ) {
-			scaling_factor = 122727600 ; // This is the NTSC scaling factor for 6502 based systems like the C64, C128 and Ultimate 64.
-		} else {
-			scaling_factor = 120200500 ; // This is the PAL >:-| scaling factor for 6502 based systems like the C64, C128 and Ultimate 64.
-		};//end-if
-
-	} else {
-
-		POKE(0xD030,253);	// Put C128 into fast mode. This comes *BEFORE* we start the timing so it doesn't affect the timing. However, the math works out better above with the SuperCPU.
-
-		// Display mode $D011 Bit #7: Read: Current raster line (bit #8). C64 generates 262 (0-255 0) scanlines total on NTSC, 312 for Pal
-		// TODO: Do teh proper bit shift thing here!
-
-		while(1){
-			if ( PEEK(0xD012) == 0 && PEEK(0xD011) == 27 ) break;
-		};//end-while
-
-		while(cycles_to_burn != 50) { // 50 worked but doesn't scale up preciscly.
-            fifteen_nops();
-			++cycles_to_burn;															// Do literally nothing... one more time. Makes the math easier.
-		};//end-while
-
-		raster_scan_line = PEEK(0xD012); 												// Record the current raster scan line.
-
-		if (ntsc_status == TRUE ) {
-			scaling_factor = 94091160 ; // This is the NTSC scaling factor for 6502 based systems like the C64, C128 and Ultimate 64.
-		} else {
-			scaling_factor = 93598750 ; // This is the PAL >:-| scaling factor for 6502 based systems like the C64, C128 and Ultimate 64.
-		};//end-if
-
-	};//end-if
+	raster_scan_line = PEEK(0xD012); 												// Record the current raster scan line.
 
 	POKE(0xD030,252);																// Put C128 into C64 *normal* mode.
 	CLI(); 																			// Enable interupts.
 
-	//raster_scan_line       = raster_scan_line; 									// Actual count.
-
+	raster_scan_line       = raster_scan_line-100; 									// Actual count.
 	if (raster_scan_line == 0) return;												// If for some reason this completes in less than a raster line of time, and to avoid dividing by zero, exti without printing anything.
-
-	estimated_original_hz  = scaling_factor / raster_scan_line; 					// This is the scaling factor. C64/C128/Ultimate=171818640 and SuperCPU=225000600.
+	// estimated_original_hz  = 40909200 / raster_scan_line; 							// This is the scaling factor.
+	estimated_original_hz  = 81818400 / raster_scan_line; 							// This is the scaling factor.// 81,818,400.00
 	estimated_mhz_only     = estimated_original_hz / 1000000; 						// Get only the MHz.
 	estimated_remaining_hz = estimated_original_hz - (estimated_mhz_only*1000000);	// Get the rest of the hz
 	estimated_remaining_hz = estimated_remaining_hz / 10000; 						// We only want the lazt 2 decimals.
 
-	if (display_mhz == TRUE) printf("%u.%02lu MHz", estimated_mhz_only, estimated_remaining_hz );			// Print the result if it's been told to.
+	printf("This CPU did 2040 NOP’s over %u raster lines.\n%u.%02lu MHz", raster_scan_line, estimated_mhz_only, estimated_remaining_hz );			// Print the result.
 
 };//end-func
 
 
+unsigned char ntsc_status = TRUE; // NTSC is the TRUE C64!!!
 
 void sysinfo(unsigned char is_drive_detection_disabled) {
 
@@ -799,48 +736,34 @@ void sysinfo(unsigned char is_drive_detection_disabled) {
 	//cputs("MOS ");
 
 	switch(cpu_detected) {
-		case 9  : cputs("MOS 8502 ");  break;
-		case 10 : cputs("MOS 8500 ");  break;
-		case 11 : cputs("MOS 6510 ");  break;
+		case 9  : cputs("MOS 8502 "); break;
+		case 10 : cputs("MOS 8500 "); break;
+		case 11 : cputs("MOS 6510 "); break;
 		case 2  : cputs("WDC 65816 "); break;
-		default : cputs("MOS ");       break; // printf("R:%u",cpu_detected); break;
+		default : showquestion();break; // printf("R:%u",cpu_detected); break;
 	};//end-switch
 
-	print_speed(TRUE);
+	print_speed();
 
 	gotoxy(starting_x+SYS_INFO_RESULTS_OFFSET,starting_y+6);
 	cputs("VIC-II ");
 
-	// switch(model_detected) {
-	// 	case 0 : cputs("128D");       break;
-	// 	case 1 : cputs("128");        break;
-	// 	case 2 : cputs("128DCR");     break;
-	// 	case 3 : cputs("64 (Early)"); break;
-	// 	case 5 :
-	// 	case 7 : cputs("64C");        break;
-	// 	case 8 : cputs("SX-64");      break;
-	// 	case 9 : cputs("4064");       break;
-	// 	case 4 :
-	// 	case 6 :
-	// 	default: cputs("64");         break; // Catch-all when we have trouble detecting the exact model.
-	// };//end switch 
-
-    switch(model_detected) {
-        case 0 : case 1 : case 2 : // C128 C128D C128DCR
+    switch(cpu_detected) {
+        case 9 : // C128
             switch(ntscpal_detected) {
                 case 0 : cputs("8564");      break; // VIC-II in the NTSC C128
                 case 1 : cputs("8566/8569"); break; // VIC-II in the PAL C128
             };//end_switch
         break;
 
-        case 5 : case 7 :  // C64C
+        case 10 : // C64C
             switch(ntscpal_detected) {
                 case 0 : cputs("8562"); break; // VIC-II in the NTSC C64C
                 case 1 : cputs("8565"); break; // VIC-II in the PAL C64C
             };//end_switch
         break;
 
-        case 4 : case 6 : case 8 : case 9 :  // C64 SX-64 4064
+        case 11 : // C64
             switch(ntscpal_detected) {
 		        case 0 : cputs("6567");      break; // VIC-II in the NTSC C64
 		        case 1 : cputs("6569/6572"); break; // VIC-II in the PAL C64
@@ -1124,14 +1047,12 @@ int main( int argc, char* argv[] ) {
 	reboot_register.pc = 0xFCE2; // this is the value that get sys'ed to reboot
 
 	// ********************************************************************************
-	// DEFAULT ALIASES
+	// SET DEFAULT ALIASES
 	// ********************************************************************************
 	set_alias( "cd.."    , "cd .." ); // Adds around 25 bytes per call
 	set_alias( cdarrow   , "cd .." ); // Adds around 25 bytes per call
 	set_alias( "cd/"     , "cd /"  ); // Adds around 25 bytes per call
-	set_alias( "?/"      , "? /"   ); // Adds around 25 bytes per call // This can save around 100 bytes when memory is tight.
-	set_alias( "mount"   , "cd"    ); // Adds around 25 bytes per call // This can save around 100 bytes when memory is tight.
-	set_alias( "unmount" , "cd .." ); // Adds around 25 bytes per call // This can save around 100 bytes when memory is tight.
+	// set_alias( "unmount" , "cd .." ); // Adds around 25 bytes per call // This can save around 100 bytes when memory is tight.
 
 
 	// ********************************************************************************
@@ -1141,7 +1062,7 @@ int main( int argc, char* argv[] ) {
 	// set_hotkey(2,"");
 	set_hotkey(3,"cls");
 	// set_hotkey(4,"");
-	set_hotkey(5,"stopwatch");
+	set_hotkey(5,"sw");
 	// set_hotkey(6,"");
 	set_hotkey(7,"ss");
 	// set_hotkey(8,"");
@@ -1668,7 +1589,7 @@ int main( int argc, char* argv[] ) {
 
 			// display_title_text(); // title // This cost 19 bytes!
 			display_description_text(); // description
-			printf("GitHub.com/ChironB/ChiCLI\n\nLic  GNU GPLv3\nVer  %s\nDate %s\nTime %s\n", VERSION, __DATE__, __TIME__); // version
+			printf("GitHub.com/ChironB/ChiCLI\n\nLicence GNU GPLv3\nVer     %s\nDate    %s\nTime    %s\n", VERSION, __DATE__, __TIME__); // version
 
 
 		// ********************************************************************************
@@ -1696,19 +1617,16 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		} else if ( user_input_command_string[0] == '.' && user_input_command_string[1] == '/' ) {
 
-			if (strlen(user_input_command_string) <= 2) goto END_DOTSLASH;
-
 			supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
 
 			// TODO: I think I can pass the entire path as part of the first string I pass to exec() so that it works in different folders!
 			// TODO: rewrite this to inlude all args with quotes on the command line
-			strcpy(extracted_program_name,user_input_command_string+2); // THIS GIVES ME EVERYTHING EXCEPT THE FIRST TWO CHARACTERS
+			strcpy(extracted_program_name,user_input_command_string+2); // THIS GIVES ME EVERYTHING EXCEPT THE FIRST TWO CHARACTERS 
 			exec(extracted_program_name, user_input_arg1_string);
 
-		    return EXIT_SUCCESS;
+			supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
 
-			END_DOTSLASH : ;
-			printf("Er arg\n");
+		    return EXIT_SUCCESS;
 
 
 		// ********************************************************************************
@@ -2210,9 +2128,6 @@ int main( int argc, char* argv[] ) {
 
 					// cd d##:
 					} else if ( user_input_arg1_string[0]=='d' && (user_input_arg1_string[3]==':'||user_input_arg1_string[3]=='['||user_input_arg1_string[3]==';') ) {
-
-						START_CHANGE_DEVICE : ;
-
 						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);
 						if (user_input_arg1_number == 255) { // The above macro "function" updates user_input_arg1_number with 255 if user_input_arg1_string[2] is fucked.
 							printf("Device"); // printf("Er arg:%i\n", number_of_user_inputs);
@@ -2223,8 +2138,6 @@ int main( int argc, char* argv[] ) {
 
 					// cd d##?:
 					} else if (user_input_arg1_string[0] == 'd' && (user_input_arg1_string[4]==':'||user_input_arg1_string[4]=='['||user_input_arg1_string[4]==';')) {
-
-						START_CHANGE_DEVICE_AND_PARTITION : ;
 
 						convert_device_string(user_input_arg1_string[2], user_input_arg1_number);	// Convert number to valid device character
 
@@ -2326,57 +2239,57 @@ int main( int argc, char* argv[] ) {
 			supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
 
 
-		// // ********************************************************************************
-		// // MOUNT COMMAND
-		// // ********************************************************************************
-		// } else if ( matching("mount",user_input_command_string) ) { // About 302 bytes for both
+		// ********************************************************************************
+		// MOUNT COMMAND
+		// ********************************************************************************
+		} else if ( matching("mount",user_input_command_string) ) {
 
-		// 	supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
+			supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
 
-		// 	// If we are on a CMD HD device, and trying to "mount" anything,
-		// 	// that's not supported. So prevent that from happeneing.
-		// 	if (get_drive_type(dev)==DRIVE_CMDHD) goto END_MOUNT;
+			// If we are on a CMD HD device, and trying to "mount" anything,
+			// that's not supported. So prevent that from happeneing.
+			if (get_drive_type(dev)==DRIVE_CMDHD) goto END_MOUNT;
 
-		// 	switch (number_of_user_inputs) {
-		// 		case 2 :
-		// 			strcpy (drive_command_string,"cd:"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
-		// 			strcat (drive_command_string,user_input_arg1_string);
-		// 			strcat (drive_command_string,"");
-		// 			result = cbm_open(1, dev, 15, drive_command_string);
-		// 			cbm_close(1);
-		// 	    break;
+			switch (number_of_user_inputs) {
+				case 2 :
+					strcpy (drive_command_string,"cd:"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
+					strcat (drive_command_string,user_input_arg1_string);
+					strcat (drive_command_string,"");
+					result = cbm_open(1, dev, 15, drive_command_string);
+					cbm_close(1);
+			    break;
 
-		// 	    default :
-		// 	    	END_MOUNT :
-		// 	    	printf("Er!\n");
-		// 	    break;
-		// 	};//end-switch
+			    default :
+			    	END_MOUNT :
+			    	printf("Er!\n");
+			    break;
+			};//end-switch
 
-		// 	supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
+			supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
 
 
-		// // ********************************************************************************
-		// // UNMOUNT COMMAND
-		// // ********************************************************************************
-		// } else if ( matching("unmount",user_input_command_string) ) {
+		// ********************************************************************************
+		// UNMOUNT COMMAND
+		// ********************************************************************************
+		} else if ( matching("unmount",user_input_command_string) ) {
 
-		// 	supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
+			supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
 
-		// 	switch (number_of_user_inputs) {
-		// 		case 1 :
-		// 			strcpy (drive_command_string,"cd"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
-		// 			strcat (drive_command_string,command_cdback);
-		// 			strcat (drive_command_string,"");
-		// 			result = cbm_open(1, dev, 15, drive_command_string);
-		// 			cbm_close(1);
-		// 	    break;	
+			switch (number_of_user_inputs) {
+				case 1 :
+					strcpy (drive_command_string,"cd"); // This doesn't need to take into account the current partition because ONLY SD2IEC supports mounting disk images.
+					strcat (drive_command_string,command_cdback);
+					strcat (drive_command_string,"");
+					result = cbm_open(1, dev, 15, drive_command_string);
+					cbm_close(1);
+			    break;	
 
-		// 	    default : 
-		// 	    	printf("Er arg\n");
-		// 	    //end default
-		// 	};//end switch
+			    default : 
+			    	printf("Er arg\n");
+			    //end default
+			};//end switch
 
-		// 	supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
+			supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
 
 
 		// ********************************************************************************
@@ -2509,55 +2422,45 @@ int main( int argc, char* argv[] ) {
 			};//end-if
 
 
-		// ********************************************************************************
-		//  D##: COMMAND / CHANGE DEVICE
-		// ********************************************************************************
-        } else if ( user_input_command_string[0]=='d' && (user_input_command_string[3]==':'||user_input_command_string[3]=='['||user_input_command_string[3]==';') ) {
+		// // ********************************************************************************
+		// //  D##: COMMAND / CHANGE DEVICE
+		// // ********************************************************************************
+  //       } else if ( user_input_command_string[0]=='d' && (user_input_command_string[3]==':'||user_input_command_string[3]=='['||user_input_command_string[3]==';') ) {
 
-			supercpu_disable();											// Turn off SuperCPU accelleration for timing sensitive disk routines.
-			strcpy (drive_command_string,"cd");							// The CD command that we are (holy shit) jumping into is expecting this to be set.
-			strcpy (user_input_arg1_string, user_input_command_string);	// It's also expecting this, so how much are we actually saving?
-			goto START_CHANGE_DEVICE ; 									// THIS IS INSANE! This jumps into the part of the CD COMMAND which does this. FOR FUCK'S SAKE MAKE THIS A FUNCTION! This saves space and program time.
-																		// After jumping into these routines, the CD COMMAND will turn on SuperCPU accelleration back on when it's finished.
+		// 	supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
 
+		// 	convert_device_string(user_input_command_string[2], user_input_arg1_number);
+		// 	change_drive(user_input_arg1_number);
 
-			// convert_device_string(user_input_command_string[2], user_input_arg1_number);
-			// change_drive(user_input_arg1_number);
-
-			// supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
+		// 	supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
 
 
-		// ********************************************************************************
-		// D##?: COMMAND / CHANGE DEVICE
-		// ********************************************************************************
-        } else if (user_input_command_string[0] == 'd' && (user_input_command_string[4]==':'||user_input_command_string[4]=='['||user_input_command_string[4]==';')) {
+		// // ********************************************************************************
+		// // D##?: COMMAND / CHANGE DEVICE
+		// // ********************************************************************************
+  //       } else if (user_input_command_string[0] == 'd' && (user_input_command_string[4]==':'||user_input_command_string[4]=='['||user_input_command_string[4]==';')) {
 
-			supercpu_disable();											// Turn off SuperCPU accelleration for timing sensitive disk routines.
-			strcpy (drive_command_string,"cd");							// The CD command that we are (holy shit) jumping into is expecting this to be set.
-			strcpy (user_input_arg1_string, user_input_command_string);	// It's also expecting this, so how much are we actually saving?
-			goto START_CHANGE_DEVICE_AND_PARTITION ; 					// THIS IS INSANE! This jumps into the part of the CD COMMAND which does this. FOR FUCK'S SAKE MAKE THIS A FUNCTION! This saves space and program time.
-																		// After jumping into these routines, the CD COMMAND will turn on SuperCPU accelleration back on when it's finished.
+		// 	supercpu_disable(); // Turn off SuperCPU accelleration for timing sensitive disk routines.
 
+		// 	convert_device_string(user_input_command_string[2], user_input_arg1_number);
+		// 	change_drive(user_input_arg1_number);
 
-			// convert_device_string(user_input_command_string[2], user_input_arg1_number);
-			// change_drive(user_input_arg1_number);
+		// 	// convert_partition_string(user_input_command_string[3], par);
+		// 	par = convert_partition_string(user_input_command_string[3]);
 
-			// // convert_partition_string(user_input_command_string[3], par);
-			// par = convert_partition_string(user_input_command_string[3]);
+		// 	if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
+		// 		change_partition_command();
 
-			// if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
-			// 	change_partition_command();
+		// 	} else if (get_drive_type(dev) == DRIVE_1581) {
+		// 		change_1581_root_par(); // We are doing this first, because the request is to change directly to the device's first, second, third, etc... partition.
+		// 		list_and_change_1581_par(TRUE);
 
-			// } else if (get_drive_type(dev) == DRIVE_1581) {
-			// 	change_1581_root_par(); // We are doing this first, because the request is to change directly to the device's first, second, third, etc... partition.
-			// 	list_and_change_1581_par(TRUE);
+		// 	} else {
+		// 		printf("Drive %c set.\n", par+17);
 
-			// } else {
-			// 	printf("Drive %c set.\n", par+17);
+		// 	};//end-if
 
-			// };//end-if
-
-			// supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
+		// 	supercpu_enable(); // Turn SuperCPU accelleration back on since we are done timing sensitive disk routines.
 
 
 		// ********************************************************************************
@@ -3439,10 +3342,9 @@ int main( int argc, char* argv[] ) {
 		// ********************************************************************************
 		// LIST COMMAND
 		// ********************************************************************************
-		} else if ( matching("list",user_input_command_string) 								 ||
+		} else if ( matching("list",user_input_command_string) ||
 		            (user_input_command_string[0]=='l' && user_input_command_string[1]=='s') ||
-		            (user_input_command_string[0]=='d' && user_input_command_string[1]=='i') ||
-		            (user_input_command_string[0]=='l' && user_input_command_string[1]== 0 ) ){
+					(user_input_command_string[0]=='d' && user_input_command_string[1]=='i' && user_input_command_string[2]=='r') ){
 
 			// Supported usage examples:
 			// ls -s
@@ -4032,14 +3934,9 @@ int main( int argc, char* argv[] ) {
         // ********************************************************************************
 		} else if ( matching("speed",user_input_command_string) ) {
 
-			print_speed(FALSE);
-			result = detect_cpu();
-			printf("CPU Type #: %u\n", result);
-			printf("Raster time for NOPs: %u\n", raster_scan_line);
 			printf("CPU Speed: ");
-			print_speed(TRUE);
+			print_speed();
 			printf("\n");
-
 
           // ********************************************************************************
           // HELP COMMAND
@@ -4227,14 +4124,12 @@ int main( int argc, char* argv[] ) {
 			// it contains the same string /6.0
 			// but after teh REM part, which means the same bug or whatever is
 			// screwing up the argument processing as well.
+			if ( strlen(entered_keystrokes) != strlen(user_input_command_string) ){
+				printf("???\n", user_input_command_string);
+			} else {
+				printf("%s ?\n", user_input_command_string);
+			};//end-if
 
-			// if ( strlen(entered_keystrokes) != strlen(user_input_command_string) ){
-			// 	printf("???\n", user_input_command_string);
-			// } else {
-			// 	printf("%s ?\n", user_input_command_string);
-			// };//end-if
-
-			printf("?\n");
 
 		// ********************************************************************************
 		// FINISHED COMMAND PROCESSING AND EXECUTING

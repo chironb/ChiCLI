@@ -235,11 +235,6 @@ void dir_goto_file_index(unsigned char file_index) 	{
 };//end macro func 
 
 
-// TODO: We should keep a byte variable that is set to 0 at the start of copying,
-// TODO: and if there's an error, we set the byte to 1,
-// TODO: and then we can display and copying error message at the end of copying.
-
-
 // ********************************************************************************
 // DCOPY COMMAND - Between Devices Copying - ChiCLI manually shovels bytes around.
 // ********************************************************************************
