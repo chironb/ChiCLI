@@ -101,6 +101,7 @@ Testing successfully with the following hardware:
 - VICE FS Driver 2.0 additionally tested as emulated under VICE.
 - SuperCPU additionally tested as emulated under VICE.
 - IDE64 additionally tested as emulated under VICE.
+- SuperCPU tested by 8-Bit Show And Tell --> https://www.youtube.com/c/8BitShowAndTell
 
 *Please note: the people above are thanked for their help, but that does not imply endorsement or fitness for any purpose of any kind.*
 
