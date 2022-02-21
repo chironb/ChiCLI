@@ -23,130 +23,156 @@
 // string. Therefore --> position_in_string == (strlen(entered_keystrokes)-1) *IS WRONG*!
 
 
-#define cursor_home() 																			\
-	if ( position_in_string != 0 ) {															\
-		if ( position_in_string == strlen(entered_keystrokes) ) { /* See Note above. */         \
-			cputc(' ');																			\
-		} else {																				\
-			cputc(entered_keystrokes[position_in_string]); /* restore char where cursor was */	\
-		};/*end-if*/																			\
-																								\
-		gotox(position_at_prompt_x);															\
-		gotoy(position_at_prompt_y);															\
-																								\
-		position_in_string = 0;																	\
-																								\
-		previous_x = wherex();	 /* remember where we are...             */						\
-		previous_y = wherey(); 	 /* ...so we can come back here          */						\
-		cputc(CURSOR_CHARACTER); /* ...so we can come back here          */						\
-		gotoy(previous_y);       /* go back to...                        */						\
-		gotox(previous_x);       /* ...where we were, but move forward 1 */						\
-	};/*end-if*/																				\
-//end-macro
+// #define cursor_home() 																			\
+// 	if ( position_in_string != 0 ) {															\
+// 		if ( position_in_string == strlen(entered_keystrokes) ) { /* See Note above. */         \
+// 			cputc(' ');																			\
+// 		} else {																				\
+// 			cputc(entered_keystrokes[position_in_string]); /* restore char where cursor was */	\
+// 		};/*end-if*/																			\
+// 																								\
+// 		gotox(position_at_prompt_x);															\
+// 		gotoy(position_at_prompt_y);															\
+// 																								\
+// 		position_in_string = 0;																	\
+// 																								\
+// 		previous_x = wherex();	 /* remember where we are...             */						\
+// 		previous_y = wherey(); 	 /* ...so we can come back here          */						\
+// 		cputc(CURSOR_CHARACTER); /* ...so we can come back here          */						\
+// 		gotoy(previous_y);       /* go back to...                        */						\
+// 		gotox(previous_x);       /* ...where we were, but move forward 1 */						\
+// 	};/*end-if*/																				\
+// //end-macro
 
 
-#define cursor_end() 																		\
-	if ( position_in_string != strlen(entered_keystrokes) ) {								\
-																							\
-		gotox(position_at_prompt_x);														\
-		gotoy(position_at_prompt_y);														\
-																							\
-		result = display_substring(entered_keystrokes, 0);	/* moving forward so +1 */		\
-		if (result == 1) { 									/* has scrolled         */		\
-			previous_y = previous_y-result;													\
-		};/*end-if*/ 			    														\
-																							\
-		position_in_string = strlen(entered_keystrokes);									\
-																							\
-		if (wherex()==39) {																	\
-			/* actual cursor has line wrapped therefore:        */ 							\
-			/* move up one and then move to the last x position */ 							\
-			/* otherwise just move back one                     */ 							\
-			cputc(CURSOR_CHARACTER);														\
-			gotoy(wherey()-1);																\
-			gotox(39);																		\
-		} else {																			\
-			cputc(CURSOR_CHARACTER);														\
-			gotox(wherex()-1);																\
-		};/*end-if*/																		\
-																							\
-	};/*end-if*/																			\
-//end-macro
+// #define cursor_end() 																		\
+// 	if ( position_in_string != strlen(entered_keystrokes) ) {								\
+// 																							\
+// 		gotox(position_at_prompt_x);														\
+// 		gotoy(position_at_prompt_y);														\
+// 																							\
+// 		result = display_substring(entered_keystrokes, 0);	/* moving forward so +1 */		\
+// 		if (result == 1) { 									/* has scrolled         */		\
+// 			previous_y = previous_y-result;													\
+// 		};/*end-if*/ 			    														\
+// 																							\
+// 		position_in_string = strlen(entered_keystrokes);									\
+// 																							\
+// 		if (wherex()==39) {																	\
+// 			/* actual cursor has line wrapped therefore:        */ 							\
+// 			/* move up one and then move to the last x position */ 							\
+// 			/* otherwise just move back one                     */ 							\
+// 			cputc(CURSOR_CHARACTER);														\
+// 			gotoy(wherey()-1);																\
+// 			gotox(39);																		\
+// 		} else {																			\
+// 			cputc(CURSOR_CHARACTER);														\
+// 			gotox(wherex()-1);																\
+// 		};/*end-if*/																		\
+// 																							\
+// 	};/*end-if*/																			\
+// //end-macro
 
-
-
-// we need to create a "stashed" commmand string, so when they press down it gets them back to whatever they werwe typign 
-#define cursor_up() 													\
-	previous_x = position_at_prompt_x;									\
-	previous_y = position_at_prompt_y;									\
-																		\
-	gotox(previous_x);													\
-	gotoy(previous_y);													\
-																		\
-	original_position_at_prompt_y = previous_y;							\
-																		\
-	result = display_blank_substring(entered_keystrokes, 0);			\
-	if (result > 0) { /* has scrolled */								\
-		previous_y = previous_y-result;									\
-	};/*end if*/ 														\
-																		\
-	gotox(previous_x);													\
-	gotoy(previous_y);													\
-																		\
-	strcpy(entered_keystrokes, previous_entered_keystrokes);			\
-																		\
-	result = display_substring(entered_keystrokes, 0);					\
-	if (result > 0) { /* has scrolled */								\
-		previous_y = previous_y-result;									\
-		position_at_prompt_y = position_at_prompt_y-result;				\
-	};/*end if*/ 														\
-																		\
-	previous_x = wherex();			    								\
-	previous_y = wherey();												\
-																		\
-	cputc(CURSOR_CHARACTER);											\
-	gotox(previous_x);													\
-	gotoy(previous_y);													\
-																		\
-	position_in_string = strlen(entered_keystrokes); 					\
-																		\
-	if ( original_position_at_prompt_y == SCREEN_BOTTOM_EDGE  &&  		\
-	     wherey() == SCREEN_BOTTOM_EDGE-1 ) { 							\
-			position_at_prompt_y--;										\
-	};/*end if*/ 														\
-//end macro func
 
 
 // we need to create a "stashed" commmand string, so when they press down it gets them back to whatever they werwe typign 
-#define cursor_down() 																	\
-	previous_x = position_at_prompt_x;													\
-	previous_y = position_at_prompt_y;													\
-																						\
-	gotox(previous_x);																	\
-	gotoy(previous_y);																	\
-																						\
-	result = display_blank_substring(entered_keystrokes, 0);							\
-	cputc(' ');																			\
-																						\
-	if (result > 0) { /* has scrolled */ 												\
-		previous_y = previous_y-result;													\
-	};/*end if*/																		\
-																						\
-	gotox(previous_x);																	\
-	gotoy(previous_y);																	\
-																						\
-	cputc(CURSOR_CHARACTER);															\
-	gotox(previous_x);																	\
-	gotoy(previous_y);																	\
-																						\
-	/* this is right - cursor should be at NEXT char after the end of the string */		\
-	position_in_string = 0;  															\
-																						\
-	memset(entered_keystrokes,0,sizeof(entered_keystrokes));							\
-																						\
-	position_at_prompt_x = wherex();													\
-	position_at_prompt_y = wherey();													\
-//end macro func
+// #define cursor_up() 													\
+// 	previous_x = position_at_prompt_x;									\
+// 	previous_y = position_at_prompt_y;									\
+// 																		\
+// 	gotox(previous_x);													\
+// 	gotoy(previous_y);													\
+// 																		\
+// 	original_position_at_prompt_y = previous_y;							\
+// 																		\
+// 	result = display_blank_substring(entered_keystrokes, 0);			\
+// 	if (result > 0) { /* has scrolled */								\
+// 		previous_y = previous_y-result;									\
+// 	};/*end if*/ 														\
+// 																		\
+// 	gotox(previous_x);													\
+// 	gotoy(previous_y);													\
+// 																		\
+// 	/* strcpy(entered_keystrokes, previous_entered_keystrokes);	*/		\
+// 																		\
+//     /* press up */														\
+//     if (position_in_history == 255) {									\
+//         strcpy(command_history[0],entered_keystrokes);					\
+//         position_in_history = 1;									    \
+//     } else if (position_in_history >= MAX_COMMAND_HISTORY-1) {			\
+//         position_in_history = MAX_COMMAND_HISTORY-1;					\
+//     } else {									                        \
+//         ++position_in_history;									        \
+//     };/*end-if*/									                    \
+//     strcpy(entered_keystrokes,command_history[position_in_history]);	\
+// 																		\
+// 	result = display_substring(entered_keystrokes, 0);					\
+// 	if (result > 0) { /* has scrolled */								\
+// 		previous_y = previous_y-result;									\
+// 		position_at_prompt_y = position_at_prompt_y-result;				\
+// 	};/*end-if*/ 														\
+// 																		\
+// 	previous_x = wherex();			    								\
+// 	previous_y = wherey();												\
+// 																		\
+// 	cputc(CURSOR_CHARACTER);											\
+// 	gotox(previous_x);													\
+// 	gotoy(previous_y);													\
+// 																		\
+// 	position_in_string = strlen(entered_keystrokes); 					\
+// 																		\
+// 	if ( original_position_at_prompt_y == SCREEN_BOTTOM_EDGE  &&  		\
+// 	     wherey() == SCREEN_BOTTOM_EDGE-1 ) { 							\
+// 			position_at_prompt_y--;										\
+// 	};/*end if*/ 														\
+// //end macro func
+
+
+// // we need to create a "stashed" commmand string, so when they press down it gets them back to whatever they werwe typign 
+// #define cursor_down() 																	\
+// 	previous_x = position_at_prompt_x;													\
+// 	previous_y = position_at_prompt_y;													\
+// 																						\
+// 	gotox(previous_x);																	\
+// 	gotoy(previous_y);																	\
+// 																						\
+// 	result = display_blank_substring(entered_keystrokes, 0); */							\
+// 	cputc(' ');																			\																						\
+// 																						\
+// 	if (result > 0) { /* has scrolled */ 												\
+// 		previous_y = previous_y-result;													\
+// 	};/*end-if*/																		\
+// 																						\
+// 	gotox(previous_x);																	\
+// 	gotoy(previous_y);																	\
+// 																						\
+// 	cputc(CURSOR_CHARACTER);															\
+// 	gotox(previous_x);																	\
+// 	gotoy(previous_y);																	\
+// 																						\
+// 	/* this is right - cursor should be at NEXT char after the end of the string */		\
+// 	position_in_string = 0;  															\
+// 																						\
+// 	/* memset(entered_keystrokes,0,sizeof(entered_keystrokes));	*/						\
+// 																						\
+//     /* press down */																	\
+//     position_in_history = 2;															\
+//     if (position_in_history == 255 || position_in_history == 0 ) {						\
+//         /* Do nothing */																\
+//     } else {																			\
+//         --position_in_history;															\
+//         strcpy(entered_keystrokes,command_history[position_in_history]);				\
+//     };/*end-if*/																		\
+// 																						\
+// 	result = display_substring(entered_keystrokes, 0);									\
+// 	if (result > 0) { /* has scrolled */												\
+// 		previous_y = previous_y-result;													\
+// 		position_at_prompt_y = position_at_prompt_y-result;								\
+// 	};/*end-if*/ 																		\
+// 																						\
+// 	position_at_prompt_x = wherex();													\
+// 	position_at_prompt_y = wherey();													\
+// //end macro func
 
 
 #define cursor_backspace() 																		\
@@ -166,7 +192,7 @@
 		previous_y = wherey();	/* .remember where we are... so we can come back here	*/  	\
 		gotox(SCREEN_RIGHT_EDGE);         		/*go to the end of the line */					\
 		cputc(CURSOR_CHARACTER);	       			/*draw teh cursor*/							\
-		result = result = display_substring(entered_keystrokes, position_in_string);			\
+		result = display_substring(entered_keystrokes, position_in_string);						\
 																								\
 		if (result == 1) { 			/* has scrolled*/											\
 			previous_y = previous_y-1;															\
@@ -369,87 +395,91 @@
 //end macro func
 
 
-#define cursor_add_character() 														\
-	/* ADD CHARACTER TO END */														\
-	if ( position_in_string == strlen(entered_keystrokes) ) { /* if at end */		\
-	/* is teh command string  not full? if it is, do nothing */			 			\
-		if ( string_add_character(entered_keystrokes, keystroke) != 0 ) { 			\
-			if (wherex() == SCREEN_RIGHT_EDGE-1) {									\
-				cputc(keystroke);													\
-				previous_x = SCREEN_RIGHT_EDGE;										\
-				previous_y = wherey();												\
-				cputc(CURSOR_CHARACTER);											\
-			  	gotox(previous_x);													\
-			  	gotoy(previous_y);													\
-			} else if (wherex() == SCREEN_RIGHT_EDGE) {								\
-				if (wherex()==SCREEN_RIGHT_EDGE && wherey()==SCREEN_BOTTOM_EDGE){	\
-					printf("\n");													\
-					gotoy(SCREEN_BOTTOM_EDGE-1);									\
-					gotox(SCREEN_RIGHT_EDGE);										\
-					position_at_prompt_y--;	/* since we scrolled */					\
-				};/*end if*/ 														\
-				cputc(keystroke);													\
-				cputc(CURSOR_CHARACTER);											\
-				gotox(SCREEN_LEFT_EDGE);			    							\
-			} else {																\
-				cputc(keystroke);													\
-				cputc(CURSOR_CHARACTER);											\
-				gotox(wherex()-1);													\
-			};/*end if*/															\
-			position_in_string++;													\
-		};/*end if*/																\
-																					\
-	/* INSERT CHARACTER IN THE MIDDLE 		*/										\
-	/* if anywhere else but string not full */										\
-	} else if (strlen(entered_keystrokes) != (MAX_ENTERED_KEYSTROKES-1) ) { 		\
-		if (wherex() == SCREEN_RIGHT_EDGE-1) {										\
-			cputc(keystroke);														\
-			previous_x = SCREEN_RIGHT_EDGE;											\
-			previous_y = wherey();													\
-			result = display_substring(entered_keystrokes, position_in_string); 	\
-			if (result == 1) { /* has scrolled */									\
-				previous_y = previous_y-result;										\
-			};/*end if*/															\
-			gotox(previous_x);														\
-			gotoy(previous_y);														\
-			cputc(CURSOR_CHARACTER);												\
-			gotox(previous_x);														\
-			gotoy(previous_y);														\
-		} else if (wherex() == SCREEN_RIGHT_EDGE) {									\
-			if ( wherex() == SCREEN_RIGHT_EDGE && wherey() == SCREEN_BOTTOM_EDGE) {	\
-				printf("\n");														\
-				gotoy(SCREEN_BOTTOM_EDGE-1);										\
-				gotox(SCREEN_RIGHT_EDGE);											\
-				position_at_prompt_y--;	/* since we scrolled */						\
-			};/*end if*/															\
-			cputc(keystroke);														\
-			gotox(SCREEN_LEFT_EDGE);												\
-	    	previous_y = wherey();													\
-			result = display_substring(entered_keystrokes, position_in_string); 	\
-			if (result == 1) { /* since we scrolled */								\
-				previous_y = previous_y-result;										\
-			};/*end if*/ 															\
-			gotox(SCREEN_LEFT_EDGE);												\
-			gotoy(previous_y);														\
-			cputc(CURSOR_CHARACTER); 												\
-			gotox(SCREEN_LEFT_EDGE);												\
-			gotoy(previous_y);														\
-		} else {																	\
-			cputc(keystroke);		    											\
-	    	previous_x = wherex();													\
-	    	previous_y = wherey();		    										\
-	    	result = display_substring(entered_keystrokes, position_in_string); 	\
-			if (result == 1) { /* since we scrolled */								\
-				previous_y = previous_y-result;										\
-			};/*end if*/			    											\
-	    	gotox(previous_x);														\
-	    	gotoy(previous_y);														\
-	    	cputc(CURSOR_CHARACTER);												\
-			gotox(previous_x);														\
-			gotoy(previous_y);														\
-		};/*end if*/																\
-																					\
-		string_insert_character(entered_keystrokes, keystroke, position_in_string);	\
-		position_in_string++;														\
-	};/*end if*/																	\
-//end macro func
+// #define cursor_add_character() 														\
+// 	/* ADD CHARACTER TO END */														\
+// 	if ( position_in_string == strlen(entered_keystrokes) ) { /* if at end */		\
+// 	/* is teh command string  not full? if it is, do nothing */			 			\
+// 		if ( string_add_character(entered_keystrokes, keystroke) != 0 ) { 			\
+// 			if (wherex() == SCREEN_RIGHT_EDGE-1) {									\
+// 				cputc(keystroke);													\
+// 				previous_x = SCREEN_RIGHT_EDGE;										\
+// 				previous_y = wherey();												\
+// 				cputc(CURSOR_CHARACTER);											\
+// 			  	gotox(previous_x);													\
+// 			  	gotoy(previous_y);													\
+// 			} else if (wherex() == SCREEN_RIGHT_EDGE) {								\
+// 				if (wherex()==SCREEN_RIGHT_EDGE && wherey()==SCREEN_BOTTOM_EDGE){	\
+// 					printf("\n");													\
+// 					gotoy(SCREEN_BOTTOM_EDGE-1);									\
+// 					gotox(SCREEN_RIGHT_EDGE);										\
+// 					position_at_prompt_y--;	/* since we scrolled */					\
+// 				};/*end if*/ 														\
+// 				cputc(keystroke);													\
+// 				cputc(CURSOR_CHARACTER);											\
+// 				gotox(SCREEN_LEFT_EDGE);			    							\
+// 			} else {																\
+// 				cputc(keystroke);													\
+// 				cputc(CURSOR_CHARACTER);											\
+// 				gotox(wherex()-1);													\
+// 			};/*end if*/															\
+// 			position_in_string++;													\
+// 		};/*end if*/																\
+// 																					\
+// 	/* INSERT CHARACTER IN THE MIDDLE 		*/										\
+// 	/* if anywhere else but string not full */										\
+// 	} else if (strlen(entered_keystrokes) != (MAX_ENTERED_KEYSTROKES-1) ) { 		\
+// 		if (wherex() == SCREEN_RIGHT_EDGE-1) {										\
+// 			cputc(keystroke);														\
+// 			previous_x = SCREEN_RIGHT_EDGE;											\
+// 			previous_y = wherey();													\
+// 			result = display_substring(entered_keystrokes, position_in_string); 	\
+// 			if (result == 1) { /* has scrolled */									\
+// 				previous_y = previous_y-result;										\
+// 			};/*end if*/															\
+// 			gotox(previous_x);														\
+// 			gotoy(previous_y);														\
+// 			cputc(CURSOR_CHARACTER);												\
+// 			gotox(previous_x);														\
+// 			gotoy(previous_y);														\
+// 		} else if (wherex() == SCREEN_RIGHT_EDGE) {									\
+// 			if ( wherex() == SCREEN_RIGHT_EDGE && wherey() == SCREEN_BOTTOM_EDGE) {	\
+// 				printf("\n");														\
+// 				gotoy(SCREEN_BOTTOM_EDGE-1);										\
+// 				gotox(SCREEN_RIGHT_EDGE);											\
+// 				position_at_prompt_y--;	/* since we scrolled */						\
+// 			};/*end if*/															\
+// 			cputc(keystroke);														\
+// 			gotox(SCREEN_LEFT_EDGE);												\
+// 	    	previous_y = wherey();													\
+// 			result = display_substring(entered_keystrokes, position_in_string); 	\
+// 			if (result == 1) { /* since we scrolled */								\
+// 				previous_y = previous_y-result;										\
+// 			};/*end if*/ 															\
+// 			gotox(SCREEN_LEFT_EDGE);												\
+// 			gotoy(previous_y);														\
+// 			cputc(CURSOR_CHARACTER); 												\
+// 			gotox(SCREEN_LEFT_EDGE);												\
+// 			gotoy(previous_y);														\
+// 		} else {																	\
+// 			cputc(keystroke);		    											\
+// 	    	previous_x = wherex();													\
+// 	    	previous_y = wherey();		    										\
+// 	    	result = display_substring(entered_keystrokes, position_in_string); 	\
+// 			if (result == 1) { /* since we scrolled */								\
+// 				previous_y = previous_y-result;										\
+// 			};/*end if*/			    											\
+// 	    	gotox(previous_x);														\
+// 	    	gotoy(previous_y);														\
+// 	    	cputc(CURSOR_CHARACTER);												\
+// 			gotox(previous_x);														\
+// 			gotoy(previous_y);														\
+// 		};/*end if*/																\
+// 																					\
+// 		string_insert_character(entered_keystrokes, keystroke, position_in_string);	\
+// 		position_in_string++;														\
+// 	};/*end if*/																	\
+// //end macro func
+
+void cursor_home(void);
+void cursor_end(void);
+void cursor_add_character(void);

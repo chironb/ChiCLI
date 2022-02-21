@@ -4,13 +4,13 @@ A CLI for Commodore Computers!
 
 ![ChiCLI v1 Screenshot](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot.png?raw=true)
 
-![ChiCLI v1 Screenshot 2](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_2.png?raw=true)
+![ChiCLI v1 Screensaver Temperature](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Screensaver_Temperature.png?raw=true)
 
 ![ChiCLI v1 Screenshot Commands](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Commands.png?raw=true)
 
-![ChiCLI v1 Screenshot Commands](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Screensaver.png?raw=true)
+![ChiCLI v1 Screensaver Date and Time](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Screensaver.png?raw=true)
 
-ChiCLI v1.04 (c) 2020 - 2022 Chiron Bramberger
+ChiCLI v1.05 (c) 2020 - 2022 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
@@ -105,7 +105,48 @@ Testing successfully with the following hardware:
 
 *Please note: the people above are thanked for their help, but that does not imply endorsement or fitness for any purpose of any kind.*
 
+Compilation Notes:
+
+- You can download everything and run the compilation script on Linux and Mac OS to build the files and disk image.
+- You need cc65 to compile it: https://cc65.github.io/ https://github.com/cc65/cc65
+- You also can use cc1541 with the compilation script to automatically create the correctly formatted disk image: https://csdb.dk/release/?id=196448 https://bitbucket.org/PTV_Claus/cc1541/src/master/
+- *I will update these instructions in the future.*
+
 Latest News:
+
+v1.05 - Exciting Update! - Feb 21 2022
+- Added:     A new "temp" command which reports the temperature of the CPU! Works on standard stock C64 and C64C machines *without* any modifications or extra hardware! It will only attempt to run on currently supported machines.
+- Updated:   The "ss" screensaver command can now display the CPU temperature instead of the time and date.
+- Added:     A much requested feature: command history! You can now go back and forth in your entered command history, up to five levels deep!
+- Added:     A new CTRL+D shortcut that cycles through valid devices just like in JiffyDOS.
+- Added:     A new "@" command which is similar to the "dos" command, but executes right away without asking. For people who are usd to JiffyDOS.
+- Added:     A new "$" shortcut which is similar to the "list" command. For people who are usd to JiffyDOS.
+- Added:     A "supercpu" command that lets you run in Turbo Mode or Normal mode.
+- Faster:    The "help" command now loads help much faster than before! The help files have been split up so there's less text to search through.
+- Faster:    The "list" command and "cd" command are now positioned to run as quickly as possible, making the program feel faster and more responsive.
+- Faster:    SuperCPU users can now enjoy the program program running in Turbo Mode whenever it isn't doing anything disk related. Disk commands are now wrapped such that the system throttles down to normal speed, does the disk stuff, and then immediately returns to Turbo Mode.
+- Merged:    The changelabel and changeid commands into one new command called "relabel". It works like this: "relabel chicli-disk 15".
+- Merged:    The dec2bin, dec2hex, hex2dec, into one new comamnd "convert" which takes an option to determine what is being converted.
+- Updated:   The "stopwatch" command now supports up to 59:59.9 mins/secs/decisecs. It also uses the TOD clock on the CIA instead of counting jiffies.
+- Updated:   The "pwd" command now displays the current directory, or disk label, along with the device and partition / drive information.
+- Updated:   The "help" command now checks to make sure the help file it's trying to load is in fact a SEQ file.
+- Updated:   The help files and manual files with updated information on many commands.
+- Updated:   The drive detection takes less in space, is faster, and also now the BusCardII devices that aren't connected are ignored properly.
+- Fixed:     If something screws up the cursor color, it is restored the next time the prompt is displayed.
+- Fixed:     The "=" maths command now tolerates unspaced input, such as = 2*2 instead of = 2 * 2.
+- Fixed:     The alias command now trims whitespace before it runs so it isn't thrown off by something like "myalias " is entered.
+- Fixed:     The speed command now returns the expected speed in MHz on systems like the SuperCPU and Ultimate 64.
+- Fixed:     The following command will now check the arguments given and will not run unless they are correct: dos, echo, part, peek, peeking, poke, run, sd2iec, sys, run.
+- Fixed:     The "run" command and the "./" now check to make sure the given file exists and is actually a PRG program file.
+- Fixed:     The "poke" command will now fail if you give it commas. This isn't BASIC.
+- Fixed:     A bug in "list" that also revealed itself in the "$" shortcut. Using this could overwrite options for the "ss" screensaver command. This is a strcpy() / strcat() string copying error, as the second string is bigger than the first string, which is blowing past the end of the first string. The solution is *strncpy()* or *strncat()*, since these let you set a specific limit on how many characters you end up copying.
+- Renamed:   The "screensaver" command is now just the "ss" command.
+- Renamed:   The "driveset" command is now "drvset".
+- Renamed:   The "drivedetect" command is now "drvdetect".
+- Renamed:   The "initialize" command is now "init".
+- Dropped:   The "restart" command was dropped as it wasn't really worthwhile and the RAM and program size could be put to better use.
+- Dropped:   The "vars" command, which took up too much room, and wasn't that helpful beyond debugging. The alias and hotkey commands now show the information you would have used vars for in the part. For example the number of aliases and how many characters long they can be.
+- Updated:   The build script and automated many tasks to improve the speed with which I can work on and test ChiCLI.
 
 v1.04 - Another Big Update! - Feb 1 2022
 - Added:     Essential support for the IDE64! Also supports the real-time clock functions, and the driveset command! Note: Partitions are not yet supported as well as other advanced features of the IDE64. Look out for future updates!

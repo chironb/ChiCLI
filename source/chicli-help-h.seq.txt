@@ -1,0 +1,362 @@
+_HARDWARE
+ChiCLI Hardware Information
+
+COMPREHENSIVE SUPPORT:
+These devices are supported by
+most of the relevant commands.
+  SD2IEC          CMD HD
+  Commodore 1541  M.S.D. SD-2
+  Commodore 1570  Commodore 2031
+  Commodore 1571  Commodore 4040
+  Commodore 1581  Commodore SFD-1001
+  VICE FS Driver v2.0
+
+ESSENTIAL SUPPORT:
+Support for these devices is
+either limited to certain
+commands or the device has only
+been tested via emulation.
+  CMD FD2000 / FD4000
+  Flyer Internet Modem
+
+_SD2IEC
+SD2IEC
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  changeid / changelabel (mounted d64)
+  datetime / date / time / filedate
+  drvset
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+UNSUPORTED COMMANDS:
+  1571
+  diskcopy
+
+TESTING:
+  Actual Hardware
+
+_1541
+Commodore 1541
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  changeid / changelabel (mounted d64)
+  drvset
+
+UNSUPORTED COMMANDS:
+  1571
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+TESTING:
+  Actual Hardware
+
+_1570
+Commodore 1570
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  1571
+  drvset
+
+UNSUPORTED COMMANDS:
+  1571
+  changeid / changelabel (mounted d64)
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+TESTING:
+  VICE Emulation
+
+_1571
+Commodore 1571
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  1571
+  drvset
+
+UNSUPORTED COMMANDS:
+  changeid / changelabel (mounted d64)
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+TESTING:
+  VICE Emulation
+
+_1581
+Commodore 1581
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  cd, part, format, drvset
+
+UNSUPORTED COMMANDS:
+  cd..
+  changeid / changelabel (mounted d64)
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  sd2iec
+
+TESTING: VICE Emulation
+
+NOTES: You can treat 1581 partitions
+as if they were directories or
+partitions. The 1581 doesn't support
+sending files driectly to a partition
+like this: "copy * d08a:" Instead go
+into the partition you want, and then
+copy to it like this: "copy * d08:".
+
+_2031
+Commodore 2031
+
+This drive is fully supported, when
+used with an IEEE-488 adapter.
+
+SUPPORTED SPECIAL COMMANDS:
+  changeid / changelabel
+  drvset
+
+UNSUPORTED COMMANDS:
+  1571
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+TESTING:
+  Actual Hardware with a BusCardII
+
+_4040
+Commodore 4040
+
+This drive is fully supported, when
+used with an IEEE-488 adapter.
+
+SUPPORTED SPECIAL COMMANDS:
+  diskcopy
+  drvset
+
+UNSUPORTED COMMANDS:
+  1571
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+TESTING:
+  Actual Hardware with a BusCardII
+
+_SFD-1001
+Commodore SFD-1001
+
+This drive is fully supported, when
+used with an IEEE-488 adapter.
+
+SUPPORTED SPECIAL COMMANDS:
+  drvset
+
+UNSUPORTED COMMANDS:
+  1571
+  datetime / date / time / filedate
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+TESTING:
+  Actual Hardware with a BusCardII
+
+_SD-2
+Commodore M.S.D. SD-2
+
+This drive is fully supported,
+either over the IEC serial bus,
+or when used with an IEEE-488
+adapter.
+
+SUPPORTED COMMANDS:
+  changeid / changelabel
+  diskcopy
+  drvset
+  part
+
+UNSUPORTED COMMANDS:
+  1571
+  sd2iec
+
+TESTING:
+  Actual Hardware and a BusCardII
+
+_CMDHD
+CMD HD
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  datetime / date / time / filedate
+  drvset
+  mkdir / rmdir / mount / unmount
+  part
+  sd2iec
+
+UNSUPORTED COMMANDS:
+  1571
+  diskcopy
+  sd2iec
+
+TESTING:
+  Actual Hardware
+
+_VICEFS
+VICE FS Driver v2.0
+
+This drive is fully supported.
+
+SUPPORTED SPECIAL COMMANDS:
+  mkdir, rmdir
+
+UNSUPORTED COMMANDS:
+  1571, copy, 
+  datetime, date, time, filedate
+  diskcopy, drvset, mount, unmount
+  part, sd2iec
+
+TESTING: VICE Emulation
+
+NOTES:
+  The VICE Emulator's FS Driver 2.0
+does not support the DOS copy command.
+This is noted in the VICE source code
+as of Jan 2022. ChiCLI can still copy
+from a mounted device & another device
+using the VICE FS Driver.
+
+_FD2000
+CMD FD2000
+
+It is assumed this device works exactly
+like a CMD HD.
+
+TESTING:
+  VICE Emulation
+
+_FD4000
+CMD FD4000
+
+It is assumed this device works exactly
+like a CMD HD.
+
+TESTING:
+  VICE Emulation
+
+_FLYER
+Flyer Internet Modem
+
+This device only has basic support.
+
+It's complicated...
+
+TESTING:
+  Actual Hardware
+
+_IDE64
+IDE64
+
+This drive has essential support.
+
+SUPPORTED SPECIAL COMMANDS:
+  copy (DEVICE TO DEVICE)
+  datetime / date / time / filedate
+  drvset / mkdir / rmdir
+  ide64
+
+UNSUPORTED COMMANDS:
+  1571 / sd2iec
+  copy (WITHIN A DEVICE)
+  diskcopy / mount / unmount / part
+
+TESTING: VICE Emulation
+         Volunteer Testing on Hardware
+
+NOTES:  The IDE64 does not support the
+DOS copy command. ChiCLI can still
+copy between a mounted device and
+an IDE64 device.
+
+_MISTER
+MiSTer FPGA
+
+This machine has essential support.
+
+TESTING:
+Volunteer Testing on Hardware
+
+NOTES: This system appears to
+work with hardware IEC devices.
+
+_SUPERCPU
+SuperCPU
+
+This accelerator has essential support,
+as well as the supercpu command, which
+enabled or disables Turbo Mode.
+
+SUPPORTED SPECIAL COMMANDS:
+  supercpu
+  speed
+
+TESTING:
+VICE Emulation
+Volunteer Testing on Hardware
+
+NOTES: Disk commands automatically
+slow down the CPU to due to timing
+requirements.
+
+_THEC64MINI
+The C64 Mini
+
+This machine has essential support.
+
+TESTING:
+Tested on real hardware.
+
+_THEC64
+The C64
+
+This machine has essential support.
+
+TESTING: Currently untested.
+
+_ULTIMATE64
+Ultimate 64
+
+This accelerator has essential support.
+The speed command has tweaks to output
+the correctly set speed in MHz.
+
+SUPPORTED SPECIAL COMMANDS:
+  speed
+
+TESTING:
+Volunteer Testing on Hardware
+
+NOTES: This device appears to
+automatically deal with IEC device
+speed throttling.
+

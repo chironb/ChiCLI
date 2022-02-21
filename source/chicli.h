@@ -10,6 +10,24 @@
 // ********************************************************************************
 // MACRO VARS
 // ********************************************************************************
+
+// **************
+// CURRENT VALUES
+// **************
+/*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
+#define MAX_COMMODORE_DOS_FILENAME 16 // Commodore DOS maximum length of filenames is 16 characters
+#define MAX_ENTERED_KEYSTROKES 64     // Commodore 40 column machines let you input a max line length of 80 characters
+#define MAX_LENGTH_COMMAND 64 	      // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
+#define MAX_LENGTH_ARGS 32 		      // Commodore DOS maximum length of command string is 40 characters
+/*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
+#define MAX_COMMAND_HISTORY ( 5 + 1 ) // This is the press up command history length plus one for the currently stashed entered keystrokes.
+#define MAX_DISK_BUFFER 256           // This is the size of the buffer used when transfering data over the UIEC bus.
+#define MAX_ALIASES 8			      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
+#define MAX_ALIAS_LENGTH 16  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
+#define MAX_HOTKEYS 8 			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
+#define MAX_HOTKEY_LENGTH 16	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
+/*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
+
 // ********************** ADJUST THESE WHEN RAM IS EXCEEDED ***********************
 // This section is about trying to find the balance between 
 // useabilty, performance and RAM usage.
@@ -35,55 +53,10 @@
 // tight as it is, and an overall overhaul is probably required to get more
 // features packed into a C Programming based 8-bit 6502 based program.
 
-// ************
-// CURRENT VALUES
-// ************
-/*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-#define MAX_COMMODORE_DOS_FILENAME 16 // Commodore DOS maximum length of filenames is 16 characters
-#define MAX_ENTERED_KEYSTROKES 50     // Commodore 40 column machines let you input a max line length of 80 characters
-#define MAX_LENGTH_COMMAND 50 	      // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
-#define MAX_LENGTH_ARGS 40 		      // Commodore DOS maximum length of command string is 40 characters
-/*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-#define MAX_DISK_SECTOR_BUFFER 255    // This is the size of the buffer used when transfering data over the UIEC bus.
-#define MAX_ALIASES 7			      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
-#define MAX_ALIAS_LENGTH 25  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
-#define MAX_HOTKEYS 8  			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
-#define MAX_HOTKEY_LENGTH 25	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
-/*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-//
-// // ****************************
-// // LOWEST MEMORY SAVINGS VALUES
-// // ****************************
-// /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-// #define MAX_COMMODORE_DOS_FILENAME 16 // Commodore DOS maximum length of filenames is 16 characters
-// #define MAX_ENTERED_KEYSTROKES 55     // Commodore 40 column machines let you input a max line length of 80 characters
-// #define MAX_LENGTH_COMMAND 55 	      // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
-// #define MAX_LENGTH_ARGS 25 		      // Commodore DOS maximum length of command string is 40 characters
-// /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-// #define MAX_DISK_SECTOR_BUFFER 200    // This is the size of the buffer used when transfering data over the UIEC bus.
-// #define MAX_ALIASES 6    		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
-// #define MAX_ALIAS_LENGTH 25  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
-// #define MAX_HOTKEYS 8  			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
-// #define MAX_HOTKEY_LENGTH 25 	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
-// /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-// // ************
-// // IDEAL VALUES
-// // ************
-// /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-// #define MAX_COMMODORE_DOS_FILENAME 16 // Commodore DOS maximum length of filenames is 16 characters
-// #define MAX_ENTERED_KEYSTROKES 70     // Commodore 40 column machines let you input a max line length of 80 characters
-// #define MAX_LENGTH_COMMAND 70 	      // Commodore DOS maximum length of filenames is 16 characters, but we also want quotes around the string, so we add two characters for that // fuck it make it 40 
-// #define MAX_LENGTH_ARGS 40 		      // Commodore DOS maximum length of command string is 40 characters
-// /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
-// #define MAX_DISK_SECTOR_BUFFER 255    // This is the size of the buffer used when transfering data over the UIEC bus.
-// #define MAX_ALIASES 8   		      // This is the number of slots available for setting aliases. This takes up a lot of RAM!
-// #define MAX_ALIAS_LENGTH 40  	      // This is the number of characters in length any alias can be. This also takes up a lot of RAM!
-// #define MAX_HOTKEYS 8  			      // This is the number of slots available for setting hotkeys. You can't really change this without disabling certain function keys. This takes up a lot of RAM!
-// #define MAX_HOTKEY_LENGTH 40	      // This is the number of characters in length any hotkeys can be. This also takes up a lot of RAM!
-// /*-------------16--20---25---30--------40--------50---55---60------------------80--------------------*/
+#define CHECKERBOARD_CHARACTER      230
+#define DIAGONAL_HATCHING_CHARACTER 223
 
-// #define CURSOR_CHARACTER 230 // This is the checkerboard character 
-#define CURSOR_CHARACTER 223 // This is the diagonal hatching character 
+#define CURSOR_CHARACTER DIAGONAL_HATCHING_CHARACTER
 
 #define SCREEN_WIDTH 40
 #define SCREEN_HEIGHT 25
@@ -93,8 +66,8 @@
 #define SCREEN_BOTTOM_EDGE SCREEN_HEIGHT-1
 #define SCREEN_TOP_EDGE 0
 
-// the following if for type-prg functionality 
-#define first_header_byte  				0 
+// the following if for type-prg functionality
+#define first_header_byte  				0
 #define second_header_byte 				1
 #define first_basic_line_address_byte   2
 #define second_basic_line_address_byte  3
@@ -105,16 +78,19 @@
 #define end_of_prg_byte    				8
 
 unsigned char they_are_sure(void);
-unsigned char convert_char(unsigned char char_to_convert) ;
+unsigned char convert_char(unsigned char char_to_convert);
 
 
 // ********************************************************************************
 // MACRO HELPER FUNCTIONS
 // ********************************************************************************
 
+// BIT HELPERS FUNCTIONS ********************************************************
+
 #define get_bit(var,y)     (var>>y) & 1       // Return Data.Y value - Ex: uint8_t some_var = get_bit(number,bit_2); // some_var = 1
 #define set_bit(var,bit)   var |= (1 << bit)  // Set Data.Y   to 1   - Ex: set_bit(number,1); // number =  0x07 => 0b00000111 // bits are right to left so the right most bit is bit 0
 #define clear_bit(var,bit) var &= ~(1 << bit) // Clear Data.Y to 0   - Ex: clear_bit(number,2); // number =0x03 => 0b0000011
+
 
 // LOGIC HELPERS FUNCTIONS ********************************************************
 
@@ -125,10 +101,12 @@ unsigned char convert_char(unsigned char char_to_convert) ;
 #define FALSE 0
 #define False 0
 
+
 // LOOP HELPERS FUNCTIONS ********************************************************
 
 #define LOOP while(TRUE)
 #define loop while(TRUE)
+
 
 // MEMORY HELPERS FUNCTIONS *******************************************************
 
@@ -140,42 +118,21 @@ unsigned char convert_char(unsigned char char_to_convert) ;
 // ********************************************************************************
 
 #define matching(testing_string,original_string) (strcmp(original_string,testing_string)==0)
-
 #define display_title_text() printf("ChiCLI %s (c) 2022 Chiron Bramberger\n", VERSION)
-
 #define display_description_text() printf("A CLI for Commodore Computers!\n")
 
-// #define wait_for_keypress() 			\
-// 										\
-// 	while(kbhit()) { /* flush buffer */	\
-// 		cgetc();						\
-// 	};/*end while*/						\
-// 										\
-// 	while(!kbhit()) {					\
-// 		/*do nothing*/					\
-// 	};/*end while*/ 					\
-// 										\
-// //end macro func 
-
-
-// // Keeping this as a macro saves bytes over a function for some reason. --> Only 1 call! 
-// #define display_title_screen(has_ddd) \
-// 	clrscr();					      \
-// 	display_title_text();		      \
-// 	sysinfo(has_ddd);			      \
-// 	pet_chirp();				      \
-// 	printf("Ready!");                   \
-// //end macro func 
-
-// TODO: Add an extra space before the Ready!
 
 // ********************************************************************************
-// GENERAL FUNCTIONS
+// ERROR MESSAGES
 // ********************************************************************************
 
+#define display_error()             printf("Er.\n")
+#define display_error_rtc()         printf("Er: RTC?\n")
+#define display_error_drive()       printf("Er: drv.\n")
+#define display_error_arguments()   printf("Er: args.\n")
+
+// Before: 47606
+// After:  47552
+// Saved:     54!
 
 // ********************************************************************************
-// GENERIC PROMPTS FUNCTIONS 
-// ********************************************************************************
-
-

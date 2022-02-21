@@ -35,26 +35,33 @@
 	if (token_pointer_arg2    != NULL) number_of_user_inputs++ ;								\
 	if (token_pointer_arg3    != NULL) number_of_user_inputs++ ;								\
 																								\
-	strncpy(user_input_command_string,       token_pointer_command, MAX_LENGTH_COMMAND - 1 ); 	\
-	strncpy(user_input_arg1_string,   token_pointer_arg1   , MAX_LENGTH_ARGS    - 1 ); 			\
-	strncpy(user_input_arg2_string,   token_pointer_arg2   , MAX_LENGTH_ARGS    - 1 ); 			\
-	strncpy(user_input_arg3_string,   token_pointer_arg3   , MAX_LENGTH_ARGS    - 1 ); 			\
+	strncpy(user_input_command_string, token_pointer_command, MAX_LENGTH_COMMAND - 1 ); 	    \
+	strncpy(user_input_arg1_string,    token_pointer_arg1   , MAX_LENGTH_ARGS    - 1 ); 		\
+	strncpy(user_input_arg2_string,    token_pointer_arg2   , MAX_LENGTH_ARGS    - 1 ); 		\
+	strncpy(user_input_arg3_string,    token_pointer_arg3   , MAX_LENGTH_ARGS    - 1 ); 		\
 																								\
 	replace_characters(user_input_command_string, '\"', ' ');									\
 	replace_characters(user_input_arg1_string,    '\"', ' ');									\
 	replace_characters(user_input_arg2_string,    '\"', ' ');									\
 	replace_characters(user_input_arg3_string,    '\"', ' ');									\
 																								\
-	if (strlen(user_input_command_string) > 0) { user_input_command_type = 's'; };/*end if*/	\
-	if (strlen(user_input_arg1_string)    > 0) { user_input_arg1_type    = 's'; };/*end if*/	\
-	if (strlen(user_input_arg2_string)    > 0) { user_input_arg2_type    = 's'; };/*end if*/	\
-	if (strlen(user_input_arg3_string)    > 0) { user_input_arg3_type    = 's'; };/*end if*/	\
-																								\
+	user_input_arg1_number = atoi(user_input_arg1_string); \
+	user_input_arg2_number = atoi(user_input_arg2_string); \
+	user_input_arg3_number = atoi(user_input_arg3_string); \
+//end macro func
+
+// TODO: REMOVED FOR NOW. MAYBE RESTORE? MAYBE CUT ALL THIS TYPE SHIT.
+// TODO: SAVED 84 bytes!
+	// if (strlen(user_input_command_string) > 0) { user_input_command_type = 's'; };/*end if*/	\
+	// if (strlen(user_input_arg1_string)    > 0) { user_input_arg1_type    = 's'; };/*end if*/	\
+	// if (strlen(user_input_arg2_string)    > 0) { user_input_arg2_type    = 's'; };/*end if*/	\
+	// if (strlen(user_input_arg3_string)    > 0) { user_input_arg3_type    = 's'; };/*end if*/	\
+	// 																							\
 	/* if (is_string_only_numbers(user_input_command_string) == 1) { user_input_command_type = 'n'; user_input_command_number = atoi(user_input_command_string); }; // <-- MAJOR CHANGE - Seems like this variable is never used. */ \
-	if (is_string_only_numbers(user_input_arg1_string)    == 1) { user_input_arg1_type    = 'n'; user_input_arg1_number    = atoi(user_input_arg1_string   ); };/*end if*/ \
-	if (is_string_only_numbers(user_input_arg2_string)    == 1) { user_input_arg2_type    = 'n'; user_input_arg2_number    = atoi(user_input_arg2_string   ); };/*end if*/ \
-	if (is_string_only_numbers(user_input_arg3_string)    == 1) { user_input_arg3_type    = 'n'; user_input_arg3_number    = atoi(user_input_arg3_string   ); };/*end if*/ \
-//end macro func 
+	// if (is_string_only_numbers(user_input_arg1_string)    == 1) { user_input_arg1_type    = 'n'; user_input_arg1_number    = atoi(user_input_arg1_string   ); };/*end if*/ \
+	// if (is_string_only_numbers(user_input_arg2_string)    == 1) { user_input_arg2_type    = 'n'; user_input_arg2_number    = atoi(user_input_arg2_string   ); };/*end if*/ \
+	// if (is_string_only_numbers(user_input_arg3_string)    == 1) { user_input_arg3_type    = 'n'; user_input_arg3_number    = atoi(user_input_arg3_string   ); };/*end if*/ \
+//end macro func
 
 
 // ********************************************************************************
@@ -69,3 +76,5 @@ void acopy() ;
 void type_text( unsigned char * file_to_type ) ;
 void type_prg( unsigned char * file_to_type ) ;
 void type_hex( unsigned char * file_to_type ) ;
+
+void single_char_dos_command( unsigned char single_char );

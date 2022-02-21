@@ -19,22 +19,39 @@
 #include <unistd.h>
 #include <conio.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <cbm.h>
+#include <cc65.h>
+#include <conio.h>
+#include <6502.h>
+#include <peekpoke.h>
+#include <device.h>
+#include <ctype.h>
+
 #ifndef CHICLI_H
-#define CHICLI_H
-#include "chicli.h"
-#endif 
+	#define CHICLI_H
+	#include "chicli.h"
+#endif
 
 #ifndef HARDWARE_H
-#define HARDWARE_H
-#include "hardware.h"
-#endif 
+	#define HARDWARE_H
+	#include "hardware.h"
+#endif
 
 #ifndef STRING_PROCESSING_H
-#define STRING_PROCESSING_H
-#include "string_processing.h"
-#endif 
+	#define STRING_PROCESSING_H
+	#include "string_processing.h"
+#endif
 
 
+
+// extern unsigned char first_xor_length_hash( const unsigned char *key );
+// extern unsigned char pearson_hash( const unsigned char *key );
+
+extern unsigned char supercpu_turbo_status;
 
 extern unsigned int  error_number      ;
 extern unsigned char error_message[32] ;
@@ -44,10 +61,11 @@ extern unsigned int  error_block       ;
 
 extern unsigned char result ;
 extern unsigned char dev ;
-extern unsigned char read_bytes ;
-//extern unsigned char disk_sector_buffer[255] ; // need to compile with "static lcoals" or you get the error "Error: Too many local variables" but apparently this doesn't work if you have any recursive code --> cl65 -g -Oi -t c64 --static-locals  chicli-v02.c
-extern unsigned char disk_sector_buffer[MAX_DISK_SECTOR_BUFFER];
-extern struct cbm_dirent dir_ent; 
+extern signed int    read_bytes;
+
+extern unsigned char disk_buffer[MAX_DISK_BUFFER];
+
+extern struct        cbm_dirent dir_ent; 
 extern unsigned int  number_of_files ;
 extern unsigned char color_profiles[14][3];
 
@@ -90,6 +108,191 @@ char cdrive_command_set[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; 
 // ********************************************************************************
 // HARDWARE FUNCTIONS
 // ********************************************************************************
+// ********************************************************************************
+// SAFE DISK ACCESS FUNCTIONS
+// ********************************************************************************
+
+
+// For Reference cc65 GitHub:
+// https://github.com/cc65/cc65/blob/master/include/cbm.h
+
+
+unsigned char execute_dos_command( unsigned char * command ) { // Note: This function assumes we are sending a command to the current device, which is true like most of the time prolly... prolly.
+
+	unsigned char cbm_open_result;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_open_result = cbm_open(15, dev, 15, command);
+	// printf("cbm_open_result:%u\n",cbm_open_result);
+	// printf("command:%s\n",command);
+	cbm_close(15);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	if (cbm_open_result != 0) {
+		printf("DOS Error: %i\n", result);
+	};//end-if
+
+	// https://github.com/cc65/cc65/blob/master/include/cbm.h
+	/* The cbm_* I/O functions below set _oserror (see errno.h),
+	** in case of an error.
+	**
+	** error-code   BASIC error
+	** ----------   -----------
+	**       0  =   Returns 0 if openning was successful, otherwise it's an error below
+	**       1  =   too many files
+	**       2  =   file open
+	**       3  =   file not open
+	**       4  =   file not found
+	**       5  =   device not present
+	**       6  =   not input-file
+	**       7  =   not output-file
+	**       8  =   missing file-name
+	**       9  =   illegal device-number
+	**
+	**      10  =   STOP-key pushed
+	**      11  =   general I/O-error
+	*/
+
+	return(cbm_open_result);
+
+};//end-func
+
+
+unsigned char open_file_safely( unsigned char file_number , unsigned char device , unsigned char address , unsigned char * command ) {
+
+	unsigned char cbm_open_result;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_open_result = cbm_open(file_number, device, address, command);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	return(cbm_open_result);
+
+};//end-func
+
+
+int read_file_safely( unsigned char file_number , unsigned char *buffer , unsigned int buffer_length) {
+
+	int cbm_read_bytes;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_read_bytes = cbm_read(file_number, buffer, buffer_length);
+	// printf("file_number:%u\n",file_number);
+	// printf("buffer_length:%u\n",buffer_length);
+	// printf("cbm_read_bytes:%u\n",cbm_read_bytes);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	return(cbm_read_bytes);
+
+};//end-func
+
+
+void close_file_safely( unsigned char file_number ) {
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_close(file_number);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+};//end-func
+
+
+int write_file_safely( unsigned char file_number , unsigned char * buffer , unsigned int size ) {
+
+	// int __fastcall__ cbm_write (unsigned char lfn, const void* buffer, unsigned int size);
+	//
+	// Writes up to "size" bytes from "buffer" to a file.
+	// Returns the number of actually-written bytes, or -1 in case of an error;
+	// _oserror contains an error-code, then (see above table).
+
+	int cbm_written_bytes;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_written_bytes = cbm_write(file_number, buffer, size); // The 1 means we are only writing one byte.
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	return(cbm_written_bytes);
+
+};//end-func
+
+int write_byte_to_file_safely( unsigned char file_number , unsigned char * buffer ) {
+
+	// int __fastcall__ cbm_write (unsigned char lfn, const void* buffer, unsigned int size);
+	//
+	// Writes up to "size" bytes from "buffer" to a file.
+	// Returns the number of actually-written bytes, or -1 in case of an error;
+	// _oserror contains an error-code, then (see above table).
+
+	int cbm_written_bytes;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_written_bytes = cbm_write(file_number, buffer, 1); // The 1 means we are only writing one byte.
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	return(cbm_written_bytes);
+
+};//end-func
+
+
+unsigned char open_dir_safely( unsigned char file_number , unsigned char device , unsigned char *listing_string ) {
+
+	unsigned char cbm_opendir_result;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	// printf("file_number:%u\n",file_number);
+	// printf("device:%u\n",device);
+	// printf("listing_string:%s\n",listing_string);
+	cbm_opendir_result = cbm_opendir(file_number, device, listing_string);
+	// printf("cbm_opendir_result:%u\n",cbm_opendir_result);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	return(cbm_opendir_result);
+
+};//end-func
+
+
+unsigned char read_dir_safely( unsigned char file_number , struct cbm_dirent* directory_entry ) {
+
+	unsigned char cbm_readdir_result;
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_readdir_result = cbm_readdir(file_number, directory_entry);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+	return(cbm_readdir_result);
+
+};//end-func
+
+
+void close_dir_safely( unsigned char file_number ) {
+
+	supercpu_disable(); // Disable SuperCPU so the kernal timing isn't screwed up.
+	cbm_closedir(file_number);
+	supercpu_enable();  // Enable SuperCPU so the kernal timing isn't screwed up.
+
+};//end-func
+
+
+// ********************************************************************************
+// ********************************************************************************
+// ********************************************************************************
+
+
+// Convert from device string to DOS ready string
+// Valid devices: 8,9,0,1,2,3,4,5
+// We "return" 255 if the input was out of range or invalid.
+unsigned char convert_device_string(unsigned char device_character) {
+    switch(device_character) {                                    \
+        case '8' : return(8); break;                      \
+        case '9' : return(9); break;                      \
+        case '0' : ;											  \
+        case '1' : ;											  \
+        case '2' : ;											  \
+        case '3' : ;											  \
+        case '4' : ;											  \
+        case '5' : return(device_character - 38); break;  \
+        default  : return(255); break; /*INVALID DEVICE*/ \
+    };/*end-switch*/                                              \
+};//end-func
 
 
 unsigned char last_raster_scan_line;
@@ -513,7 +716,7 @@ unsigned char detect_model(void) {
 
 	unsigned char result = 0;
 // TODO: !!!!!!!!!!!!!!! DELETE THE LINE BELOW! IT'S NOT USED AND IS STUPID!!!
-// unsigned char disk_sector_buffer[40] = " "; // TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
+// unsigned char disk_buffer[40] = " "; // TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
 	unsigned char read_bytes = 0;
 
 	// First, why am I doing this twice? This whole function is a waste and needs to be tighten up a lot 
@@ -538,11 +741,11 @@ unsigned char detect_model(void) {
 	} else if (detected_cpu     == 9 &&    sid_detected == 1 &&   detected_1571 == 1)  { return(0);   // 128D       CPU:8502 GPU:8564 NTSC or 8566/69 PAL SID:6581 Drive: Must have 1571
 	} else if (detected_cpu     == 9 &&    sid_detected == 1 )                         { return(1);   // 128        CPU:8502 GPU:8564 NTSC or 8566/69 PAL SID:6581 Drive: Anything other than 1571
     } else if (detected_cpu     == 9 &&    sid_detected == 2 )     					   { return(2);   // 128DCR     CPU:8502 GPU:8564 NTSC or 8566/69 PAL SID:8580 Don't need to worry about the drive, because the DCR is the only machine with the 8502 CPU and 8580 SID.
-	} else if (ntscpal_detected == 0 &&    sid_detected == 1 && kernal_detected == 1)  { return(3);   // 64 (Early) NTSC + 6581 + KERNAL R1 901227-01 --> C64 (Early) --> VIC-II 6567	
-	} else if (ntscpal_detected == 0 &&    sid_detected == 1 )                         { return(4);   // 64         NTSC + 6581 + KERNAL R2 901227-02 --> C64 	    --> VIC-II 6567
-	} else if (ntscpal_detected == 0 &&    sid_detected == 2 )                         { return(5);   // 64C        NTSC + 8580 + Any		 	        --> C64C 	    --> VIC-II 8562
-	} else if (ntscpal_detected == 1 &&    sid_detected == 1 )                         { return(6);   // 64         PAL  + 6581 + Any 			    --> C64 		--> VIC-II 6569/6572/6573
-	} else if (ntscpal_detected == 1 &&    sid_detected == 2 )                         { return(7);   // 64C        PAL  + 8580 + Any		  		    --> C64C 	    --> VIC-II 8565
+	} else if (ntscpal_detected == 0 &&    sid_detected == 1 && kernal_detected == 1)  { return(3);   // 64 (Early) NTSC + 6581 + KERNAL R1 901227-01 --> C64 (Early) --> VIC-II 6567
+	} else if (ntscpal_detected == 0 &&    sid_detected == 1 )                         { return(4);   // 64         NTSC + 6581 + KERNAL R2 901227-02 --> C64 	      --> VIC-II 6567
+	} else if (ntscpal_detected == 0 &&    sid_detected == 2 )                         { return(5);   // 64C        NTSC + 8580 + Any		 	      --> C64C 	      --> VIC-II 8562
+	} else if (ntscpal_detected == 1 &&    sid_detected == 1 )                         { return(6);   // 64         PAL  + 6581 + Any 			      --> C64 		  --> VIC-II 6569/6572/6573
+	} else if (ntscpal_detected == 1 &&    sid_detected == 2 )                         { return(7);   // 64C        PAL  + 8580 + Any		  		  --> C64C 	      --> VIC-II 8565
 	} else 																			   { return(255); // Couldn't detect a specific model!
 	};//end if
 
@@ -567,30 +770,43 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 
 	unsigned char cbm_result = 255; // we need to do this 
 
+	unsigned char error_message2[16] ;
+
 	set_drive_detection(device_number,0);
 	set_drive_type(device_number,0);
 
-	if (have_device_numbers_changed == TRUE) { 
+	if (have_device_numbers_changed == TRUE) {
 		printf("Detect disabled.\n");
 		return(254); //this means the detection never ran, because drives have changed
 	};//end if 
 
-	cbm_result = cbm_open(1, device_number, 15, "uj"); // reset the drive
+	// cbm_result = cbm_open(1, device_number, 15, "uj"); // reset the drive
+	// cbm_close(1);
 
-	switch (cbm_result) { 
-		case 0 : 
-			set_drive_detection(device_number,1); // successfully detected
+	cbm_result = open_file_safely(1, device_number, 15, "uj"); // reset the drive
+
+	// printf("D%02u: CR:%u ",device_number, cbm_result);
+
+	// close_file_safely(1);
+
+	switch (cbm_result) {
+		case 0 :
+			set_drive_detection(device_number,1); // successfully detected --> // NOT detected // 0 == not scanned , 1 == detected , 2 == scanned but NOT detected
 	    break;
 
-		case 5 : // NOT detected // 0 == not scanned , 1 == detected , 2 == scanned but NOT detected
+		// case 5 :								  // device not present
+		default :
 			set_drive_detection(device_number,2);
-			cbm_close(1);
+			// cbm_close(1);
+			close_file_safely(1);
 			return(255); // returns a code that means we didn't see teh drive 
 	    break;
 
-		default :
-			set_drive_detection(device_number,0); // unknown failure; 0 == not successfully scanned either way 
-	    break;
+		// default :
+		// 	set_drive_detection(device_number,0); // unknown failure; 0 == not successfully scanned either way
+		// 	// close_file_safely(1); // TODO: WHY WASN'T THIS NEEDED BEFORE???
+		// 	// return(cbm_result); // TODO: WHY WASN'T THIS NEEDED BEFORE???
+	 //    break;
 	};//end switch
 
 	// // #define DRIVE_RESET_WAIT_TIME 23000
@@ -612,7 +828,6 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// https://github.com/cc65/cc65/blob/master/libsrc/common/sleep.c
 	// wait(25000L);
 
-
 	// ****************************************
 	// DRIVE RESET DELAY - TOTAL: 1.3 seconds.
 	// ****************************************
@@ -624,22 +839,41 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// ****************************************
 	// READ DEVICE STRING
 	// ****************************************
-	result = cbm_open(1, device_number, 15, "");
-	read_bytes = cbm_read(1, disk_sector_buffer, sizeof(disk_sector_buffer));
-	cbm_close(1);
-	process_status(disk_sector_buffer);
+
+	// result = cbm_open(1, device_number, 15, "");
+	// read_bytes = cbm_read(1, disk_buffer, sizeof(disk_buffer));
+	// cbm_close(1);
+
+	result = open_file_safely(1, device_number, 15, "");
+	read_bytes = read_file_safely(1, disk_buffer, sizeof(disk_buffer));
+	close_file_safely(1);
+
+	// printf("sizeof(disk_buffer):%u ",sizeof(disk_buffer));
+	// printf("cbm_result:%u ",cbm_result);
+	// printf("result:%u ",result);
+	// printf("read_bytes:%u ",read_bytes);
+	// printf("disk_buffer:%s\n",disk_buffer);
+
+	process_status(disk_buffer);
+
+	// printf("error_message:%s\n",error_message);
 
 	// ****************************************
 	// COMMODORE 1541 - IEC
 	// ****************************************
-	if        ( matching( "cbm dos v2.6 1541", error_message) ) {
+	// if        ( matching( "cbm dos v2.6 1541", error_message) ) {
+	if ( (error_message[13]=='1' && \
+	  	  error_message[14]=='5' && \
+		  error_message[15]=='4' && \
+		  error_message[16]=='1' ) ){
+
 		set_drive_type(device_number, DRIVE_1541);
 
 	// ****************************************
 	// COMMODORE 1541 - JiffyDOS - IEC
 	// ****************************************
-	} else if ( matching( "jiffydos 5.0 1541", error_message) ) {
-	 	set_drive_type(device_number, DRIVE_1541);
+	// } else if ( matching( "jiffydos 5.0 1541", error_message) ) {
+	 	// set_drive_type(device_number, DRIVE_1541);
 
 	// ****************************************
 	// SD2IEC OLD FIRMWARE - IEC
@@ -652,11 +886,12 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
  				 error_message[1]=='i' && \
  				 error_message[2]=='e' && \
  				 error_message[3]=='c' ) ){
+
 		set_drive_type(device_number, DRIVE_UIEC );
 		strcpy(error_message2,"SD2IEC v");
-		string_add_character(error_message2,error_message[ 6]); //output from position 6 until the end.
-		string_add_character(error_message2,error_message[ 7]);
-		string_add_character(error_message2,error_message[ 8]);
+		string_add_character(error_message2,error_message[ 6]); // TODO: output from position 6 until the end.
+		string_add_character(error_message2,error_message[ 7]); // TODO: This is the only place it's used.
+		string_add_character(error_message2,error_message[ 8]); // TODO: There's got to be a way to drop this var.
 		string_add_character(error_message2,error_message[ 9]);
 		string_add_character(error_message2,error_message[10]);
 		string_add_character(error_message2,error_message[11]);
@@ -687,15 +922,31 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 		strcpy(error_message,error_message2); // Final string
 
 	// ****************************************
-	// VICE FS DRIVER 2.0 - IEC
+	// VIRTUAL DRIVE EMULATION / VICE FS DRIVER 2.0 - IEC
 	// ****************************************
-	} else if ( matching( "vice fs driver v2.0", error_message) ) {
+	// } else if ( matching( "virtual drive emulation", error_message) ) {
+	} else if ( (error_message[ 0]=='v' && \
+			 	 error_message[ 1]=='i' ) ){
 		set_drive_type(device_number, DRIVE_VICEFS);
+
+	// // ****************************************
+	// // VICE FS DRIVER 2.0 - IEC
+	// // ****************************************
+	// // } else if ( matching( "vice fs driver v2.0", error_message) ) {
+	// } else if ( (error_message[ 0]=='v' && \
+	// 		 	    error_message[ 1]=='i' && \
+	// 		 	    error_message[ 2]=='c' && \
+	// 		 	    error_message[ 3]=='e' ) ){
+	// 	set_drive_type(device_number, DRIVE_VICEFS);
 
 	// ****************************************
 	// COMMODORE 1570 - IEC
 	// ****************************************
-	} else if ( matching( "cbm dos v3.0 1570", error_message) ) {
+	// } else if ( matching( "cbm dos v3.0 1570", error_message) ) {
+	} else if ( (error_message[13]=='1' && \
+			 	 error_message[14]=='5' && \
+			 	 error_message[15]=='7' && \
+			 	 error_message[16]=='0' ) ){
 		set_drive_type(device_number, DRIVE_1570);
 
 	// ****************************************
@@ -708,21 +959,29 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// ****************************************
 	// COMMODORE 1571 - IEC
 	// ****************************************
-	} else if ( matching( "cbm dos v3.0 1571", error_message) ) {
+	// } else if ( matching( "cbm dos v3.0 1571", error_message) ) {
+	} else if ( (error_message[13]=='1' && \
+			 	 error_message[14]=='5' && \
+			 	 error_message[15]=='7' && \
+			 	 error_message[16]=='1' ) ){
 		set_drive_type(device_number, DRIVE_1571);
 
 	// ****************************************
 	// COMMODORE 1571 - JiffyDOS - IEC
 	// ****************************************
-	} else if ( matching( "jiffydos 6.0 1571", error_message) ) {
-		set_drive_type(device_number, DRIVE_1571);
-		// strncpy(error_message,error_message+10,16);
-		// error_message[16] = '\0';
+	// } else if ( matching( "jiffydos 6.0 1571", error_message) ) {
+	// 	set_drive_type(device_number, DRIVE_1571);
+
 
 	// ****************************************
 	// COMMODORE 1581 - IEC
 	// ****************************************
-	} else if ( matching( "copyright cbm dos v10 1581", error_message) ) {
+	// } else if ( matching( "copyright cbm dos v10 1581", error_message) ) {
+	} else if ( (error_message[10]=='c' && \
+				 error_message[22]=='1' && \
+			 	 error_message[23]=='5' && \
+			 	 error_message[24]=='8' && \
+			 	 error_message[25]=='1' ) ){
 		set_drive_type(device_number, DRIVE_1581);
 		strncpy(error_message,error_message+10,16);
 		error_message[16] = '\0';
@@ -730,7 +989,12 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// ****************************************
 	// COMMODORE 1581 - JIFFYDOS - IEC
 	// ****************************************
-	} else if ( matching( "(c) 1989 jiffydos 6.0 1581", error_message) ) {
+	// } else if ( matching( "(c) 1989 jiffydos 6.0 1581", error_message) ) {
+	} else if ( (error_message[ 9]=='j' && \
+				 error_message[22]=='1' && \
+			 	 error_message[23]=='5' && \
+			 	 error_message[24]=='8' && \
+			 	 error_message[25]=='1' ) ){
 		set_drive_type(device_number, DRIVE_1581);
 		strncpy(error_message,error_message+9,17);
 		error_message[17] = '\0';  // "JiffyDOS 6.0 1581"
@@ -738,19 +1002,33 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// ****************************************
 	// CMD HD - IEC
 	// ****************************************
-	} else if ( matching( "cmd hd dos v1.92", error_message) ) {
+	// } else if ( matching( "cmd hd dos v1.92", error_message) ) {
+	} else if ( (error_message[11]=='v' && \
+			 	 error_message[12]=='1' && \
+			 	 error_message[13]=='.' && \
+			 	 error_message[14]=='9' && \
+			 	 error_message[15]=='2' ) ){
 		set_drive_type(device_number, DRIVE_CMDHD);
 
 	// ****************************************
 	// COMMODORE CMD FD-2000 / FD-4000 - IEC
 	// ****************************************
-	} else if ( matching( "cmd fd dos v1.40", error_message) ) {
+	// } else if ( matching( "cmd fd dos v1.40", error_message) ) {
+	} else if ( (error_message[11]=='v' && \
+			 	 error_message[12]=='1' && \
+			 	 error_message[13]=='.' && \
+			 	 error_message[14]=='4' && \
+			 	 error_message[15]=='0' ) ){
 		set_drive_type(device_number, DRIVE_FD2000); 				// Note: This is currently just using DRIVE_CMDHD because all these drives should work in exactly the same way.
 
 	// ****************************************
 	// MSD SD-2 - IEC *OR* IEEE-488
 	// ****************************************
-	} else if ( matching( "m.s.d. dos v2.3", error_message) ) {
+	// } else if ( matching( "m.s.d. dos v2.3", error_message) ) {
+	} else if ( (error_message[11]=='v' && \
+			 	 error_message[12]=='2' && \
+			 	 error_message[13]=='.' && \
+			 	 error_message[14]=='3' ) ){
 		set_drive_type(device_number, DRIVE_SD2);
 
 	// ****************************************
@@ -761,20 +1039,34 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	// ****************************************
 	// IDE64 - Cartridge
 	// ****************************************
-	} else if ( matching( " ide dos v0.90 ide64", error_message) ) {
+	// } else if ( matching( " ide dos v0.90 ide64", error_message) ) {
+	} else if ( (error_message[15]=='i' && \
+			 	 error_message[16]=='d' && \
+			 	 error_message[17]=='e' && \
+			 	 error_message[18]=='6' && \
+			 	 error_message[19]=='4' ) ){
 		set_drive_type(device_number, DRIVE_IDE64);
-		strcpy(error_message,"ide dos v0.90 ide64");
+		// strcpy(error_message,"ide dos v0.90 ide64");
+		strcpy(error_message,error_message+1);
 
 	// ****************************************
 	// COMMODORE 2031 - IEEE-488
 	// ****************************************
-	} else if ( matching( "cbm dos v2.6 2031", error_message) ) {
+	// } else if ( matching( "cbm dos v2.6 2031", error_message) ) {
+	} else if ( (error_message[13]=='2' && \
+			 	 error_message[14]=='0' && \
+			 	 error_message[15]=='3' && \
+			 	 error_message[16]=='1' ) ){
 		set_drive_type(device_number, DRIVE_2031);
 
 	// ****************************************
 	// COMMODORE SFD-1001 - IEEE-488
 	// ****************************************
-	} else if ( matching( "cbm dos v2.7", error_message) ) { 	// TODO: Add SFD-1001 to the end of the string like the 2031.
+	// } else if ( matching( "cbm dos v2.7", error_message) ) { 	// TODO: Add SFD-1001 to the end of the string like the 2031.
+	} else if ( (error_message[ 8]=='v' && \
+			 	 error_message[ 9]=='2' && \
+			 	 error_message[10]=='.' && \
+			 	 error_message[11]=='7' ) ){
 		set_drive_type(device_number, DRIVE_SFD1001);
 
 	// ****************************************
@@ -826,7 +1118,7 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	strupper(error_message);
 
     // TODO: This should go into a section below, so we only cut it off at length 22 when it's being displayed as part of the sysinfo or title screen.
-    error_message[22]='\0'; // GitHub Issue#???: Text too makes it look bad: SD2IEC V1.0.0ATENTDEAD0-24 - Testing: // strcpy(error_message,"SD2IEC V1.0.0ATENTDEAD0-24");
+    error_message[23]='\0'; // GitHub Issue#???: Text too makes it look bad: SD2IEC V1.0.0ATENTDEAD0-24 - Testing: // strcpy(error_message,"SD2IEC V1.0.0ATENTDEAD0-24");
 
 	if ( display_status == TRUE ) { // This is what runs when I call this from the command line.
 		if ( result == 2 && error_number == 73 ) {
@@ -844,9 +1136,12 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 	} else if ( display_status == 3 ) { // This is what runs when it gets called from within sysinfo. Special case. So like TRUE display it, FALSE, don't display it, 3 just for sysinfo
 		// NEW! Mon Dec 13 505PM
 		// This is to try and address the weird display of null strings with that stupid /6_O string.
-		// TODO: This is a kludgy fix. The /6_O string.it whatever I see when there's some weird unuised or unformatted or wahtever string fuckl I hate this. It matches some text starting rigth at 0x0000 so WTF??? it's like a null pointer or somethign but it's not. Fuck fuck fuck.
+		// TODO: This is a kludgy fix. The /6_O string.it whatever I see when there's some weird unuised or unformatted or wahtever string fuck I hate this. It matches some text starting rigth at 0x0000 so WTF??? it's like a null pointer or somethign but it's not. Fuck fuck fuck.
 		if ( result == 2 && error_number == 73 && strlen(error_message) != 4 ) {
 			printf("%02i %s", device_number, error_message ); //  everything is okay, and we go the drive identity 
+		} else if ( cbm_result == 0 && strlen(error_message) == 4 ) {
+			set_drive_detection(device_number,2);  // Set device to not present, because this is the special BusCardII situation.
+			return(255); // This means that it detected a drive, but the drive returned no string. This is a workaround for the BusCardII IEEE-488 Commodore 64 cartridge. This device returns a result as if a drive was detected, but there's no attached drive, and so there's no drive string returned. Which leaves a bunch of blank lines which we are trying not to do here.
 		};//end if
 	};//end if
 
@@ -855,9 +1150,10 @@ unsigned char detect_drive(unsigned char device_number, unsigned char display_st
 };//end func
 
 
+// #define get_drive_detection(drive) drive_detected[drive-8]
 unsigned char get_status(unsigned char device_number, unsigned char display_status) {
 
-	if (have_device_numbers_changed == TRUE) { 
+	if (have_device_numbers_changed == TRUE) {
 		printf("Detect disabled.\n");
 		if (they_are_sure() == FALSE) {
 			return(254);//
@@ -870,19 +1166,25 @@ unsigned char get_status(unsigned char device_number, unsigned char display_stat
 	};//endif
 
 	if (get_drive_detection(device_number) == 2) {
-		printf("Err!\n");// Error not detected
+		printf("Error: Device:%u not detected.\n",device_number);// Error not detected
 		return(255);
 	};//endif
 
-	result = cbm_open(1, device_number, 15, "");
+	// printf("device_number:%u get_drive_detection:%u \n", device_number, get_drive_detection(device_number));// Error not detected
 
+	// result = cbm_open(15, device_number, 15, "");
+	// do {
+	// 	read_bytes = cbm_read(15, disk_buffer, 256);
+	// } while( read_bytes == sizeof(disk_buffer) ); //end loop
+	// cbm_close(1);
+
+	result = open_file_safely(15, device_number, 15, "");
 	do {
-		read_bytes = cbm_read(1, disk_sector_buffer, sizeof(disk_sector_buffer));
-	} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+		read_bytes = read_file_safely(15, disk_buffer, sizeof(disk_buffer));
+	} while( read_bytes == sizeof(disk_buffer) ); //end loop
+	close_file_safely(15);
 
-	process_status(disk_sector_buffer); 
-
-	cbm_close(1);
+	process_status(disk_buffer);
 
 	if ( display_status == TRUE ) {
 	    printf("Device:%i ", device_number);
@@ -897,6 +1199,7 @@ unsigned char get_status(unsigned char device_number, unsigned char display_stat
 	return(error_number); // either there's no drive, and we return 255, or we just send what the drive sends us in error_number
 
 };//end func
+
 
 
 void change_drive(unsigned char device_number) {
@@ -920,109 +1223,6 @@ void change_drive(unsigned char device_number) {
 	};//end if 
 
 };//end func 
-
-
-unsigned char detect_filetype(unsigned char * filename, unsigned char print_typefile) {
-
-	listing_string[0] = '$'; // This is the short version of the DOS command
-
-	if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
-	    listing_string[1] = par+1;
-	} else if (get_drive_type(dev)==DRIVE_1581 || get_drive_type(dev)==DRIVE_VICEFS) {
-		listing_string[1] = '0';
-	} else {
-		listing_string[1] = par;
-	};//end-if
-
-	// listing_string[2] = convert_partition_for_drive(); // need to export this function or move it to this hardware.c module.
-	listing_string[3] = '\0';
-
-	result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
-
-	for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
-
-		if (result != 0 && print_typefile==TRUE) {
-			printf("Er cbm_o:%i\n", result);
-			break;
-		};//end if
-
-	    result = cbm_readdir(1, &dir_ent);
-
-		if (number_of_files != 0 || number_of_files != 2 ) { //  0 dir_ent.name ==  DISK NAME  //  2 dir_ent.size == FREE DISK SPACE 
-
-	    	if ( matching(dir_ent.name,filename) ) { // current file == filename we want
-
-	    		if (print_typefile == TRUE) {
-
-					switch (dir_ent.type) {
-						case  1 : printf("CBM"); break;	// DIR
-						case  2 : printf("DIR"); break;	// DIR
-						case 16 : printf("SEQ"); break; // SEQ
-						case 17 : printf("PRG"); break; // PRG
-						case 18 : printf("USR"); break; // USR
-						case 19 : printf("REL"); break;	// REL
-						// TODO: Detect "CBM" type here for 1581 support!!!
-						default : printf("???"); //end default
-					};//end switch
-
-					printf(" ");
-
-					switch (dir_ent.access) {
-						case CBM_A_RO : printf("R");   break; // R
-						case CBM_A_WO : printf("W");   break; // W
-						case CBM_A_RW : printf("R/W"); break; // R/W
-						default       : printf("???"); //end default
-					};//end switch
-
-					printf("\n");
-
-				};//end if 
-
-				cbm_closedir(1);
-
-				return(dir_ent.type); // break out of loop and exit function 
-
-			};//end if
-
-		};//end if
-
-	};//end for
-
-	cbm_closedir(1); // if we made it this far, that means we never found the file.
-
-	if (print_typefile==TRUE) {
-		printf("Er no file\n");//file nto found
-	};//end if
-
-	return(255);
-
-};//end func
-
-
-void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number) {
-
-	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
-
-	unsigned char new_drive_number_as_int;
-
-	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends 
-
-	result = cbm_open(1, old_drive_number, 15, "");
-
-	// const char cdrive_command_set[]  = { 'm' , '-' , 'w' , 119 , 0 , 2 ,  8+32 ,  8+64 }; // we need to this bypass cc65 remapping ascii to petscii
-	new_drive_number_as_int = atoi(new_drive_number);
-	cdrive_command_set[6] = new_drive_number_as_int+32;
-	cdrive_command_set[7] = new_drive_number_as_int+64;
-	cbm_write (1, cdrive_command_set,  sizeof(cdrive_command_set)  );
-
-	cbm_close(1);
-
-	if (result == 0) {
-		printf("Drive set.\n");
-	} else {
-		printf("Er.\n");
-	};//end if
-};//end func
 
 
 // MSD SD-2 --> SAME AS 1541!
@@ -1056,24 +1256,151 @@ followed, the disk drives will conflict with each other.
 ************************************************************/
 
 
+void c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number) {
+// void c1541_set(unsigned char * new_drive_number) {
+
+	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
+
+	unsigned char new_drive_number_as_int;
+
+	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends 
+
+	new_drive_number_as_int = atoi(new_drive_number);
+	cdrive_command_set[6] = new_drive_number_as_int+32;
+	cdrive_command_set[7] = new_drive_number_as_int+64;
+
+	// Making the assumption that the current device (dev) is the one we are changing from.
+	// execute_dos_command(cdrive_command_set);
+
+	// result = cbm_open(1, old_drive_number, 15, "");
+	// cbm_write (1, cdrive_command_set,  sizeof(cdrive_command_set)  );
+	// cbm_close(1);
+
+	result = open_file_safely(1, old_drive_number, 15, "");
+	write_file_safely (1, cdrive_command_set,  sizeof(cdrive_command_set)  );
+	close_file_safely(1);
+
+	// if (result == 0) {
+	// 	printf("Drive set.\n");
+	// } else {
+	// 	printf("Er.\n");
+	// };//end if
+
+};//end func
+
+
 // TODO: Maybe this should all be a part of the drive-set section, instead of costly functions.
-void uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number) {
+void uiec_set(unsigned char * new_drive_number) {
 
 	have_device_numbers_changed = TRUE; // ocne this is set, drive detect is disabled until the program ends. 	// if this is running, set a global dirty byte to skip any drive detection at any point in the future
 
 	command_set[3] = atoi(new_drive_number); // Please tell me there isn't some stupid reason this *DOESN'T* work!
 
-	result = cbm_open(15, old_drive_number, 15, "");
-    cbm_write(15, command_set, sizeof(command_set) );
-	cbm_close(15);
+	execute_dos_command(cdrive_command_set);
 
-	if (result == 0) {
-		printf("Drive set.\n");
-	} else {
-		printf("?\n");
-	};//end if
+	// result = cbm_open(15, old_drive_number, 15, "");
+	// cbm_write(15, command_set, sizeof(command_set) );
+	// cbm_close(15);
+
+	// if (result == 0) {
+	// 	printf("Drive set.\n");
+	// } else {
+	// 	printf("?\n");
+	// };//end if
 
 };//end func
+
+
+// ********************************************************************************
+// Filetype Stuff
+// ********************************************************************************
+
+
+unsigned char detect_filetype(unsigned char * filename, unsigned char print_typefile) {
+
+	listing_string[0] = '$'; // This is the short version of the DOS command
+
+	if (get_drive_type(dev)==DRIVE_UIEC || get_drive_type(dev)==DRIVE_CMDHD) {
+	    listing_string[1] = par+1;
+	} else if (get_drive_type(dev)==DRIVE_1581 || get_drive_type(dev)==DRIVE_VICEFS) {
+		listing_string[1] = '0';
+	} else {
+		listing_string[1] = par;
+	};//end-if
+
+	// listing_string[2] = convert_partition_for_drive(); // need to export this function or move it to this hardware.c module.
+	listing_string[3] = '\0';
+
+	// result = cbm_opendir(1, dev, listing_string); // need to deal with errors here
+	result = open_dir_safely(1, dev, listing_string); // need to deal with errors here
+
+	for (number_of_files = 0; number_of_files <= 255 ; number_of_files++) {
+
+		if (result != 0 && print_typefile==TRUE) {
+			printf("Er cbm_o:%i\n", result);
+			break;
+		};//end if
+
+	    // result = cbm_readdir(1, &dir_ent);
+	    result = read_dir_safely(1, &dir_ent);
+
+		if (number_of_files != 0 || number_of_files != 2 ) { //  0 dir_ent.name ==  DISK NAME  //  2 dir_ent.size == FREE DISK SPACE 
+
+	    	if ( matching(dir_ent.name,filename) ) { // current file == filename we want
+
+	    		if (print_typefile == TRUE) {
+
+					switch (dir_ent.type) {
+						case  1 : printf("CBM"); break;	// DIR
+						case  2 : printf("DIR"); break;	// DIR
+						case 16 : printf("SEQ"); break; // SEQ
+						case 17 : printf("PRG"); break; // PRG
+						case 18 : printf("USR"); break; // USR
+						case 19 : printf("REL"); break;	// REL
+						// TODO: Detect "CBM" type here for 1581 support!!!
+						default : printf("???"); //end default
+					};//end switch
+
+					printf(" ");
+
+					switch (dir_ent.access) {
+						case CBM_A_RO : printf("R");   break; // R
+						case CBM_A_WO : printf("W");   break; // W
+						case CBM_A_RW : printf("R/W"); break; // R/W
+						default       : printf("???"); //end default
+					};//end switch
+
+					printf("\n");
+
+				};//end if 
+
+				// cbm_closedir(1);
+				close_dir_safely(1);
+
+				return(dir_ent.type); // break out of loop and exit function 
+
+			};//end if
+
+		};//end if
+
+	};//end for
+
+	// cbm_closedir(1); // if we made it this far, that means we never found the file.
+	close_dir_safely(1); // if we made it this far, that means we never found the file.
+
+	if (print_typefile==TRUE) {
+		printf("Er no file\n");//file nto found
+	};//end if
+
+	return(255);
+
+};//end func
+
+
+// ********************************************************************************
+// Profile Stuff
+// ********************************************************************************
+
 
 
 void set_colors(unsigned char text, unsigned char background, unsigned char border) {

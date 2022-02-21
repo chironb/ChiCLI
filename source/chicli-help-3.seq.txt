@@ -1,0 +1,316 @@
+_REBOOT
+REBOOT
+Usage: reboot
+
+This restarts the Commodore by calling
+the system reset vector.
+
+Note: The Epyx Fast Load cartridge
+is not loaded when you reboot.
+To re-enable it, run this in
+Commoodre Basic: sys 57194
+
+_RELABEL
+RELABEL
+Usage: relabel [NEW LABEL] [NEW ID]
+
+Changes the disk name and id on a
+1541 disk. Only supported on the
+2031, MSD SD-2, and 1541 drives.
+
+New Label: The new disk label.
+New ID: The new 2 character disk ID.
+
+Example: changelabel gamesdisk gd
+
+_RENAME
+RENAME
+Usage: rename [ORIGINAL] [NEW NAME]
+
+Renames a file.
+
+Original: The name of the file to
+rename in the current directory.
+
+New Name: The name you'd like to
+rename the file to.
+
+Example: rename oldfilename newfilename
+         rename weirdfile* friendlyfile
+
+_RESTART
+RESTART
+Usage: restart
+
+This exits ChiCLI and automatically
+loads and runs ChiCLI from disk again.
+
+_RMDIR
+RMDIR
+Usage: rmdir [DIRECTORY]
+
+Remove an empty directory.
+
+Directory: The directory to remove.
+
+Example: rmdir somefolder
+
+_RUN
+RUN
+Usage: run [PROG] [OPTION1] [OPTION2]
+
+This loads and runs a command after
+exiting the ChiCLI system.
+
+Prog: Name of the program to run.
+
+Option1:
+   Nothing or -1  Uses: LOAD"GO",8,1
+              -0  Uses: LOAD"GO",8,0
+              -t  Uses: SYS8*4096
+ *anything else*  Sends as argument
+
+Option2:  Sends as argument
+
+Examples: run coolgame
+          run super-program -0
+          run turbomacropro -t
+          run edit arg1 arg2
+
+_SS
+SS
+Usage: ss [OPTIONS]
+
+Displays a moving logo screensaver
+with the date and time if used with
+an SD2IEC only if a SD2IEC software
+or RTC clock is detected.
+
+Options:
+You can also enable or disable whether
+the date and/or time is displayed.
+Additionally, you can display the
+CPU temperature instead.
+  -et  Enables time display.
+  -dd  Enables date display.
+  -dt  Disables time display.
+  -dd  Disables time display.
+  -te  Temperature enable display.
+
+Examples:   ss
+            ss -dd
+
+_SHUTDOWN
+SHUTDOWN
+Usage: shutdown
+
+This exits the program and displays
+a message letting you know it's safe
+to turn off your Commodore.
+
+_SPEED
+SPEED
+Usage: speed [OPTIONS]
+
+This commands runs a payload of NOP
+instructions and estimates the speed
+in MHz of the current processor. It
+displays the speed in MHz and also
+can show the number of raster scan
+lines it took for the NOP payload to
+execute. For the SuperCPU it shows the
+currently set processor speed. For the
+C128 it shows the maximum CPU speed
+even though it's running in C64 mode.
+
+Option: passing -d will show some
+debugging information.
+
+Please note: This is an estimate, and
+for crazy fast systems above 20 MHz
+it will probably not report that
+exact speed in MHz.
+
+_STATUS
+STATUS
+Usage: status [OPTIONS]
+
+This retrives the status of the
+current drive.
+
+Option: Passing the drive number will
+show you the status for that device.
+
+Example: status
+         status d08:
+
+_STOPWATCH
+STOPWATCH
+Usage: stopwatch
+
+The "stopwatch" command starts when
+you run it, and when run again, stops
+and outputs the elapsed minutes and
+seconds since it was last called.
+It resets on the second call as well.
+The maximum time:
+  59:59.9 minutes:seconds.deciseconds
+
+Example: stopwatch
+
+_SUPERCPU
+SuperCPU
+Usage: supercpu [OPTION]
+
+This determines if the SuperCPU is
+enabled when possible, or disabled
+all the time. The SuperCPU is always
+disabled for disk access.
+
+Option: 
+  -t  Turbo Enabled
+  -n  Normal Mode (Turbo Disabled)
+
+Example: supercpu -t
+
+_SYS
+SYS
+Usage: sys [ADDRESS]
+
+This causes execution to jump to the
+memory location given. It expects a
+number in decimal. This works just
+like the Commodore Basic command.
+
+Address: The address where you want
+the processor to begin execution.
+
+Note: This will probably bork the
+currently running ChiCLI. Use with
+caution.
+
+Example: sys 64738
+
+_SYSINFO
+SYSINFO
+Usage: sysinfo
+
+A neofetch inspired display, that
+attempts to detect the hardware in
+your standard C64 and displays info
+about your system. It also plays a
+sound based on the chirp used on the
+Commodore PET and Commodore PC.
+
+It will also detect if the system
+is running under emulation under
+VICE as well as TheC64.
+
+_TEMP
+TEMP
+Usage: temp
+
+This using special programming and
+mapping curves to display the
+current temperature of the CPU
+without any additional hardware.
+
+Works only on original C64s and C64Cs,
+with the C64C having approx. +/- 2'C
+accuracy, and for the C64 having
+approx +/- 1'C accuracy.
+
+Option: passing -d will show some
+debugging information.
+
+_TIME
+TIME
+Usage: time [OPTIONS]
+
+Displays the current time.
+
+To set the date and time use the
+command datetime with the
+parameter "-set".
+
+_TYPE
+TYPE
+Usage: type [FILE NAME] [OPTIONS]
+
+This is a file viewer. It can display
+files in the formats SEQ, PRG, or any
+other type of file. It attempts to
+auto-detect the file type and shows
+the relevant output, such as:
+Text view -> SEQ files
+Program view -> BASIC PRG files
+Hex view -> Machine language PRG files
+
+File Name: File name you want to view.
+
+Options: -text  Forces text view.
+         -hex   Forces hex view.
+
+Example:
+type chicli
+type chicli-readme
+type chicli -hex
+
+_SD2IEC
+SD2IEC
+Usage: sd2iec [OPTIONS]
+
+A command for SD2IEC specific
+functions.
+
+Options:
+-hide-ext  Hide files ending in
+Commodore DOS extensions, such as
+.prg or .seq, and instead reports
+them to the system as if they were
+that type of file.
+
+-show-ext  The opposite of -hide-ext,
+where it shows all file names as-is
+and as if they were PRG files.
+
+-save  Saves the current settings to
+the SD2IEC, for example after changing
+the device number.
+
+_UNALIAS
+UNALIAS
+Usage: unalias [alias]
+
+Clears a given alias.
+
+_UNMOUNT
+UNMOUNT
+Usage: unmount
+
+This unmounts a previously mounted
+disk image. It automatically pops you
+back to the previous folder.
+
+_VALIDATE
+VALIDATE
+Usage: validate
+
+Executes the Commodore DOS drive
+command for validate, based on the
+current drive.
+
+_VIEWMEM
+VIEWMEM
+Usage: viewmem [START] [END]
+
+Displays memory in hexidecimal and in
+plain text value. Running without
+options will start at address 0 and
+will continue until you press RUNSTOP.
+
+Start: The starting address.
+End:   The ending address.
+
+Example: viewmem 100 200
+

@@ -60,7 +60,7 @@ void display_hotkeys() {
 	for (i = 0 ; i <= 7 ; i++) {
 		printf("F%u = %s\n", i+1, hotkeys_list[i]);
 	};//end-for
-	printf("Total hotkey slots:%u\n",MAX_HOTKEYS);
+	printf("Slots:%u x Size:%u\n",MAX_HOTKEYS,MAX_HOTKEY_LENGTH);
 };//end-func
 
 

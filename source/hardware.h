@@ -119,8 +119,8 @@
 // Disk routines are timing sensitive, so we gotta turn that shit off.
 // See "Load with 1 MHz" here: http://supercpu.cbm8bit.com/comp.htm
 // ********************************************************************
-#define supercpu_enable()  POKE(0xD07B,255) // Enable SuperCPU.  Switch to 20 MHz mode. STA $D07B
-#define supercpu_disable() POKE(0xD07A,255) // Disable SuperCPU. Switch to  1 MHz mode. STA $D07A
+#define supercpu_enable()  if(supercpu_turbo_status==TRUE)POKE(0xD07B,255)  // Enable  SuperCPU. Switch to 20 MHz mode. STA $D07B
+#define supercpu_disable() POKE(0xD07A,255)                                 // Disable SuperCPU. Switch to  1 MHz mode. STA $D07A
 
 
 // MAKING THESE FUNCTIONS ONLY SAVES A FEW BYTES
@@ -145,26 +145,26 @@
 //end-func
 
 #define set_drive_detection(drive,detected) drive_detected[drive-8] = detected
-#define get_drive_detection(drive) drive_detected[drive-8]
-#define set_drive_type(drive,type) drive_detected_type[drive-8] = type
-#define get_drive_type(drive) drive_detected_type[drive-8]
+#define get_drive_detection(drive)          drive_detected[drive-8]
+#define set_drive_type(drive,type)          drive_detected_type[drive-8] = type
+#define get_drive_type(drive)               drive_detected_type[drive-8]
 
-// Convert from device string to DOS ready string
-// Valid devices: 8,9,0,1,2,3,4,5
-// We "return" 255 if the input was out of range or invalid.
-#define convert_device_string(device_character, device_number)    \
-    switch(device_character) {                                    \
-        case '8' : device_number = 8; break;                      \
-        case '9' : device_number = 9; break;                      \
-        case '0' : ;											  \
-        case '1' : ;											  \
-        case '2' : ;											  \
-        case '3' : ;											  \
-        case '4' : ;											  \
-        case '5' : device_number = device_character - 38; break;  \
-        default  : device_number = 255; break; /*INVALID DEVICE*/ \
-    };/*end-switch*/                                              \
-//end-func
+// // Convert from device string to DOS ready string
+// // Valid devices: 8,9,0,1,2,3,4,5
+// // We "return" 255 if the input was out of range or invalid.
+// #define convert_device_string(device_character, device_number)    \
+//     switch(device_character) {                                    \
+//         case '8' : device_number = 8; break;                      \
+//         case '9' : device_number = 9; break;                      \
+//         case '0' : ;											  \
+//         case '1' : ;											  \
+//         case '2' : ;											  \
+//         case '3' : ;											  \
+//         case '4' : ;											  \
+//         case '5' : device_number = device_character - 38; break;  \
+//         default  : device_number = 255; break; /*INVALID DEVICE*/ \
+//     };/*end-switch*/                                              \
+// //end-func
 
 // // Convert from partition or drive string to DOS ready string
 // // Valid partitions: a,b,c,d,e,f,g,h,i
@@ -189,29 +189,39 @@
 // HARDWARE FUNCTIONS
 // ********************************************************************************
 
-// void wait(unsigned int delay);
-void wait_one_second(void);
-void process_status(char * input_string);
-void pet_chirp(void);
+unsigned char convert_device_string(unsigned char device_character);
 
-unsigned char detect_sid(void) ;
-unsigned char detect_cpu(void) ;
-unsigned char detect_kernal(void) ;
-unsigned char detect_ntsc_pal(void) ; 
-unsigned char detect_model(void) ; 
+void          wait_one_second( void );
+void          process_status( char * input_string );
+void          pet_chirp( void );
 
-void            process_status(char * input_string);
-unsigned char   get_status(unsigned char device_number, unsigned char display_status);
-unsigned char   detect_drive(unsigned char device_number, unsigned char display_status);
-void            change_drive(unsigned char device_number);
-void            display_cbm_error( unsigned char cbm_error_code );
-unsigned char   detect_filetype(unsigned char * filename, unsigned char print_typefile);
-void            c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number);
-void            uiec_set(unsigned char old_drive_number, unsigned char * new_drive_number);
-void            set_colors(unsigned char text, unsigned char background, unsigned char border);
-void            set_profile_colors(unsigned char profile_to_set);
-unsigned char   convert_partition_string(unsigned char user_input_partition);
+unsigned char detect_sid( void );
+unsigned char detect_cpu( void );
+unsigned char detect_kernal( void );
+unsigned char detect_ntsc_pal( void );
+unsigned char detect_model( void );
 
+void          process_status( char * input_string );
+unsigned char get_status( unsigned char device_number, unsigned char display_status );
+unsigned char detect_drive( unsigned char device_number, unsigned char display_status );
+void          change_drive( unsigned char device_number );
+void          display_cbm_error( unsigned char cbm_error_code );
+unsigned char detect_filetype( unsigned char * filename, unsigned char print_typefile );
+void          c1541_set(unsigned char old_drive_number, unsigned char * new_drive_number);
+void          uiec_set( unsigned char * new_drive_number );
+void          set_colors( unsigned char text, unsigned char background, unsigned char border );
+void          set_profile_colors( unsigned char profile_to_set );
+unsigned char convert_partition_string( unsigned char user_input_partition );
 
+unsigned char execute_dos_command( unsigned char * command );
 
+unsigned char open_file_safely( unsigned char file_number , unsigned char device , unsigned char address , unsigned char * command );
+int           read_file_safely( unsigned char file_number , unsigned char *buffer , unsigned int buffer_length);
+int           write_byte_to_file_safely( unsigned char file_number , unsigned char * buffer );
+int           write_file_safely( unsigned char file_number , unsigned char * buffer , unsigned int size );
+void          close_file_safely( unsigned char file_number );
+
+unsigned char open_dir_safely( unsigned char file_number , unsigned char device , unsigned char * listing_string );
+unsigned char read_dir_safely( unsigned char file_number , struct cbm_dirent* directory_entry );
+void          close_dir_safely( unsigned char file_number );
 

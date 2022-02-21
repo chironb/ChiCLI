@@ -1,0 +1,81 @@
+_./
+./
+Usage: ./[PROGRAM] [ARGUMENTS]...
+
+Executes a PROGRAM, passing any of the
+arguments given.
+
+Examples:
+./hello-world
+
+_@
+@
+Usage: @[DOS COMMAND]
+
+This lets you execute a custom command
+intended for a Commodore DOS device.
+This is similar to the "dos" command,
+however, this version differs in that:
+- There is no space between the @
+  and the command.
+- There is no prompt asking if
+  you are sure you want to execute
+  the command.
+
+This is intended for people used to
+JiffyDOS, however, all it does is
+pass whatever is after @ as a command.
+
+Please see the "dos" command for more
+information.
+
+Note: *DO NOT* use quotes, as this
+command grabs the entire remainder
+of the command string.
+
+Example: @v0
+
+_$
+$
+Usage: $[OPTIONS]
+
+This is a special built-in alias for
+the "list" command, however, this
+version differs in that:
+- There is no space between the $
+  and the options.
+
+This is intended for people used to
+JiffyDOS, however, all it does is
+pass whatever is after $ as a command.
+
+Please see the "list" command for more
+information.
+
+Example: $chicli-*
+
+_=
+=
+Usage: = [TERM 1] [OPERATION] [TERM 2]
+
+Does very simple calculations. Limited 
+to integers, only two terms, and the
+basic operations of plus, minus, 
+multiply, and divide.
+
+Examples: = 2 + 2
+          = 2 - 2
+          = 256 * 256
+          = 100000 / 2
+
+_1571
+1571
+Usage: 1571 [OPTIONS]
+
+A command for 1571 specific functions.
+
+Options:
+-d  Put a 1571 into double-sided mode.
+-s  Put a 1571 into single-sided mode.
+
+Example: 1571 -d

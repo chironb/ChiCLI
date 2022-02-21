@@ -15,13 +15,13 @@
 #include <ctype.h>
 
 #ifndef CHICLI_H
-#define CHICLI_H
-#include "chicli.h"
+    #define CHICLI_H
+    #include "chicli.h"
 #endif 
 
 #ifndef STRING_PROCESSING_H
-#define STRING_PROCESSING_H
-#include "string_processing.h"
+    #define STRING_PROCESSING_H
+    #include "string_processing.h"
 #endif 
 
 
@@ -304,3 +304,49 @@ unsigned char is_string_only_numbers(unsigned char * input_string ) {
 	return(1); 								// is_string_only_zeros == TRUE (1) means the stirng is only zeros, otherwise FALSE (0) means there's more than zeros
 
 };//end func
+
+// 47023 - 46954 = 69 bytes!
+unsigned char does_string_contain_character(unsigned char * input_string , unsigned char character_to_find) {
+
+	unsigned char i  = 0;
+
+	for (i = 0 ; i < strlen(input_string) ; i++) {
+		if (input_string[i]==character_to_find) return(TRUE);
+	};//end for 
+
+	return(FALSE); 								// is_string_only_zeros == TRUE (1) means the stirng is only zeros, otherwise FALSE (0) means there's more than zeros
+
+};//end func
+
+
+// 46996 before 
+// 46762 after
+// 234 cost for these two functons
+// removing a check for tabs saved 42 bytes between them!
+// So 192 for both!
+void trim_leading_space(unsigned char *s)
+{
+	unsigned char i,j;
+	for(i=0;s[i]==' ';i++);
+
+	for(j=0;s[i];i++)
+	{
+		s[j++]=s[i];
+	}
+	s[j]='\0';
+}
+
+
+void trim_trailing_space(unsigned char *s)
+{
+	signed int i;
+	i=strlen(s)-1;
+	while(i>-1)
+	{
+	  if(s[i]==' ')
+	   i--;
+	  else
+	   break;
+	}
+	s[i+1]='\0';
+}

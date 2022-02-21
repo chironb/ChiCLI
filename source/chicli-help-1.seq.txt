@@ -1,0 +1,300 @@
+_COMMANDS
+----- ChiCLI - Quick Command List -----
+
+  1571     diskcopy  list    shutdown
+  ./       dos       mkdir   speed
+  @        drvdetect mount   ss
+  =        drvset    part    status
+  about    dumpmem   peek    stopwatch
+  alias    echo      peeking supercpu
+  cd       exit      poke    sys
+  chirp    filedate  profile sysinfo
+  clear    format    pwd     temp
+  colorset help      reboot  time
+  convert  hotkey    relabel type
+  copy     ide64     rename  unalias
+  date     init      rmdir   unmount
+  datetime keycodes  run     validate
+  delete   ld        sd2iec  viewmem
+
+_ABOUT
+ABOUT
+Usage: about
+
+This displays information about
+ChiCLI, as well as links to the
+project on the web, and the licence
+under which is it released.
+
+Example: about
+
+_ALIAS
+ALIAS
+Usage: alias [ALIAS] [REPLACEMENT]
+  or:  alias [ALIAS] [OPTIONS]
+  or:  alias [OPTIONS]
+
+Define or display aliases. Without
+arguments, 'alias' prints the list of
+aliases. Otherwise an alias is defined
+for each ALIAS whose REPLACEMENT is
+given.
+
+Options:
+-clear  Clears a given alias, or clears
+all alias if no specific alias given.
+
+Examples:
+alias               -> Lists aliases
+alias hi "echo Hi!" -> Sets an alias
+alias vm view-mem   -> Sets an alias
+alias vm -clear     -> Clears an alias
+alias -clear        -> Clears all
+
+_CD
+CD
+Usage: cd [DIRECTORY]
+  or:  cd [DRIVE]
+
+Change the current working drive or
+directory. You can change to the root
+directory by using / and move to the
+parent directory by using the ..
+characters.
+
+NOte: You can also use the built-in
+alias cd(left arrow) just like you
+can in JiffyDOS.
+
+Examples:
+cd somedir -> Go to dir
+cd /       -> Go to root dir
+cd ..      -> Go up to parent dir
+cd d09:    -> Go to device 9
+cd d09a:   -> Go to device 9 drive a
+
+_CHIRP
+CHIRP
+Usage: chirp
+
+Plays the ChiCLI startup sound!
+
+_CLEAR
+CLEAR
+Usage: clear
+
+This clears the screen of text.
+
+_COLORSET
+COLORSET
+Usage: colorset [Text] [Back] [Border]
+
+Changes the current text, background
+and border colors, allowing you to set
+each individually.
+
+1 - Black        9 - Orange
+2 - White       10 - Brown
+3 - Red         11 - Lt. Red
+4 - Cyan        12 - Dk. Grey
+5 - Purple      13 - Grey
+6 - Green       14 - Lt. Green
+7 - Blue        15 - Lt. Blue
+8 - Yellow      16 - Lt. Grey
+
+Example: colorset 1 15 7
+
+_CONVERT
+CONVERT
+Usage: convert [CONVERSION] [NUMBER]
+
+Converts a number to another format,
+as determined by the given option
+for conversion.
+
+Conversions:
+  -d2b  Decimal to binary
+  -d2h  Decimal to hexidecimal
+  -h2d  Hexidecimal to binary
+
+Example: 
+  convert -d2b 123
+  convert -d2h 255
+  convert -h2d BEEF
+
+_COPY
+COPY
+Usage: copy [SOURCE] [DESTINATION]
+  or:  copy [SOURCE] [DIRECTORY]
+  or:  copy [SOURCE] [DRIVE]
+  or:  copy * [DRIVE]
+
+Copy SOURCE to DESTINATION, or 
+multiple SOURCE(s) to DIRECTORY or
+a DRIVE on a DEVICE. If a DIRECTORY 
+is used, the argument must end with 
+a / character. Using a * as the 
+source will copy all the files in 
+the current directory, excluding 
+sub-directories.
+
+Examples: copy readme readme-copy
+          copy readme misc/
+          copy readme d10a:
+          copy * misc/
+          copy * d09b:
+
+_D##:
+D##:
+Usage: d08:
+
+Changes the currently active drive.
+
+Commands: cd, d##?:, d##:, and copy,
+all accept d08: d08; or d08[. This is
+to help with muscle memory between
+using VICE on a PC and a *real* C64.
+
+_D##?:
+D##?:
+Usage: d08a:
+
+Changes the currently active drive.
+
+Commands: cd, d##?:, d##:, and copy,
+all accept d08: d08; or d08[. This is
+to help with muscle memory between
+using VICE on a PC and a *real* C64.
+
+_DATE
+DATE
+Usage: date [OPTIONS]
+
+Displays the current date.
+
+To set the date and time use the
+command datetime with the
+parameter "-set".
+
+_DATETIME
+DATETIME
+Usage: datetime [OPT] [NEW DATE/TIME]
+
+Displays the current date and time.
+All time and date handling by ChiCLI
+is done on the SD2IEC device
+exclusively.
+
+Opt: -set  Option to set date / time.
+New Date/Time:  The current date and
+time, given in the following format:
+
+"sat. 11/13/21 10:57:00 pm"
+
+Examples: datetime
+datetime -set "sat. 11/13/21 10:57:00 pm"
+
+_DELETE
+DELETE
+Usage: delete [FILE]
+  or:  delete [PATTERN]
+
+Deletes a given file.
+
+Pattern: Use * to delete all the files
+within the current disk, image, or
+folder you are currently in.
+
+Examples:
+delete somefile -> Deletes a file
+delete junk*    -> Deletes every file
+                   starting with junk
+delete *        -> Deletes all files
+                   in current folder
+
+_DISKCOPY
+DISKCOPY
+Usage: diskcopy
+
+Starts the Commodore DOS disk copying
+routine on supported drives, such as
+the M.S.D. SD-2 and 4040.
+
+_DOS
+DOS
+Usage: dos [DOS COMMAND]
+
+This lets you execute a custom command
+intended for a Commodore DOS device.
+
+DOS Command:
+Passes the given string directly to
+the Commodore DOS device, using
+channel 1.
+
+Note: Commodore DOS commands
+*appear* to be in upper case because
+that is the default Basic startup mode.
+However DOS expects lower case.
+When using this command, you need to
+use lower case, as in the example
+given below.
+
+Note: Use quotes if there's spaces in
+the command string you want to send.
+
+Example:
+dos "v0"
+
+_DRVDETECT
+DRVDETECT
+Usage: drvdetect
+
+Gets the drive name string from the
+current device.
+
+_DRVSET
+DRVSET
+Usage: drvset [DEVICE]
+
+Changes the drive number of the
+current drive, which is automatically
+detected and the right method is used
+if the drive is supported. For the
+SD2IEC, you can use the sd2iec -save
+command to make this permanent.
+
+Device: The new device number for
+the current device.
+
+Currently supported drives:
+  1541  sd-2
+  1570  sd2iec
+  1571  cmd hd
+  1581
+
+Examples: drvset 10
+
+_DUMPMEM
+DUMPMEM
+Usage: dumpmem [START] [END] [FILE]
+
+This let's you dump an area of memory
+to a file in the current directory 
+you're in.
+
+Start: Starting location in memory
+expressed as a decimal number.
+The shortcut 'rom' can also be
+used.
+
+End: Ending address in memory.
+The shortcut 'kernal' can also be
+used with the 'rom' shortcut.
+
+File: File name for the saved bytes 
+read from memory.
+
+Example: dump-mem 100 200 memory.bin
+         dump-mem rom kernal kernalrom
+

@@ -20,7 +20,6 @@
 
 #define matching(testing_string,original_string) (strcmp(original_string,testing_string)==0)
 
-
 // ********************************************************************************
 // STRING PROCESSING FUNCTIONS
 // ********************************************************************************
@@ -36,3 +35,7 @@ void          replace_characters(unsigned char * input_string , unsigned char ch
 void          process_quotes(unsigned char * input_string , unsigned char * output_string);
 void          remove_extra_spaces(unsigned char * input_string );
 unsigned char is_string_only_numbers(unsigned char * input_string );
+
+void          trim_leading_space(unsigned char *s);
+void          trim_trailing_space(unsigned char *s);
+unsigned char does_string_contain_character(unsigned char * input_string , unsigned char character_to_find);

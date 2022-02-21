@@ -16,14 +16,14 @@
 #include <unistd.h>
 
 #ifndef CHICLI_H
-#define CHICLI_H
-#include "chicli.h"
-#endif 
+	#define CHICLI_H
+	#include "chicli.h"
+#endif
 
 #ifndef COMMANDS_H
-#define COMMANDS_H
-#include "hardware.h"
-#endif 
+	#define COMMANDS_H
+	#include "hardware.h"
+#endif
 
 // I did this!
 // This could be optimized so that there's a smaller than 7 char string array per entry,
@@ -144,9 +144,11 @@ extern unsigned char user_input_arg2_string[MAX_LENGTH_ARGS];
 extern unsigned int user_input_arg2_number;
 extern unsigned char target_par;
 
-extern unsigned char disk_sector_buffer    [MAX_DISK_SECTOR_BUFFER] ; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
+extern unsigned char disk_buffer[MAX_DISK_BUFFER] ; //TODO: Look up how big this string can actually get in Commodore DOS / 1541 stuff...
+
 extern unsigned char drive_command_string  [MAX_LENGTH_COMMAND]	    ;
-extern unsigned char drive_command_string2 [MAX_LENGTH_COMMAND]	    ;
+// extern unsigned char drive_command_string2 [MAX_LENGTH_COMMAND]	    ;
+
 extern unsigned char get_key ;
 extern unsigned char dev ;
 extern signed int result    ; // This needs to be signed, because cbm_read and  cbm_write return -1 in case of an error;
@@ -176,18 +178,13 @@ unsigned char dir_file_count(unsigned char * listing_string){
 
 	unsigned char total_files = 0;
 
-	// strcpy(listing_string,"$"); // The default is $ to load the current directory.
-	// string_add_character(listing_string,convert_partition_for_drive());
-
- 	result = cbm_opendir(1, dev, listing_string);
-
-	// printf("B result: %u i:%u &dir_ent.name:%s\n",result,iii,&dir_ent.name);//&dir_ent);
+ 	// result = cbm_opendir(1, dev, listing_string);
+ 	result = open_dir_safely(1, dev, listing_string);
 
 	for (iii = 0; iii <= 254 ; iii++) {
 
-	    result = cbm_readdir(1, &dir_ent);
-
-		// printf("result: %u i:%u &dir_ent.name:%s\n",result,iii,&dir_ent.name);//&dir_ent);
+	    // result = cbm_readdir(1, &dir_ent);
+	    result = read_dir_safely(1, &dir_ent);
 
 		if (result != 0) {
 			break;
@@ -203,7 +200,8 @@ unsigned char dir_file_count(unsigned char * listing_string){
 
 	};/*end for*/
 
-	cbm_closedir(1);
+	// cbm_closedir(1);
+	close_dir_safely(1);
 
 	return(total_files);
 
@@ -212,25 +210,22 @@ unsigned char dir_file_count(unsigned char * listing_string){
 
 void dir_goto_file_index(unsigned char file_index) 	{
 
-	//strcpy(listing_string,"$0"); /* The default is $ to load the current directory.*/
-
 	strcpy(listing_string,"$"); // The default is $ to load the current directory.
 
 	string_add_character(listing_string,convert_partition_for_drive());
 
-	// if (get_drive_type(dev) == DRIVE_UIEC) {
-	// 	listing_string[1] = par+1; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-	// } else {
-	// 	listing_string[1] = par; /* Add the current partition, or drive, for MSD SD-2 and 4040 support.*/
-	// };/*end for*/
-
- 	result = cbm_opendir(1, dev, listing_string);
+ 	// result = cbm_opendir(1, dev, listing_string);
+ 	result = open_dir_safely(1, dev, listing_string);
 
 	for (jjj = 0; jjj <= file_index ; jjj++) {
-	    result = cbm_readdir(1, &dir_ent);
-	};/*end for*/
 
-	cbm_closedir(1);
+	    // result = cbm_readdir(1, &dir_ent);
+	    result = read_dir_safely(1, &dir_ent);
+
+	};//end-for
+
+	// cbm_closedir(1);
+	close_dir_safely(1);
 
 };//end macro func 
 
@@ -245,8 +240,11 @@ void dir_goto_file_index(unsigned char file_index) 	{
 // ********************************************************************************
 void dcopy() {
 
+	// swap_in(DISK_BUFFER, multi_buffer, DISK_BUFFER);
+
 	switch (detected_filetype) {
-		case  2 : /* bad */      break;	/* DIR */
+		case  1 : /* bad */      break;	// CBM
+		case  2 : /* bad */      break;	// DIR
 		case 16 : detected_filetype_char[0]='s';detected_filetype_char[1]='\0'; break; /* SEQ */
 		case 17 : detected_filetype_char[0]='p';detected_filetype_char[1]='\0'; break; /* PRG */
 		case 18 : detected_filetype_char[0]='u';detected_filetype_char[1]='\0'; break; /* USR */
@@ -257,35 +255,45 @@ void dcopy() {
 	switch (number_of_user_inputs) {
 		case 3 :
 			/* Setup SOURCE FILE for READING */
-			strcpy (drive_command_string, "");
-			strncat(drive_command_string,&source_par,1);              /* this is the source partition */
-			strcat (drive_command_string, ":");
-			strcat (drive_command_string, user_input_arg1_string); /*filename*/
-			strcat (drive_command_string, ",r,");
-			strcat (drive_command_string, detected_filetype_char);
+			strcpy (drive_command_string , "");
+			strncat(drive_command_string ,&source_par,1);              /* this is the source partition */
+			strcat (drive_command_string , ":");
+			strcat (drive_command_string , user_input_arg1_string); /*filename*/
+			strcat (drive_command_string , ",r,");
+			strcat (drive_command_string , detected_filetype_char);
 
-			result = cbm_open(6, dev, CBM_READ, drive_command_string);
+			// result = cbm_open(6, dev, CBM_READ, drive_command_string );
+			result = open_file_safely(6, dev, CBM_READ, drive_command_string );
 
 			/* Setup TARGET FILE for WRITING */
-			strcpy (drive_command_string2, "");
-			strncat(drive_command_string2,&target_par,1);              /* this is the target partition */
-			strcat (drive_command_string2, ":");
-			strcat (drive_command_string2, user_input_arg1_string); /*filename*/
-			strcat (drive_command_string2, ",w,");
-			strcat (drive_command_string2, detected_filetype_char);
+			strcpy (drive_command_string, "");
+			strncat(drive_command_string,&target_par,1);              /* this is the target partition */
+			strcat (drive_command_string, ":");
+			strcat (drive_command_string, user_input_arg1_string); /*filename*/
+			strcat (drive_command_string, ",w,");
+			strcat (drive_command_string, detected_filetype_char);
 
-			result2 = cbm_open(7, user_input_arg2_number, CBM_WRITE, drive_command_string2);
+			// result2 = cbm_open(7, user_input_arg2_number, CBM_WRITE, drive_command_string);
+			result2 = open_file_safely(7, user_input_arg2_number, CBM_WRITE, drive_command_string);
 
 			printf("-> %s [",user_input_arg1_string);
 
-			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+			memset(disk_buffer,0,sizeof(disk_buffer));
 
 			if (result == 0 && result2 == 0) {
-				do {
-					read_bytes = cbm_read(6, disk_sector_buffer, sizeof(disk_sector_buffer));
-					result = cbm_write(7, disk_sector_buffer, read_bytes);
+				// do {
+				while(1){
+
+					// read_bytes = cbm_read(6, disk_buffer, sizeof(disk_buffer));
+					read_bytes = read_file_safely(6, disk_buffer, sizeof(disk_buffer));
+
+					if(read_bytes==0)break;
+
+					// result = cbm_write(7, disk_buffer, read_bytes);
+					result = write_file_safely(7, disk_buffer, read_bytes);
+
 					if ( (read_bytes == -1) || (result == -1) ) {
-						printf("dcopy() er!");
+						printf("Device write error!");
 						break;
 					};/*end_if*/
 
@@ -300,20 +308,27 @@ void dcopy() {
 					    break;
 				    };/*end_if*/
 
-					memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
-				} while( read_bytes == sizeof(disk_sector_buffer) );/* end do */
+					memset(disk_buffer,0,sizeof(disk_buffer));
+
+				};//end-while
+				// } while( read_bytes == sizeof(disk_buffer) ); // TODO: WHY THE FUCK DOES THIS WORK HERE, BUT DIDN'T WORK FOR THE TYPE FUNCTIONS???
 			};/* end if */
 
-			cbm_close (6);
-			cbm_close (7);
+			// cbm_close (6);
+			// cbm_close (7);
+			close_file_safely(6);
+			close_file_safely(7);
 
 			printf("]\n");
 	    break;
 
 	    default :
 	    	printf("Er args:%i\n", number_of_user_inputs);
-	    /* end default */
+	    break;/* end default */
 	};/* end switch */
+
+	// clear_out(multi_buffer);
+
 };//end-func
 
 
@@ -476,10 +491,11 @@ void acopy() {
 	printf("-->%s\n", drive_command_string);
 
 	if (copy_error_status == TRUE) {
-		printf("ERR: File not found!\n");
+		printf("Error: File not found!\n");
 	} else {
-		result = cbm_open(1, dev, 15, drive_command_string);
-		cbm_close(1);
+		// result = cbm_open(1, dev, 15, drive_command_string);
+		// cbm_close(1);
+		execute_dos_command(drive_command_string);
 	};/*end_if*/
 
 };//end-func
@@ -490,7 +506,9 @@ void acopy() {
 // ********************************************************************************
 void type_text( unsigned char * file_to_type ) {
 
-	memset(disk_sector_buffer,0,sizeof(disk_sector_buffer)); // I think I need to blank out the disk_sector_buffer right here.
+	// swap_in(DISK_BUFFER, multi_buffer, DISK_BUFFER);
+
+	memset(disk_buffer,0,sizeof(disk_buffer)); // I think I need to blank out the disk_buffer right here.
 
 	printf("Detected file: %s ", file_to_type );
 	detected_filetype = detect_filetype(file_to_type, TRUE);
@@ -517,13 +535,20 @@ void type_text( unsigned char * file_to_type ) {
 	strcat (drive_command_string, ",r,");
 	strcat (drive_command_string, detected_filetype_char);
 
-	result = cbm_open(8, dev, CBM_READ, drive_command_string);
+	// result = cbm_open(8, dev, CBM_READ, drive_command_string);
+	result = open_file_safely(8, dev, CBM_READ, drive_command_string);
 
-	do {
-		read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+	while(1){
+	// do {
+		// read_bytes = cbm_read(8, disk_buffer, sizeof(disk_buffer));
+		read_bytes = read_file_safely(8, disk_buffer, sizeof(disk_buffer));
+
+		if(read_bytes==0)break; // If we are finished reading the file, then we need to exit right now. If this isn't here, then the loop below loops forever.
 
 		// loop over buffer and barf out bytes to the screen 
-		for (i = 0 ; i < read_bytes ; i++) {
+		// for (i = 0 ; i < read_bytes ; i++) {
+		i=0;
+		while(1){
 
 			if (wherey() == 24) {
 
@@ -535,7 +560,7 @@ void type_text( unsigned char * file_to_type ) {
 				if (get_key == 3) { // RUN/STOP or CTRL-C
 					printf("\n");
 					read_bytes = 0;
-					break;
+					goto END_TYPE_TEXT;
 				};//end if 
 
 				gotox(0);
@@ -545,15 +570,24 @@ void type_text( unsigned char * file_to_type ) {
 
 			};//end if
 
-			printf( "%c", disk_sector_buffer[i] ); // this needs to be way better obviously...
+			printf( "%c", disk_buffer[i] ); // this needs to be way better obviously...
 
-		};//end for 
+			if(i==read_bytes-1)break;++i;
+		};//end-while
+		// };//end for 
 
-	} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+		// printf( "\n2nd read_bytes:%i\n", read_bytes ); // 0 ~ 254 = 255  **0 ~ 255 = 256**  0 ~ 256 = 257 // disk_buffer size = 256 (0-255)
 
-	cbm_close (8);
+	};//end-while
+	// } while( read_bytes != 0 ); //end loop
+
+	// cbm_close (8);
+	END_TYPE_TEXT: ;
+	close_file_safely(8);
 
 	printf("\n");
+
+	// clear_out(multi_buffer);
 
 };//end func
 
@@ -563,12 +597,14 @@ void type_text( unsigned char * file_to_type ) {
 // ********************************************************************************
 void type_prg( unsigned char * file_to_type ) {
 
-	// I was helped in this section by studying this code:
-	// https://github.com/doj/dracopy/blob/master/src/cat.c
-	// As well as this website:
-	// https://wpguru.co.uk/2014/06/reading-and-writing-sequential-data-on-the-commodore-1541/
-	// for Commodore 64 Basic 2.0 info, I used this:
-	// https://www.c64-wiki.com/wiki/BASIC_token
+			// swap_in(DISK_BUFFER, multi_buffer, DISK_BUFFER);
+
+			// I was helped in this section by studying this code:
+			// https://github.com/doj/dracopy/blob/master/src/cat.c
+			// As well as this website:
+			// https://wpguru.co.uk/2014/06/reading-and-writing-sequential-data-on-the-commodore-1541/
+			// for Commodore 64 Basic 2.0 info, I used this:
+			// https://www.c64-wiki.com/wiki/BASIC_token
 
 			/* Setup SOURCE FILE for READING */
 			strcpy (drive_command_string, "");
@@ -580,17 +616,25 @@ void type_prg( unsigned char * file_to_type ) {
 			strcat (drive_command_string, file_to_type);
 			strcat (drive_command_string, ",r,p");
 
-			// Blank out the disk_sector_buffer, so there isn't any garbage characters in it.
-			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+			// Blank out the disk_buffer, so there isn't any garbage characters in it.
+			memset(disk_buffer,0,sizeof(disk_buffer));
 
-			result = cbm_open(8, dev, CBM_READ, drive_command_string);
+			// result = cbm_open(8, dev, CBM_READ, drive_command_string);
+			result = open_file_safely(8, dev, CBM_READ, drive_command_string);
 
 			spot_in_prg = first_header_byte;
 
-			do {
-				read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+			// do {
+			while(1){
 
-				for (i = 0 ; i < read_bytes ; i++) { // loop over buffer and barf out bytes to the screen
+				// read_bytes = cbm_read(8, disk_buffer, sizeof(disk_buffer));
+				read_bytes = read_file_safely(8, disk_buffer, sizeof(disk_buffer));
+
+				if(read_bytes==0)break;
+
+				i=0;
+				while(1){
+				// for (i = 0 ; i < read_bytes ; i++) { // loop over buffer and barf out bytes to the screen
 
 					if (wherey() == 24) {
 
@@ -602,7 +646,7 @@ void type_prg( unsigned char * file_to_type ) {
 						if (get_key == 3) { // RUN/STOP or CTRL-C
 							printf("\n");
 							read_bytes = 0;
-							break;
+							goto END_TYPE_PRG;
 						};//end if 
 
 						gotox(0);
@@ -612,25 +656,25 @@ void type_prg( unsigned char * file_to_type ) {
 
 					};//end if
 
-					if (disk_sector_buffer[i] == 0 && previous_byte == 0) {                     // We are at the end of the program 
-						printf("\nFooter:0x%04X\n", (disk_sector_buffer[i]*256)+previous_byte); // This prints out the actual footer. But it should always be the same.
+					if (disk_buffer[i] == 0 && previous_byte == 0) {                     // We are at the end of the program 
+						printf("\nFooter:0x%04X\n", (disk_buffer[i]*256)+previous_byte); // This prints out the actual footer. But it should always be the same.
 						goto type_prg_exit_point;                                               // goto jump here beacuse it's the end of the basic stub (even though there's more file)
 					};//end if
 
 					switch ( spot_in_prg ) {
 
 						case first_header_byte :                   	// this is statring address low byte, so we can't output anything until we get teh next byte which is the high byte
-							previous_byte = disk_sector_buffer[i]; 	// store in previous character
+							previous_byte = disk_buffer[i]; 	// store in previous character
 							spot_in_prg++; 						   	// increment spot_in_prg
 						break;
 
 						case second_header_byte : 					// use previous to output "Pointer to beginning of "next" BASIC line, in low-byte/high-byte order"
-							printf("Header:0x%04X\n\n", (disk_sector_buffer[i]*256)+previous_byte); // don't need to store anything in previous byte
+							printf("Header:0x%04X\n\n", (disk_buffer[i]*256)+previous_byte); // don't need to store anything in previous byte
 							spot_in_prg++; 							// increment spot_in_prg
 						break;
 
 						case first_basic_line_address_byte : 		// use previous to output "Pointer to beginning of "next" BASIC line, in low-byte/high-byte order"
-							previous_byte = disk_sector_buffer[i]; 	// store in previous character
+							previous_byte = disk_buffer[i]; 	// store in previous character
 							spot_in_prg++; 						   	// increment spot_in_prg
 						break;
 
@@ -640,27 +684,27 @@ void type_prg( unsigned char * file_to_type ) {
 						break;
 
 						case first_basic_line_number_byte :
-							previous_byte = disk_sector_buffer[i]; // store in previous character
+							previous_byte = disk_buffer[i]; // store in previous character
 							spot_in_prg++; 						   // increment spot_in_prg
 						break;
 
 						case second_basic_line_number_byte :
-							printf("%u ", (disk_sector_buffer[i]*256)+previous_byte); // don't need to store anything in previous byte
+							printf("%u ", (disk_buffer[i]*256)+previous_byte); // don't need to store anything in previous byte
 							spot_in_prg++; 						   // increment spot_in_prg
 						break;
 
 						case body_bytes :
 
-							if ( disk_sector_buffer[i] == 0 ) {
+							if ( disk_buffer[i] == 0 ) {
 								printf("\n"); 
-								previous_byte = disk_sector_buffer[i]; 
+								previous_byte = disk_buffer[i]; 
 								spot_in_prg = first_basic_line_address_byte;
-							// } else if ( disk_sector_buffer[i] == 140 ) { 	// SAVED:17 bytes here!  // Handled manually, to save the overall size of the array.
+							// } else if ( disk_buffer[i] == 140 ) { 	// SAVED:17 bytes here!  // Handled manually, to save the overall size of the array.
 							// 	printf("restore");							 // This string is 7 chars, which is the only one. So we make the max length of each string 6 chars instead of 7.
-							} else if ( disk_sector_buffer[i] >= 128 && disk_sector_buffer[i] <= 203 ) {
-								printf("%s",basic_tokens[ disk_sector_buffer[i]-128 ]);
+							} else if ( disk_buffer[i] >= 128 && disk_buffer[i] <= 203 ) {
+								printf("%s",basic_tokens[ disk_buffer[i]-128 ]);
 							} else {
-							    printf( "%c", disk_sector_buffer[i] ); // TODO: this needs to be way better obviously...
+							    printf( "%c", disk_buffer[i] ); // TODO: this needs to be way better obviously...
 							};//end-if
 
 							// DO NOT increment spot_in_prg becuase we don't know if we are finished yet
@@ -673,13 +717,21 @@ void type_prg( unsigned char * file_to_type ) {
 
 					};//end switch
 
-				};//end for
+					if(i==read_bytes-1)break;++i;
+				};//end-while
+				// };//end for
 
-			} while( read_bytes == sizeof(disk_sector_buffer) ); //end do loop
+			};//end-while
+			// } while( read_bytes == sizeof(disk_buffer) ); //end do loop
 
 			//jump to here beacuse it's the end of the basic stub (even though there's more file)
-			type_prg_exit_point:
-				cbm_close (8);
+			type_prg_exit_point: ;
+
+			// cbm_close(8);
+			END_TYPE_PRG: ;
+			close_file_safely(8);
+
+			// clear_out(multi_buffer);
 
 };//end-func
 
@@ -688,6 +740,8 @@ void type_prg( unsigned char * file_to_type ) {
 // TYPE COMMAND - HEXIDECIMAL - Displays a file as series of characters and in hex.
 // ********************************************************************************
 void type_hex( unsigned char * file_to_type ) {
+
+			// swap_in(DISK_BUFFER, multi_buffer, DISK_BUFFER);
 
 			printf("Detected file: %s ", file_to_type );
 			detected_filetype = detect_filetype(file_to_type, TRUE);
@@ -713,25 +767,33 @@ void type_hex( unsigned char * file_to_type ) {
 			strcat (drive_command_string, ",r,");
 			strcat (drive_command_string, detected_filetype_char);
 
-			sleep(1);
+			// sleep(1); // TODO: WHY IS THIS HERE???
 
 			printf("\n");
 
-			// I think I need to blank out the disk_sector_buffer right here.
-			memset(disk_sector_buffer,0,sizeof(disk_sector_buffer));
+			// I think I need to blank out the disk_buffer right here.
+			memset(disk_buffer,0,sizeof(disk_buffer));
 
 			hex_display_position_in_file = 0 ;
 			hex_display_position_x       = 0 ;
 			hex_display_position_y       = 0 ;
 
-			result = cbm_open(8, dev, CBM_READ, drive_command_string);
+			// result = cbm_open(8, dev, CBM_READ, drive_command_string);
+			result = open_file_safely(8, dev, CBM_READ, drive_command_string);
 
 			clrscr();
 
-			do {
-				read_bytes = cbm_read(8, disk_sector_buffer, sizeof(disk_sector_buffer));
+			// do {
+			while(1){
 
-				for (i = 0 ; i < read_bytes ; i++) { // loop over buffer and barf out bytes to the screen 
+				// read_bytes = cbm_read(8, disk_buffer, sizeof(disk_buffer));
+				read_bytes = read_file_safely(8, disk_buffer, sizeof(disk_buffer));
+
+				if(read_bytes==0)break;
+
+				// for (i = 0 ; i < read_bytes ; i++) { // loop over buffer and barf out bytes to the screen 
+				i=0;
+				while(1){
 
 					// Example:
 					//
@@ -757,7 +819,7 @@ void type_hex( unsigned char * file_to_type ) {
 						if (get_key == 3) { // RUN/STOP or CTRL-C
 							printf("\n");
 							read_bytes = 0;
-							break;
+							goto END_TYPE_HEX;
 						};//end if 
 						clrscr();
 					};//end if 
@@ -771,9 +833,9 @@ void type_hex( unsigned char * file_to_type ) {
 
 					// DISPLAY HEX AND CHAR 
 					gotox((hex_display_position_x * 3) + 6);
-					printf("%02X", disk_sector_buffer[i]);
+					printf("%02X", disk_buffer[i]);
 					gotox(hex_display_position_x + 31) ;
-					cputc(convert_char(disk_sector_buffer[i]));
+					cputc(convert_char(disk_buffer[i]));
 
 					// UPDATE COUNTERS
 					if (hex_display_position_x == 7 && hex_display_position_y != 23) {
@@ -787,12 +849,44 @@ void type_hex( unsigned char * file_to_type ) {
 
 					hex_display_position_in_file++;
 
-				};//end for 
+					if(i==read_bytes-1)break;++i;
+				};//end-while
+				// };//end for
 
-			} while( read_bytes == sizeof(disk_sector_buffer) ); //end loop
+			};//end-while
+			// } while( read_bytes == sizeof(disk_buffer) ); //end do loop
 
-			cbm_close (8);
+			// cbm_close (8);
+			END_TYPE_HEX: ;
+			close_file_safely(8);
 
 			printf("\n");
 
+			// clear_out(multi_buffer);
+
 };//end func
+
+
+void single_char_dos_command(unsigned char single_char) {
+
+	if (they_are_sure() == TRUE) {
+		result = get_status(dev, TRUE);
+
+		if (result != 255) {
+
+			printf("Processing... ");
+
+			drive_command_string[0] = single_char;
+			drive_command_string[1] = convert_partition_for_drive();
+			drive_command_string[2] = '\0';
+
+			execute_dos_command(drive_command_string);
+
+			printf("Done.\n");
+
+		};//endif
+	} else {
+		printf("Cancelled.\n");
+	};//end_if
+
+};//end-func

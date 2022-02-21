@@ -1,0 +1,343 @@
+_HELP
+HELP
+Usage: help [COMMAND] [OPTION]
+
+Command: Display help for a given
+command. Press RUNSTOP / CTRL+C 
+to cancel.
+
+If the text 'commands' is
+given, help will display a list of all
+the ChiCLI commands. If 'hardware' is
+given, help will display a hardware
+support summary.
+
+Options: -h Searches the hardware
+for help on a device or machine.
+
+Example:
+help           help 1541 -h
+help commands  help sd-2 -h
+help hardware  help cmdhd -h
+help copy      help vicefs -h
+
+_HARDWARE
+ChiCLI Hardware Information
+
+COMPREHENSIVE SUPPORT:
+These devices are supported by
+most of the relevant commands.
+  SD2IEC          CMD HD
+  Commodore 1541  M.S.D. SD-2
+  Commodore 1570  Commodore 2031
+  Commodore 1571  Commodore 4040
+  Commodore 1581  Commodore SFD-1001
+  VICE FS Driver v2.0
+
+ESSENTIAL SUPPORT:
+Support for these devices is
+either limited to certain
+commands or the device has only
+been tested via emulation.
+  CMD FD2000 / FD4000
+  Flyer Internet Modem
+  Ultimate 64
+  SuperCPU
+  The C64 / The C64 Mini
+  MiSTer FPGA
+
+_HARDWARE-LIST
+ChiCLI Hardware Lookup List
+
+Use: help [HARDWARE] -h
+
+Hardware List:
+  sd2iec   cmdhd
+  1541     sd-2
+  1570     2031
+  1571     4040
+  1581     sfd-1001
+  fd2000   fd4000
+  vicefs   flyer
+  supercpu
+  ultimate64
+  thec64mini
+  mister
+
+_ECHO
+ECHO
+Usage: echo [STRING]
+
+Displays text in the first
+argument. You can also use quotes
+around the text you want echoed.
+
+Example: echo "Chicli Is The Coolest!"
+
+_EXIT
+EXIT
+Usage: exit
+
+This exits ChiCLI. :-(
+
+_FILEDATE
+FILEDATE
+Usage: filedate [FILE]
+
+If you have an SD2IEC, this command 
+shows you a time and date stamp for 
+the file given, as it has been 
+recorded on the FAT32 SD card.
+
+File:  The name of the file to show
+the date and time stamp.
+
+Example: filedate chicli-help
+
+_FORMAT
+FORMAT
+Usage: format [OPTIONS] [LABEL] [ID]
+
+Format a disk, based on the device
+your currently in.
+
+Options: -q Commodore DOS quick format.
+This function only takes a label.
+
+Label: The name to use for the disk.
+If you omit the name, format will
+default to calling the disk by the
+name "untitled.
+
+ID: The ID to use for the disk.
+If you omit the disk ID, format will
+give it "0" by default.
+
+Examples:     format mydisk 01
+format        format mydisk
+format -q     format -q mydisk
+
+_HOTKEY
+HOTKEY
+Usage: hotkey [NUMBER] [REPLACEMENT]
+  or:  hotkey [NUMBER] [OPTIONS]
+  or:  hotkey [OPTION]
+
+Define or display hotkeys. a hotkey is
+defined for each HOTKEY whose 
+REPLACEMENT is given. Entering hotkey
+alone prints the hotkey list.
+
+Number: Function key number to set
+Option: -clear  Clears a hotkey, or 
+all if no specific hotkey is given.
+
+Examples:
+hotkey              -> Lists hotkeys
+hotkey 1 "echo Hi!" -> Sets an hotkey
+hotkey 2 viewmem    -> Sets an hotkey
+hotkey 2 -clear     -> Clears an hotkey
+hotkey -clear       -> Clears all
+
+_IDE64
+IDE64
+Usage: ide64 [OPTIONS]
+
+Options: 
+-wp sets drive to write-protect
+-we sets drive to write-enable
+
+Example: 
+ide64 -we -> Drive is now write-enabled
+
+_INIT
+INIT
+Usage: init
+
+Executes the Commodore DOS command for
+initialize, based on the current drive.
+
+_KEYCODES
+KEYCODES
+Usage: keycodes
+
+Displays the key code of a key that's 
+pressed in decimal value. RUN/STOP or
+CTRL+C quits the command.
+
+_LIST
+LIST
+Usage: list [OPTION] [PATTERN]
+
+List files in the current directory.
+
+Patterns:
+- Supports Commodore DOS search 
+wildcards. These are passed directly
+to the device.
+
+Options:
+-l Use long listing, 1 column.
+-s Use short listing, 2 columns.
+
+Examples: 
+list -l
+list -s *.d64
+
+_LD
+LD / LP
+Usage: ld
+
+This command lists the partitions or
+drives on the current device. This will
+also show the disk label, ID and free
+space in blocks.
+
+_MKDIR
+MKDIR
+Usage: mkdir [DIRECTORY NAME]
+
+Makes a new, empty directory, using 
+the provided name.
+
+Directory Name: Text that used for 
+the name of the directory.
+
+Example: mkdir game-images
+
+_MOUNT
+MOUNT
+Usage: mount [DISK IMAGE NAME]
+
+This mounts a disk image on a SD2IEC
+device, like the SD2IEC.
+
+Disk Image Name: The file name of the
+disk image. Usually ending in D64.
+
+Example: mount chicli-disk.d64
+
+_PART
+PART / DRIVE
+Usage: part [PARTITION LETTER]
+
+This quickly changes the current
+partition or drive based on the
+supplied letter. Only works on device
+that support partitions or have
+multiple drives.
+
+Partition Letter: The first partition
+or drive is referenced as 'a', the
+second as 'b', etc.
+
+Example: part c
+         drive b
+
+_PEEK
+PEEK
+Usage: peek [MEMORY ADDRESS]
+
+Returns the value stored in memory at
+the given address. Works just as in 
+Commodore Basic.
+
+Memory Address: This takes the address
+as a decimal value.
+
+Example: peek 1000
+
+_PEEKBIT
+PEEKBIT
+Usage: peekbit [MEMORY ADDRESS] [BIT]
+
+Returns the value of a given bit 
+stored in memory at the given address.
+
+Memory Address: This takes the address
+as a decimal value.
+
+Bit: This is the bit to show.
+
+Example: peek 1024 2
+--> This grabs the third least 
+significant bit from memory address 
+1024 in decimal format.
+
+_PEEKING
+PEEKING
+Usage: peeking [MEMORY ADDRESS]
+
+Returns the value stored in memory at
+the given address. Works just as in
+Commodore Basic, however, this version
+repeatedly reads and prints the value
+continously.
+
+Memory Address: This takes the address
+as a decimal value.
+
+Example: peeking 1000
+
+_POKE
+POKE
+Usage: poke [MEMORY ADDRESS] [VALUE]
+
+Updates the value stored in memory at
+the given address. Works just as in
+Commodore Basic.
+
+Memory Address: This takes the address
+as a decimal value.
+
+Value: The new value to change to as
+a decimal number.
+
+Example: poke 1000 33
+
+_POKEBIT
+POKEBIT
+Usage: pokebit [ADDRESS] [BIT] [VALUE]
+
+Writes the value of a given bit
+stored in memory at the given address.
+
+Bit: This is the bit to change.
+
+Address: This takes the address
+as a decimal value.
+
+Value: The new value to change to as
+a decimal number.
+
+Example: peek 1024 2 1
+--> Writes 1 to the third least 
+significant bit from memory address
+1024 in decimal format
+
+_PROFILE
+PROFILE
+Usage: profile [PROFILE NUMBER]
+
+Changes the current text, background
+and border colors, to one of a set of
+pre-determined profiles.
+
+Profile Number: One of the following
+numbers sets the respective profile:
+
+1 - PET    5 - C128 - VDC
+2 - VIC-20 6 - Black on White
+3 - C64    7 - White on Black
+4 - C128   8 - Grey
+
+Example: profile 3
+
+_PWD
+PWD
+Usage: pwd
+
+Shows you the currently set device,
+partition, and directory or disk name,
+depending on the device.
+
