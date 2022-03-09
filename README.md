@@ -10,7 +10,7 @@ A CLI for Commodore Computers!
 
 ![ChiCLI v1 Screensaver Date and Time](https://raw.githubusercontent.com/chironb/ChiCLI/main/screenshots/ChiCLI_v1_Screenshot_Screensaver.png?raw=true)
 
-ChiCLI v1.05 (c) 2020 - 2022 Chiron Bramberger
+ChiCLI v1.06 (c) 2020 - 2022 Chiron Bramberger
 
 A Commodore 64 command line interface terminal, inspired by: AmigaDOS, MS-DOS, and Linux.
 
@@ -113,6 +113,9 @@ Compilation Notes:
 - *I will update these instructions in the future.*
 
 Latest News:
+
+v1.06 - Exciting Update! - Mar 9 2022
+- Updated:   The "temp" command had a bug that reported 30'C on anything 30 or lower. It now works by reporting between 16'C to 30'C.
 
 v1.05 - Exciting Update! - Feb 21 2022
 - Added:     A new "temp" command which reports the temperature of the CPU! Works on standard stock C64 and C64C machines *without* any modifications or extra hardware! It will only attempt to run on currently supported machines.

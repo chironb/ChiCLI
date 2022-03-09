@@ -25,7 +25,7 @@
 // VERSION
 // ********************************************************************************
 
-#define VERSION "v1.05"
+#define VERSION "v1.06"
 #define PROGRAM_NAME "chicli"
 
 
@@ -103,36 +103,6 @@ unsigned char temp_minutes;
 unsigned int  temp_cycles_counter;
 unsigned char temp_estimate;
 unsigned char temp_time_combined;
-
-// ********************************************************************************
-
-// packed_time.bcd.minutes
-// packed_time.bcd.seconds
-// time_digits.minutes_second_digit
-// time_digits.minutes_first_digit
-// time_digits.seconds_second_digit
-// time_digits.seconds_first_digit
-
-// union {
-
-// 	struct {
-// 		unsigned char minutes;
-// 		unsigned char seconds;
-// 	} bcd ;//end-struct
-
-// 	struct {
-// 		unsigned int minutes_second_digit: 4;
-// 		unsigned int minutes_first_digit:  3;
-// 		unsigned int :			   		   0;
-
-// 		unsigned int seconds_second_digit: 4;
-// 		unsigned int seconds_first_digit:  3;
-// 		unsigned int :			   		   0;
-// 	} time_digits ;//end-struct
-
-// } packed_time ;//end-union
-
-// union packed_time_var packed_time;
 
 // ********************************************************************************
 
@@ -446,55 +416,55 @@ void print_temp(){
 
 			temp_time_combined = (temp_seconds*10) + temp_deciseconds;
 
-			if (temp_seconds >= 5) {
-				printf("< 10'C");
+			if (temp_seconds >= 4) {
+				printf("!! CPU < 14'C");
 				goto END_TEMP;
 
-			} else if ( (temp_seconds >= 1) && (temp_seconds <= 4) ){
+			} else if ( (temp_seconds >= 1) && (temp_seconds <= 3) ){
 		       switch (temp_time_combined) {
-		            case 49 : /* 10'C */
-					case 48 : /* 10'C */
-					case 47 : /* 10'C */ temp_estimate = 10; // printf("10'C"); break;
-					case 46 : /* 11'C */
-					case 45 : /* 11'C */ temp_estimate = 11; // printf("11'C"); break;
-					case 44 : /* 12'C */
-					case 43 : /* 12'C */ temp_estimate = 12; // printf("12'C"); break;
-					case 42 : /* 13'C */
-					case 41 : /* 13'C */ temp_estimate = 13; // printf("13'C"); break;
-					case 40 : /* 14'C */ temp_estimate = 14; // printf("14'C"); break;
+		   			// case 49 : /* 10'C */		/* RAN OUT OF MEMORY FOR THIS - NOT WORTH IT - HARDLY EVER GONNA BE THIS COLD!!! */
+					// case 48 : /* 10'C */
+					// case 47 : /* 10'C */ temp_estimate = 10; break;
+					// case 46 : /* 11'C */
+					// case 45 : /* 11'C */ temp_estimate = 11; break;
+					// case 44 : /* 12'C */
+					// case 43 : /* 12'C */ temp_estimate = 12; break;
+					// case 42 : /* 13'C */
+					// case 41 : /* 13'C */ temp_estimate = 13; break;
+					// case 40 : /* 14'C */ temp_estimate = 14; break;
 
-		            case 39 : /* 14'C */ temp_estimate = 14; // printf("14'C"); break;
+		            case 39 : /* 14'C */ temp_estimate = 14; break;
 					case 38 : /* 15'C */
-					case 37 : /* 15'C */ temp_estimate = 15; // printf("15'C"); break;
+					case 37 : /* 15'C */ temp_estimate = 15; break;
 					case 36 : /* 16'C */
-					case 35 : /* 16'C */ temp_estimate = 16; // printf("16'C"); break;
+					case 35 : /* 16'C */ temp_estimate = 16; break;
 					case 34 : /* 17'C */
-					case 33 : /* 17'C */ temp_estimate = 17; // printf("17'C"); break;
+					case 33 : /* 17'C */ temp_estimate = 17; break;
 					case 32 : /* 18'C */
-					case 31 : /* 18'C */ temp_estimate = 18; // printf("18'C"); break;
-					case 30 : /* 19'C */ temp_estimate = 19; // printf("19'C"); break;
+					case 31 : /* 18'C */ temp_estimate = 18; break;
+					case 30 : /* 19'C */ temp_estimate = 19; break;
 
-		            case 29 : /* 20'C */ temp_estimate = 20; // printf("20'C"); break;
+		            case 29 : /* 20'C */ temp_estimate = 20; break;
 					case 28 : /* 21'C */
-					case 27 : /* 21'C */ temp_estimate = 21; // printf("21'C"); break;
+					case 27 : /* 21'C */ temp_estimate = 21; break;
 					case 26 : /* 22'C */
-					case 25 : /* 22'C */ temp_estimate = 22; // printf("22'C"); break;
+					case 25 : /* 22'C */ temp_estimate = 22; break;
 					case 24 : /* 23'C */
-					case 23 : /* 23'C */ temp_estimate = 23; // printf("23'C"); break;
+					case 23 : /* 23'C */ temp_estimate = 23; break;
 					case 22 : /* 24'C */
-					case 21 : /* 24'C */ temp_estimate = 24; // printf("24'C"); break; 
-					case 20 : /* 25'C */ temp_estimate = 25; // printf("25'C"); break;
+					case 21 : /* 24'C */ temp_estimate = 24; break; 
+					case 20 : /* 25'C */ temp_estimate = 25; break;
 
-		            case 19 : /* 25'C */ temp_estimate = 25; // printf("25'C"); break;
+		            case 19 : /* 25'C */ temp_estimate = 25; break;
 					case 18 : /* 26'C */
-					case 17 : /* 26'C */ temp_estimate = 26; // printf("26'C"); break; 
+					case 17 : /* 26'C */ temp_estimate = 26; break; 
 					case 16 : /* 27'C */
-					case 15 : /* 27'C */ temp_estimate = 27; // printf("27'C"); break;
+					case 15 : /* 27'C */ temp_estimate = 27; break;
 					case 14 : /* 28'C */
-					case 13 : /* 28'C */ temp_estimate = 28; // printf("28'C"); break;
+					case 13 : /* 28'C */ temp_estimate = 28; break;
 					case 12 : /* 29'C */
-					case 11 : /* 29'C */ temp_estimate = 29; // printf("29'C"); break;
-					case 10 : /* 30'C */ temp_estimate = 30; // printf("30'C"); break;
+					case 11 : /* 29'C */ temp_estimate = 29; break;
+					case 10 : /* 30'C */ temp_estimate = 30; break;
 				};//end-switch
 
 				goto PRINT_TEMP;
@@ -507,7 +477,7 @@ void print_temp(){
 				temp_estimate = i-1+31;
 
 				if (temp_cycles_counter < 1146L) {			// This means it's less than 3712L, and therefore warmer than 50 'C.
-					printf("! > 67'C"); // - Max is 70'C!"); // TODO: This needs to be different and be the same number of characters as the normal output.
+					printf("!! CPU > 67'C"); // - Max is 70'C!"); // TODO: This needs to be different and be the same number of characters as the normal output.
 					goto END_TEMP;
 				} else {									// This means that we exited somewhere in between and can use the lookup table to show the temp.
 					goto PRINT_TEMP;
